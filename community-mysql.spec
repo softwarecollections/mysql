@@ -12,7 +12,7 @@ URL: http://www.mysql.com
 License: GPLv2 with exceptions and LGPLv2 and BSD
 
 # Regression tests take a long time, you can skip 'em with this
-%{!?runselftest:%global runselftest 0}
+%{!?runselftest:%global runselftest 1}
 
 # Upstream has a mirror redirector for downloads, so the URL is hard to
 # represent statically.  You can get the tarball by following a link from
