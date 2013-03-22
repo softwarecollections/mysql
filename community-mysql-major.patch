@@ -1,0 +1,12 @@
+diff -up mysql-5.5.30/cmake/mysql_version.cmake.major mysql-5.5.30/cmake/mysql_version.cmake
+--- mysql-5.5.30/cmake/mysql_version.cmake.major	2013-03-11 18:32:45.326473598 +0100
++++ mysql-5.5.30/cmake/mysql_version.cmake	2013-03-11 18:33:10.634472902 +0100
+@@ -17,7 +17,7 @@
+ # Global constants, only to be changed between major releases.
+ #
+ 
+-SET(SHARED_LIB_MAJOR_VERSION "18")
++SET(SHARED_LIB_MAJOR_VERSION "1018")
+ SET(PROTOCOL_VERSION "10")
+ SET(DOT_FRM_VERSION "6")
+ 
