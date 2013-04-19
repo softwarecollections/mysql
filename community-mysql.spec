@@ -1,6 +1,6 @@
 Name: community-mysql
-Version: 5.5.30
-Release: 5%{?dist}
+Version: 5.5.31
+Release: 1%{?dist}
 
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
@@ -696,6 +696,10 @@ install -m 0644 mysql-test/rh-skipped-tests.list ${RPM_BUILD_ROOT}%{_datadir}/my
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Fri Apr 19 2013 Honza Horak <hhorak@redhat.com> 5.5.31-1
+- Update to MySQL 5.5.31, for various fixes described at
+  http://dev.mysql.com/doc/relnotes/mysql/5.5/en/news-5-5-31.html
+
 * Wed Mar 20 2013 Honza Horak <hhorak@redhat.com> 5.5.30-5
 - Renaming package MySQL to community-mysql to handle issues
   introduced by case-insensitive operations of yum and for proper

@@ -6,15 +6,15 @@ read-only-to-us plugin directory.
 rhbz #789530, upstream at http://bugs.mysql.com/bug.php?id=62907
 
 
-diff -up mysql-5.5.21/mysql-test/t/mysql_plugin-master.opt.plugin mysql-5.5.21/mysql-test/t/mysql_plugin-master.opt
---- mysql-5.5.21/mysql-test/t/mysql_plugin-master.opt.plugin	2012-01-31 12:28:15.000000000 +0100
-+++ mysql-5.5.21/mysql-test/t/mysql_plugin-master.opt	2012-03-14 16:54:19.060951822 +0100
+diff -up mysql-5.5.31/mysql-test/t/mysql_plugin-master.opt.p17 mysql-5.5.31/mysql-test/t/mysql_plugin-master.opt
+--- mysql-5.5.31/mysql-test/t/mysql_plugin-master.opt.p17	2013-03-25 14:14:58.000000000 +0100
++++ mysql-5.5.31/mysql-test/t/mysql_plugin-master.opt	2013-04-19 13:38:23.761741532 +0200
 @@ -1 +1 @@
 ---plugin-dir=$DAEMONEXAMPLE_DIR
 +--plugin-dir=$MYSQLTEST_VARDIR/plugin
-diff -up mysql-5.5.21/mysql-test/t/mysql_plugin.test.plugin mysql-5.5.21/mysql-test/t/mysql_plugin.test
---- mysql-5.5.21/mysql-test/t/mysql_plugin.test.plugin	2012-01-31 12:28:15.000000000 +0100
-+++ mysql-5.5.21/mysql-test/t/mysql_plugin.test	2012-03-14 17:11:40.769295981 +0100
+diff -up mysql-5.5.31/mysql-test/t/mysql_plugin.test.p17 mysql-5.5.31/mysql-test/t/mysql_plugin.test
+--- mysql-5.5.31/mysql-test/t/mysql_plugin.test.p17	2013-03-25 14:14:58.000000000 +0100
++++ mysql-5.5.31/mysql-test/t/mysql_plugin.test	2013-04-19 13:38:25.606742145 +0200
 @@ -25,8 +25,10 @@
  # Add the datadir, basedir, plugin_dir to the bootstrap command
  let $MYSQLD_DATADIR= `select @@datadir`;
@@ -51,10 +51,10 @@ diff -up mysql-5.5.21/mysql-test/t/mysql_plugin.test.plugin mysql-5.5.21/mysql-t
 ---copy_file $MYSQL_ERRMSG_BASEDIR/english/errmsg.sys $MYSQLD_BASEDIR/share/errmsg.sys
 ---copy_file $MYSQL_ERRMSG_BASEDIR/english/errmsg.sys $MYSQLD_BASEDIR/share/mysql/errmsg.sys
 +--mkdir $MYSQLD_TMP_BASEDIR/share
-+--mkdir $MYSQLD_TMP_BASEDIR/share/community-mysql
++--mkdir $MYSQLD_TMP_BASEDIR/share/mysql
 +--mkdir $PLUGIN_DIR
 +--copy_file $MYSQL_ERRMSG_BASEDIR/english/errmsg.sys $MYSQLD_TMP_BASEDIR/share/errmsg.sys
-+--copy_file $MYSQL_ERRMSG_BASEDIR/english/errmsg.sys $MYSQLD_TMP_BASEDIR/share/community-mysql/errmsg.sys
++--copy_file $MYSQL_ERRMSG_BASEDIR/english/errmsg.sys $MYSQLD_TMP_BASEDIR/share/mysql/errmsg.sys
 +--copy_file $PLUGIN_BASEDIR/libdaemon_example.so $PLUGIN_DIR/libdaemon_example.so
 +--copy_file $PLUGIN_BASEDIR/daemon_example.ini $PLUGIN_DIR/daemon_example.ini
 +
@@ -70,7 +70,7 @@ diff -up mysql-5.5.21/mysql-test/t/mysql_plugin.test.plugin mysql-5.5.21/mysql-t
  
  --echo #
  --echo # Ensure the plugin isn't loaded.
-@@ -202,7 +209,7 @@ EOF
+@@ -184,7 +191,7 @@ SELECT * FROM mysql.plugin WHERE dl like
  # we must copy the example daemon to a new location renaming it.
  
  let $DAEMON_RELOAD = lib$DAEMONEXAMPLE;
@@ -79,8 +79,8 @@ diff -up mysql-5.5.21/mysql-test/t/mysql_plugin.test.plugin mysql-5.5.21/mysql-t
  --copy_file include/libdaemon_example.ini $PLUGIN_DIR/libdaemon_example.ini
  
  # Now reload it and see that it is a different name.
-@@ -395,8 +402,11 @@ EOF
- --remove_file $expect_file
+@@ -361,8 +368,11 @@ replace_result $MYSQL_PLUGIN mysql_plugi
+ --remove_file $MYSQLTEST_VARDIR/tmp/mysqld.1.expect
  
  # Cleanup the share folder in the binary path.
 ---remove_file $MYSQLD_BASEDIR/share/errmsg.sys
@@ -90,7 +90,7 @@ diff -up mysql-5.5.21/mysql-test/t/mysql_plugin.test.plugin mysql-5.5.21/mysql-t
 +--remove_file $PLUGIN_DIR/libdaemon_example.so
 +--rmdir $PLUGIN_DIR
 +--remove_file $MYSQLD_TMP_BASEDIR/share/errmsg.sys
-+--rmdir $MYSQLD_TMP_BASEDIR/share/community-mysql
++--rmdir $MYSQLD_TMP_BASEDIR/share/mysql
 +--rmdir $MYSQLD_TMP_BASEDIR/share
  
  --enable_abort_on_error
