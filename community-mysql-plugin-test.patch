@@ -51,10 +51,10 @@ diff -up mysql-5.5.31/mysql-test/t/mysql_plugin.test.p17 mysql-5.5.31/mysql-test
 ---copy_file $MYSQL_ERRMSG_BASEDIR/english/errmsg.sys $MYSQLD_BASEDIR/share/errmsg.sys
 ---copy_file $MYSQL_ERRMSG_BASEDIR/english/errmsg.sys $MYSQLD_BASEDIR/share/mysql/errmsg.sys
 +--mkdir $MYSQLD_TMP_BASEDIR/share
-+--mkdir $MYSQLD_TMP_BASEDIR/share/mysql
++--mkdir $MYSQLD_TMP_BASEDIR/share/community-mysql
 +--mkdir $PLUGIN_DIR
 +--copy_file $MYSQL_ERRMSG_BASEDIR/english/errmsg.sys $MYSQLD_TMP_BASEDIR/share/errmsg.sys
-+--copy_file $MYSQL_ERRMSG_BASEDIR/english/errmsg.sys $MYSQLD_TMP_BASEDIR/share/mysql/errmsg.sys
++--copy_file $MYSQL_ERRMSG_BASEDIR/english/errmsg.sys $MYSQLD_TMP_BASEDIR/share/community-mysql/errmsg.sys
 +--copy_file $PLUGIN_BASEDIR/libdaemon_example.so $PLUGIN_DIR/libdaemon_example.so
 +--copy_file $PLUGIN_BASEDIR/daemon_example.ini $PLUGIN_DIR/daemon_example.ini
 +
@@ -89,8 +89,8 @@ diff -up mysql-5.5.31/mysql-test/t/mysql_plugin.test.p17 mysql-5.5.31/mysql-test
 +--remove_file $PLUGIN_DIR/daemon_example.ini
 +--remove_file $PLUGIN_DIR/libdaemon_example.so
 +--rmdir $PLUGIN_DIR
-+--remove_file $MYSQLD_TMP_BASEDIR/share/errmsg.sys
-+--rmdir $MYSQLD_TMP_BASEDIR/share/mysql
-+--rmdir $MYSQLD_TMP_BASEDIR/share
++--remove_file $MYSQLD_TMP_BASEDIR/community-share/errmsg.sys
++--rmdir $MYSQLD_TMP_BASEDIR/community-share/mysql
++--rmdir $MYSQLD_TMP_BASEDIR/community-share
  
  --enable_abort_on_error
