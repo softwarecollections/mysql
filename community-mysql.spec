@@ -61,6 +61,7 @@ Patch19: community-mysql-file-contents.patch
 Patch20: community-mysql-string-overflow.patch
 Patch21: community-mysql-dh1024.patch
 Patch22: community-mysql-major.patch
+Patch23: community-mysql-sharedir.patch
 
 BuildRequires: perl, readline-devel, openssl-devel
 BuildRequires: cmake, ncurses-devel, zlib-devel, libaio-devel
@@ -244,6 +245,7 @@ the MySQL sources.
 %patch20 -p1
 %patch21 -p1
 %patch22 -p1
+%patch23 -p1
 
 # workaround for upstream bug #56342
 rm -f mysql-test/t/ssl_8k_key-master.opt
@@ -701,6 +703,7 @@ install -m 0644 mysql-test/rh-skipped-tests.list ${RPM_BUILD_ROOT}%{_datadir}/my
 %changelog
 * Mon Apr 22 2013 Honza Horak <hhorak@redhat.com> 5.5.31-2
 - Build with _hardened_build
+- Fix some paths related to test suite
 
 * Fri Apr 19 2013 Honza Horak <hhorak@redhat.com> 5.5.31-1
 - Update to MySQL 5.5.31, for various fixes described at
