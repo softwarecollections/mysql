@@ -1,6 +1,6 @@
 Name: community-mysql
 Version: 5.5.31
-Release: 3%{?dist}
+Release: 4%{?dist}
 
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
@@ -13,9 +13,6 @@ License: GPLv2 with exceptions and LGPLv2 and BSD
 
 # Regression tests take a long time, you can skip 'em with this
 %{!?runselftest:%global runselftest 1}
-
-# Build with -fPIE and -z now
-%global _hardened_build 1
 
 # Upstream has a mirror redirector for downloads, so the URL is hard to
 # represent statically.  You can get the tarball by following a link from
@@ -285,6 +282,9 @@ CFLAGS=`echo $CFLAGS| sed -e "s|-O2|-O1|g" `
 %endif
 CXXFLAGS="$CFLAGS"
 export CFLAGS CXXFLAGS
+# building with PIE
+LDFLAGS="$LDFLAGS -pie"
+export LDFLAGS
 
 # The INSTALL_xxx macros have to be specified relative to CMAKE_INSTALL_PREFIX
 # so we can't use %%{_datadir} and so forth here.
@@ -311,7 +311,8 @@ cmake . -DBUILD_CONFIG=mysql_release \
 	-DWITH_EMBEDDED_SERVER=ON \
 	-DWITH_READLINE=ON \
 	-DWITH_SSL=system \
-	-DWITH_ZLIB=system
+	-DWITH_ZLIB=system \
+	-DWITH_MYSQLD_LDFLAGS="-Wl,-z,relro,-z,now"
 
 make %{?_smp_mflags} VERBOSE=1
 
@@ -701,6 +702,9 @@ install -m 0644 mysql-test/rh-skipped-tests.list ${RPM_BUILD_ROOT}%{_datadir}/my
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Fri Apr 26 2013 Honza Horak <hhorak@redhat.com> 5.5.31-4
+- Fix building with relro and PIE
+
 * Thu Apr 25 2013 Honza Horak <hhorak@redhat.com> 5.5.31-3
 - Fix paths in -plugin-test patch
 
