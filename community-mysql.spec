@@ -69,7 +69,7 @@ BuildRequires: systemd-units, systemtap-sdt-devel
 # make test requires time and ps
 BuildRequires: time procps
 # perl modules needed to run regression tests
-BuildRequires: perl(Socket), perl(Time::HiRes)
+BuildRequires: perl(Socket), perl(Time::HiRes), perl(Env)
 
 Requires: grep, fileutils, bash
 Requires: %{name}-common%{?_isa} = %{version}-%{release}
@@ -703,7 +703,7 @@ install -m 0644 mysql-test/rh-skipped-tests.list ${RPM_BUILD_ROOT}%{_datadir}/my
 %changelog
 * Mon Apr 22 2013 Honza Horak <hhorak@redhat.com> 5.5.31-2
 - Build with _hardened_build
-- Fix some paths related to test suite
+- Fix some paths and require perl(Env), which is needed by tests
 
 * Fri Apr 19 2013 Honza Horak <hhorak@redhat.com> 5.5.31-1
 - Update to MySQL 5.5.31, for various fixes described at
