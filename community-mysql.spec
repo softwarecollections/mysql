@@ -1,6 +1,6 @@
 Name: community-mysql
 Version: 5.5.31
-Release: 2%{?dist}
+Release: 3%{?dist}
 
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
@@ -701,6 +701,9 @@ install -m 0644 mysql-test/rh-skipped-tests.list ${RPM_BUILD_ROOT}%{_datadir}/my
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Thu Apr 25 2013 Honza Horak <hhorak@redhat.com> 5.5.31-3
+- Fix paths in -plugin-test patch
+
 * Mon Apr 22 2013 Honza Horak <hhorak@redhat.com> 5.5.31-2
 - Build with _hardened_build
 - Fix some paths and require perl(Env), which is needed by tests

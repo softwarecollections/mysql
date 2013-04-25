@@ -89,8 +89,8 @@ diff -up mysql-5.5.31/mysql-test/t/mysql_plugin.test.p17 mysql-5.5.31/mysql-test
 +--remove_file $PLUGIN_DIR/daemon_example.ini
 +--remove_file $PLUGIN_DIR/libdaemon_example.so
 +--rmdir $PLUGIN_DIR
-+--remove_file $MYSQLD_TMP_BASEDIR/community-share/errmsg.sys
-+--rmdir $MYSQLD_TMP_BASEDIR/community-share/mysql
-+--rmdir $MYSQLD_TMP_BASEDIR/community-share
++--remove_file $MYSQLD_TMP_BASEDIR/share/errmsg.sys
++--rmdir $MYSQLD_TMP_BASEDIR/share/community-mysql
++--rmdir $MYSQLD_TMP_BASEDIR/share
  
  --enable_abort_on_error
