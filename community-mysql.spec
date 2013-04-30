@@ -1,6 +1,6 @@
 Name: community-mysql
 Version: 5.5.31
-Release: 4%{?dist}
+Release: 5%{?dist}
 
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
@@ -155,8 +155,6 @@ Requires: %{name}%{?_isa} = %{version}-%{release}
 Requires: %{name}-libs%{?_isa} = %{version}-%{release}
 Requires: openssl-devel%{?_isa}
 Conflicts: mariadb-devel
-Provides: mysql-devel = %{version}-%{release}
-Provides: mysql-devel%{?_isa} = %{version}-%{release}
 
 %description devel
 MySQL is a multi-user, multi-threaded SQL database server. This
@@ -182,8 +180,6 @@ Group: Applications/Databases
 Requires: %{name}-embedded%{?_isa} = %{version}-%{release}
 Requires: %{name}-devel%{?_isa} = %{version}-%{release}
 Conflicts: mariadb-embedded-devel
-Provides: mysql-embedded-devel = %{version}-%{release}
-Provides: mysql-embedded-devel%{?_isa} = %{version}-%{release}
 
 %description embedded-devel
 MySQL is a multi-user, multi-threaded SQL database server. This
@@ -702,6 +698,10 @@ install -m 0644 mysql-test/rh-skipped-tests.list ${RPM_BUILD_ROOT}%{_datadir}/my
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Tue Apr 30 2013 Honza Horak <hhorak@redhat.com> 5.5.31-5
+- Remove mysql provides from devel sub-packages to not build against
+  community-mysql if mysql-devel is specified
+
 * Fri Apr 26 2013 Honza Horak <hhorak@redhat.com> 5.5.31-4
 - Fix building with relro and PIE
 
