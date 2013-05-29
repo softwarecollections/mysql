@@ -1,6 +1,6 @@
 Name: community-mysql
 Version: 5.5.31
-Release: 5%{?dist}
+Release: 6%{?dist}
 
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
@@ -59,6 +59,7 @@ Patch20: community-mysql-string-overflow.patch
 Patch21: community-mysql-dh1024.patch
 Patch22: community-mysql-major.patch
 Patch23: community-mysql-sharedir.patch
+Patch24: community-mysql-man-pages.patch
 
 BuildRequires: perl, readline-devel, openssl-devel
 BuildRequires: cmake, ncurses-devel, zlib-devel, libaio-devel
@@ -239,6 +240,7 @@ the MySQL sources.
 %patch21 -p1
 %patch22 -p1
 %patch23 -p1
+%patch24 -p1
 
 # workaround for upstream bug #56342
 rm -f mysql-test/t/ssl_8k_key-master.opt
@@ -698,6 +700,9 @@ install -m 0644 mysql-test/rh-skipped-tests.list ${RPM_BUILD_ROOT}%{_datadir}/my
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Wed May 29 2013 Jan Stanek <jstanek@redhat.com> 5.5.31-6
+- Added missing command-line options to man-pages (#948930)
+
 * Tue Apr 30 2013 Honza Horak <hhorak@redhat.com> 5.5.31-5
 - Remove mysql provides from devel sub-packages to not build against
   community-mysql if mysql-devel is specified
