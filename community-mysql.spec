@@ -61,6 +61,7 @@ Patch22: community-mysql-major.patch
 Patch23: community-mysql-sharedir.patch
 Patch24: community-mysql-man-pages.patch
 Patch25: community-mysql-tmpdir.patch
+Patch26: community-mysql-cve-2013-1861.patch
 
 BuildRequires: perl, readline-devel, openssl-devel
 BuildRequires: cmake, ncurses-devel, zlib-devel, libaio-devel
@@ -244,6 +245,7 @@ the MySQL sources.
 %patch23 -p1
 %patch24 -p1
 %patch25 -p1
+%patch26 -p1
 
 # workaround for upstream bug #56342
 rm -f mysql-test/t/ssl_8k_key-master.opt
@@ -708,6 +710,8 @@ install -m 0644 mysql-test/rh-skipped-tests.list ${RPM_BUILD_ROOT}%{_datadir}/my
 - Use /var/tmp as default tmpdir to prevent potential issues
   Resolves: #905635
 - Fix test suite requirements
+- Fix for CVE-2013-1861 backported from MariaDB
+  Resolves: #921836
 
 * Wed May 29 2013 Jan Stanek <jstanek@redhat.com> 5.5.31-6
 - Added missing command-line options to man-pages (#948930)
