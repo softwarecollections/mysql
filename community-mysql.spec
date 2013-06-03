@@ -1,6 +1,6 @@
 Name: community-mysql
 Version: 5.5.31
-Release: 6%{?dist}
+Release: 7%{?dist}
 
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
