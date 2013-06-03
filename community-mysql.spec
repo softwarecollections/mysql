@@ -212,6 +212,7 @@ Requires: %{name}-server%{?_isa} = %{version}-%{release}
 Conflicts: mariadb-test
 Provides: mysql-test = %{version}-%{release}
 Provides: mysql-test%{?_isa} = %{version}-%{release}
+Requires: perl(Socket), perl(Time::HiRes), perl(Env)
 
 %description test
 MySQL is a multi-user, multi-threaded SQL database server. This
@@ -706,6 +707,7 @@ install -m 0644 mysql-test/rh-skipped-tests.list ${RPM_BUILD_ROOT}%{_datadir}/my
 * Mon Jun  3 2013 Honza Horak <hhorak@redhat.com> 5.5.31-7
 - Use /var/tmp as default tmpdir to prevent potential issues
   Resolves: #905635
+- Fix test suite requirements
 
 * Wed May 29 2013 Jan Stanek <jstanek@redhat.com> 5.5.31-6
 - Added missing command-line options to man-pages (#948930)
