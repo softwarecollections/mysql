@@ -1,6 +1,6 @@
 Name: community-mysql
-Version: 5.5.31
-Release: 7%{?dist}
+Version: 5.5.32
+Release: 1%{?dist}
 
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
@@ -491,6 +491,9 @@ cp %{SOURCE7} README.mysql-license
 # install the list of skipped tests to be available for user runs
 install -m 0644 mysql-test/rh-skipped-tests.list ${RPM_BUILD_ROOT}%{_datadir}/mysql-test
 
+# we don't care about scripts for solaris
+rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/solaris/postinstall-solaris
+
 %pre server
 /usr/sbin/groupadd -g 27 -o -r mysql >/dev/null 2>&1 || :
 /usr/sbin/useradd -M -N -g mysql -o -r -d /var/lib/mysql -s /bin/bash \
@@ -706,6 +709,10 @@ install -m 0644 mysql-test/rh-skipped-tests.list ${RPM_BUILD_ROOT}%{_datadir}/my
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Fri Jun  7 2013 Honza Horak <hhorak@redhat.com> 5.5.32-1
+- Update to MySQL 5.5.32, for various fixes described at
+  http://dev.mysql.com/doc/relnotes/mysql/5.5/en/news-5-5-32.html
+
 * Mon Jun  3 2013 Honza Horak <hhorak@redhat.com> 5.5.31-7
 - Use /var/tmp as default tmpdir to prevent potential issues
   Resolves: #905635
@@ -1806,7 +1813,7 @@ Resolves: #199368
 - 3.23.28 (gamma)
 - remove old patches, as they are now upstreamed
 
-* Thu Nov 14 2000 Trond Eivind Glomsrd <teg@redhat.com>
+* Tue Nov 14 2000 Trond Eivind Glomsrd <teg@redhat.com>
 - Add a requirement for a new glibc (#20735)
 - build on IA64
 
@@ -1846,7 +1853,7 @@ Resolves: #199368
 - Don't try to include no-longer-existing PUBLIC file
   as doc (#17532)
 
-* Thu Sep 12 2000 Trond Eivind Glomsrd <teg@redhat.com>
+* Tue Sep 12 2000 Trond Eivind Glomsrd <teg@redhat.com>
 - rename config file to /etc/my.cnf, which is what
   mysqld wants... doh. (#17432)
 - include a changed safe_mysqld, so the pid file option
@@ -1878,7 +1885,7 @@ Resolves: #199368
 * Sat Aug 05 2000 Bill Nottingham <notting@redhat.com>
 - condrestart fixes
 
-* Mon Aug 01 2000 Trond Eivind Glomsrd <teg@redhat.com>
+* Tue Aug 01 2000 Trond Eivind Glomsrd <teg@redhat.com>
 - 3.23.22. Disable the old patches, they're now in.
 
 * Thu Jul 27 2000 Trond Eivind Glomsrd <teg@redhat.com>
@@ -1937,7 +1944,7 @@ Resolves: #199368
 - include a /etc/my.conf (empty, FTTB)
 - add conditional restart to spec file
 
-* Tue Jul  2 2000 Jakub Jelinek <jakub@redhat.com>
+* Sun Jul  2 2000 Jakub Jelinek <jakub@redhat.com>
 - Rebuild with new C++
 
 * Fri Jun 30 2000 Trond Eivind Glomsrd <teg@redhat.com>
