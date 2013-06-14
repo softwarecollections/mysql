@@ -62,6 +62,7 @@ Patch23: community-mysql-sharedir.patch
 Patch24: community-mysql-man-pages.patch
 Patch25: community-mysql-tmpdir.patch
 Patch26: community-mysql-cve-2013-1861.patch
+Patch27: community-mysql-innodbwarn.patch
 
 BuildRequires: perl, readline-devel, openssl-devel
 BuildRequires: cmake, ncurses-devel, zlib-devel, libaio-devel
@@ -246,6 +247,7 @@ the MySQL sources.
 %patch24 -p1
 %patch25 -p1
 %patch26 -p1
+%patch27 -p1
 
 # workaround for upstream bug #56342
 rm -f mysql-test/t/ssl_8k_key-master.opt
