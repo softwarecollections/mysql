@@ -1,6 +1,6 @@
 Name: community-mysql
 Version: 5.5.32
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
@@ -18,11 +18,15 @@ License: GPLv2 with exceptions and LGPLv2 and BSD
 # represent statically.  You can get the tarball by following a link from
 # http://dev.mysql.com/downloads/mysql/
 Source0: mysql-%{version}-nodocs.tar.gz
-# The upstream tarball includes non-free documentation that we cannot ship.
+# The upstream tarball includes non-free documentation and man pages that
+# we cannot ship.
 # To remove the non-free documentation, run this script after downloading
 # the tarball into the current directory:
 # ./generate-tarball.sh $VERSION
-Source1: generate-tarball.sh
+# man pages were licensed under GPL until 5.5.30, so we use man pages from
+# that version instead of files from current source tarball
+Source1: mysql-man-gpl.tar.gz
+Source2: generate-tarball.sh
 Source3: my.cnf
 Source5: my_config.h
 Source6: README.mysql-docs
@@ -59,7 +63,6 @@ Patch20: community-mysql-string-overflow.patch
 Patch21: community-mysql-dh1024.patch
 Patch22: community-mysql-major.patch
 Patch23: community-mysql-sharedir.patch
-Patch24: community-mysql-man-pages.patch
 Patch25: community-mysql-tmpdir.patch
 Patch26: community-mysql-cve-2013-1861.patch
 Patch27: community-mysql-innodbwarn.patch
@@ -224,6 +227,8 @@ the MySQL sources.
 %prep
 %setup -q -n mysql-%{version}
 
+tar -xvf %{SOURCE1}
+
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
@@ -244,7 +249,6 @@ the MySQL sources.
 %patch21 -p1
 %patch22 -p1
 %patch23 -p1
-%patch24 -p1
 %patch25 -p1
 %patch26 -p1
 %patch27 -p1
@@ -711,6 +715,10 @@ rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/solaris/postinstall-solaris
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Fri Jun 14 2013 Honza Horak <hhorak@redhat.com> 5.5.32-2
+- Use man pages from 5.5.30, because their license do not
+  allow us to ship them since 5.5.31
+
 * Fri Jun  7 2013 Honza Horak <hhorak@redhat.com> 5.5.32-1
 - Update to MySQL 5.5.32, for various fixes described at
   http://dev.mysql.com/doc/relnotes/mysql/5.5/en/news-5-5-32.html
