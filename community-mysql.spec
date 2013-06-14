@@ -1,6 +1,6 @@
 Name: community-mysql
 Version: 5.5.32
-Release: 2%{?dist}
+Release: 3%{?dist}
 
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
@@ -715,7 +715,7 @@ rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/solaris/postinstall-solaris
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
-* Fri Jun 14 2013 Honza Horak <hhorak@redhat.com> 5.5.32-2
+* Fri Jun 14 2013 Honza Horak <hhorak@redhat.com> 5.5.32-3
 - Use man pages from 5.5.30, because their license do not
   allow us to ship them since 5.5.31
 
