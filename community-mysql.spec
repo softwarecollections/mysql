@@ -63,6 +63,8 @@ Patch24: community-mysql-man-pages.patch
 Patch25: community-mysql-tmpdir.patch
 Patch26: community-mysql-cve-2013-1861.patch
 Patch27: community-mysql-innodbwarn.patch
+Patch28: community-mysql-covscan-signexpr.patch
+Patch29: community-mysql-covscan-stroverflow.patch
 
 BuildRequires: perl, readline-devel, openssl-devel
 BuildRequires: cmake, ncurses-devel, zlib-devel, libaio-devel
@@ -248,6 +250,8 @@ the MySQL sources.
 %patch25 -p1
 %patch26 -p1
 %patch27 -p1
+%patch28 -p1
+%patch29 -p1
 
 # workaround for upstream bug #56342
 rm -f mysql-test/t/ssl_8k_key-master.opt
@@ -713,6 +717,7 @@ rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/solaris/postinstall-solaris
 %changelog
 * Thu Jun 27 2013 Honza Horak <hhorak@redhat.com> 5.5.32-4
 - Remove external man pages, upstream fixed man pages license
+- Apply fixes found by Coverity static analysis tool
 
 * Fri Jun 14 2013 Honza Horak <hhorak@redhat.com> 5.5.32-3
 - Use man pages from 5.5.30, because their license do not
