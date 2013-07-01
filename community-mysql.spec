@@ -1,6 +1,6 @@
 Name: community-mysql
 Version: 5.5.32
-Release: 4%{?dist}
+Release: 5%{?dist}
 
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
@@ -65,6 +65,7 @@ Patch26: community-mysql-cve-2013-1861.patch
 Patch27: community-mysql-innodbwarn.patch
 Patch28: community-mysql-covscan-signexpr.patch
 Patch29: community-mysql-covscan-stroverflow.patch
+Patch30: community-mysql-pluginerrmsg.patch
 
 BuildRequires: perl, readline-devel, openssl-devel
 BuildRequires: cmake, ncurses-devel, zlib-devel, libaio-devel
@@ -252,6 +253,7 @@ the MySQL sources.
 %patch27 -p1
 %patch28 -p1
 %patch29 -p1
+%patch30 -p1
 
 # workaround for upstream bug #56342
 rm -f mysql-test/t/ssl_8k_key-master.opt
@@ -715,6 +717,10 @@ rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/solaris/postinstall-solaris
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Mon Jul  1 2013 Honza Horak <hhorak@redhat.com> 5.5.32-5
+- Fix misleading error message when uninstalling built-in plugins
+  Related: #966645
+
 * Thu Jun 27 2013 Honza Horak <hhorak@redhat.com> 5.5.32-4
 - Remove external man pages, upstream fixed man pages license
 - Apply fixes found by Coverity static analysis tool
