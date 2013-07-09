@@ -1,6 +1,6 @@
 Name: community-mysql
 Version: 5.5.32
-Release: 5%{?dist}
+Release: 6%{?dist}
 
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
@@ -103,7 +103,6 @@ contains the standard MySQL client programs and generic MySQL files.
 
 Summary: The shared libraries required for MySQL clients
 Group: Applications/Databases
-Requires: /sbin/ldconfig
 Requires: %{name}-common%{?_isa} = %{version}-%{release}
 Provides: mysql-libs = %{version}-%{release}
 Provides: mysql-libs%{?_isa} = %{version}-%{release}
@@ -507,24 +506,24 @@ rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/solaris/postinstall-solaris
 /usr/sbin/useradd -M -N -g mysql -o -r -d /var/lib/mysql -s /bin/bash \
 	-c "MySQL Server" -u 27 mysql >/dev/null 2>&1 || :
 
-%post libs -p /sbin/ldconfig
+%post libs -p /usr/sbin/ldconfig
 
 %post server
 %systemd_post mysqld.service
 /bin/chmod 0755 /var/lib/mysql
 /bin/touch /var/log/mysqld.log
 
-%post embedded -p /sbin/ldconfig
+%post embedded -p /usr/sbin/ldconfig
 
 %preun server
 %systemd_preun mysqld.service
 
-%postun libs -p /sbin/ldconfig
+%postun libs -p /usr/sbin/ldconfig
 
 %postun server
 %systemd_postun_with_restart mysqld.service
 
-%postun embedded -p /sbin/ldconfig
+%postun embedded -p /usr/sbin/ldconfig
 
 %files
 %doc README COPYING README.mysql-license
@@ -717,6 +716,9 @@ rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/solaris/postinstall-solaris
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Tue Jul  9 2013 Honza Horak <hhorak@redhat.com> 5.5.32-6
+- Use proper path to ldconfig
+
 * Mon Jul  1 2013 Honza Horak <hhorak@redhat.com> 5.5.32-5
 - Fix misleading error message when uninstalling built-in plugins
   Related: #966645
