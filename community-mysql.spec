@@ -17,7 +17,7 @@ License: GPLv2 with exceptions and LGPLv2 and BSD
 # Upstream has a mirror redirector for downloads, so the URL is hard to
 # represent statically.  You can get the tarball by following a link from
 # http://dev.mysql.com/downloads/mysql/
-Source0: mysql-%{version}-nodocs.tar.gz
+Source0: mysql-%{version}-nodocs.tar.xz
 # The upstream tarball includes non-free documentation that we cannot ship.
 # To remove the non-free documentation, run this script after downloading
 # the tarball into the current directory:
@@ -718,6 +718,8 @@ rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/solaris/postinstall-solaris
 %changelog
 * Tue Jul  9 2013 Honza Horak <hhorak@redhat.com> 5.5.32-6
 - Use proper path to ldconfig
+- Use xz instead of gzip
+  Resolves: #982387
 
 * Mon Jul  1 2013 Honza Horak <hhorak@redhat.com> 5.5.32-5
 - Fix misleading error message when uninstalling built-in plugins
