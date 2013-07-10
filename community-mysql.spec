@@ -1,6 +1,6 @@
 Name: community-mysql
 Version: 5.5.32
-Release: 6%{?dist}
+Release: 7%{?dist}
 
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
@@ -387,8 +387,12 @@ find $RPM_BUILD_ROOT -print | sed "s|^$RPM_BUILD_ROOT||" | sort > ROOTFILES
 # multilib header hacks
 # we only apply this to known Red Hat multilib arches, per bug #181335
 case `uname -i` in
-  i386 | x86_64 | ppc | ppc64 | ppc64p7 | s390 | s390x | sparc | sparc64 )
+  i386 | x86_64 | ppc | ppc64 | ppc64p7 | s390 | s390x | sparc | sparc64 | arm* | aarch64 )
     mv $RPM_BUILD_ROOT%{_includedir}/mysql/my_config.h $RPM_BUILD_ROOT%{_includedir}/mysql/my_config_`uname -i`.h
+    install -m 644 %{SOURCE5} $RPM_BUILD_ROOT%{_includedir}/mysql/
+    ;;
+  arm* )
+    mv $RPM_BUILD_ROOT%{_includedir}/mysql/my_config.h $RPM_BUILD_ROOT%{_includedir}/mysql/my_config_arm.h
     install -m 644 %{SOURCE5} $RPM_BUILD_ROOT%{_includedir}/mysql/
     ;;
   *)
@@ -716,6 +720,9 @@ rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/solaris/postinstall-solaris
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Wed Jul 10 2013 Honza Horak <hhorak@redhat.com> 5.5.32-7
+- Arm support for multilib hacks
+
 * Tue Jul  9 2013 Honza Horak <hhorak@redhat.com> 5.5.32-6
 - Use proper path to ldconfig
 - Use xz instead of gzip
