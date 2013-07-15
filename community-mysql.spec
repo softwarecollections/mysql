@@ -1,6 +1,6 @@
 Name: community-mysql
 Version: 5.5.32
-Release: 7%{?dist}
+Release: 8%{?dist}
 
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
@@ -510,24 +510,24 @@ rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/solaris/postinstall-solaris
 /usr/sbin/useradd -M -N -g mysql -o -r -d /var/lib/mysql -s /bin/bash \
 	-c "MySQL Server" -u 27 mysql >/dev/null 2>&1 || :
 
-%post libs -p /usr/sbin/ldconfig
+%post libs -p /sbin/ldconfig
 
 %post server
 %systemd_post mysqld.service
 /bin/chmod 0755 /var/lib/mysql
 /bin/touch /var/log/mysqld.log
 
-%post embedded -p /usr/sbin/ldconfig
+%post embedded -p /sbin/ldconfig
 
 %preun server
 %systemd_preun mysqld.service
 
-%postun libs -p /usr/sbin/ldconfig
+%postun libs -p /sbin/ldconfig
 
 %postun server
 %systemd_postun_with_restart mysqld.service
 
-%postun embedded -p /usr/sbin/ldconfig
+%postun embedded -p /sbin/ldconfig
 
 %files
 %doc README COPYING README.mysql-license
@@ -720,6 +720,9 @@ rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/solaris/postinstall-solaris
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Mon Jul 15 2013 Honza Horak <hhorak@redhat.com> 5.5.32-8
+- Revert path change to ldconfig, UsrMove is not complete yet
+
 * Wed Jul 10 2013 Honza Horak <hhorak@redhat.com> 5.5.32-7
 - Arm support for multilib hacks
 
