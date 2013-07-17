@@ -1,6 +1,6 @@
 Name: community-mysql
 Version: 5.5.32
-Release: 8%{?dist}
+Release: 9%{?dist}
 
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
@@ -720,6 +720,9 @@ rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/solaris/postinstall-solaris
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Wed Jul 17 2013 Petr Pisar <ppisar@redhat.com> - 5.5.32-9
+- Perl 5.18 rebuild
+
 * Mon Jul 15 2013 Honza Horak <hhorak@redhat.com> 5.5.32-8
 - Revert path change to ldconfig, UsrMove is not complete yet
 
