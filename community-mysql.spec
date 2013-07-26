@@ -1,6 +1,6 @@
 Name: community-mysql
 Version: 5.5.32
-Release: 9%{?dist}
+Release: 10%{?dist}
 
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
@@ -342,6 +342,13 @@ ln -s libmysqld.so.0.0.1 libmysqld.so.0
 gcc -I../../include $CFLAGS mysql-embedded-check.c libmysqld.so.0
 LD_LIBRARY_PATH=. ldd ./a.out
 cd ../..
+
+# debuginfo extraction scripts fail to find source files in their real
+# location -- satisfy them by copying these files into location, which
+# is expected by scripts
+for f in pars0grm.c pars0grm.y pars0lex.l lexyy.c ; do
+  cp -p "storage/innobase/pars/$f" "storage/innobase/$f"
+done
 
 %check
 %if %runselftest
@@ -720,6 +727,10 @@ rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/solaris/postinstall-solaris
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Fri Jul 26 2013 Honza Horak <hhorak@redhat.com> 5.5.32-10
+- Copy some generated files in order find-debuginfo.sh finds them
+  Related: #729040
+
 * Wed Jul 17 2013 Petr Pisar <ppisar@redhat.com> - 5.5.32-9
 - Perl 5.18 rebuild
 
