@@ -69,11 +69,12 @@ Patch30: community-mysql-pluginerrmsg.patch
 
 BuildRequires: perl, readline-devel, openssl-devel
 BuildRequires: cmake, ncurses-devel, zlib-devel, libaio-devel
-BuildRequires: systemd-units, systemtap-sdt-devel
+BuildRequires: systemd, systemtap-sdt-devel
 # make test requires time and ps
 BuildRequires: time procps
 # perl modules needed to run regression tests
-BuildRequires: perl(Socket), perl(Time::HiRes), perl(Env)
+BuildRequires: perl(Socket), perl(Time::HiRes)
+BuildRequires: perl(Data::Dumper), perl(Test::More), perl(Env)
 
 Requires: grep, fileutils, bash
 Requires: %{name}-common%{?_isa} = %{version}-%{release}
@@ -132,11 +133,11 @@ Requires: %{name}-common%{?_isa} = %{version}-%{release}
 Requires: sh-utils
 Requires(pre): /usr/sbin/useradd
 # We require this to be present for %%{_prefix}/lib/tmpfiles.d
-Requires: systemd-units
+Requires: systemd
 # Make sure it's there when scriptlets run, too
-Requires(post): systemd-units
-Requires(preun): systemd-units
-Requires(postun): systemd-units
+Requires(post): systemd
+Requires(preun): systemd
+Requires(postun): systemd
 # This is actually needed for the %%triggerun script but Requires(triggerun)
 # is not valid.  We can use %%post because this particular %%triggerun script
 # should fire just after this package is installed.
@@ -216,7 +217,8 @@ Requires: %{name}-server%{?_isa} = %{version}-%{release}
 Conflicts: mariadb-test
 Provides: mysql-test = %{version}-%{release}
 Provides: mysql-test%{?_isa} = %{version}-%{release}
-Requires: perl(Socket), perl(Time::HiRes), perl(Env)
+Requires: perl(Socket), perl(Time::HiRes)
+Requires: perl(Data::Dumper), perl(Test::More), perl(Env)
 
 %description test
 MySQL is a multi-user, multi-threaded SQL database server. This
@@ -730,6 +732,7 @@ rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/solaris/postinstall-solaris
 * Fri Jul 26 2013 Honza Horak <hhorak@redhat.com> 5.5.32-10
 - Copy some generated files in order find-debuginfo.sh finds them
   Related: #729040
+- Fix systemd and perl requirements
 
 * Wed Jul 17 2013 Petr Pisar <ppisar@redhat.com> - 5.5.32-9
 - Perl 5.18 rebuild
