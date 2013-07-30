@@ -1,6 +1,6 @@
 Name: community-mysql
 Version: 5.5.32
-Release: 10%{?dist}
+Release: 11%{?dist}
 
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
@@ -396,7 +396,7 @@ find $RPM_BUILD_ROOT -print | sed "s|^$RPM_BUILD_ROOT||" | sort > ROOTFILES
 # multilib header hacks
 # we only apply this to known Red Hat multilib arches, per bug #181335
 case `uname -i` in
-  i386 | x86_64 | ppc | ppc64 | ppc64p7 | s390 | s390x | sparc | sparc64 | arm* | aarch64 )
+  i386 | x86_64 | ppc | ppc64 | ppc64p7 | s390 | s390x | sparc | sparc64 | aarch64 )
     mv $RPM_BUILD_ROOT%{_includedir}/mysql/my_config.h $RPM_BUILD_ROOT%{_includedir}/mysql/my_config_`uname -i`.h
     install -m 644 %{SOURCE5} $RPM_BUILD_ROOT%{_includedir}/mysql/
     ;;
@@ -729,6 +729,9 @@ rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/solaris/postinstall-solaris
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Tue Jul 30 2013 Honza Horak <hhorak@redhat.com> 5.5.32-11
+- Fix multilib header location for arm
+
 * Fri Jul 26 2013 Honza Horak <hhorak@redhat.com> 5.5.32-10
 - Copy some generated files in order find-debuginfo.sh finds them
   Related: #729040
