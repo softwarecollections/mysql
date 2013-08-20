@@ -1,6 +1,6 @@
 Name: community-mysql
 Version: 5.5.32
-Release: 11%{?dist}
+Release: 12%{?dist}
 
 Summary: MySQL client programs and shared libraries
 Group: Applications/Databases
@@ -729,8 +729,11 @@ rm -f ${RPM_BUILD_ROOT}%{_datadir}/mysql/solaris/postinstall-solaris
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
-* Tue Jul 30 2013 Honza Horak <hhorak@redhat.com> 5.5.32-11
+* Tue Jul 30 2013 Honza Horak <hhorak@redhat.com> 5.5.32-12
 - Fix multilib header location for arm
+
+* Sat Aug 03 2013 Petr Pisar <ppisar@redhat.com> - 5.5.32-11
+- Perl 5.18 rebuild
 
 * Fri Jul 26 2013 Honza Horak <hhorak@redhat.com> 5.5.32-10
 - Copy some generated files in order find-debuginfo.sh finds them
