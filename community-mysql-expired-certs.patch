@@ -553,3 +553,19 @@ diff -Naur mysql-5.1.50.orig/mysql-test/std_data/server8k-key.pem mysql-5.1.50/m
 +nlUJasA2psbqSBJ5OJ5zAkEA2UxoMju54hASjT54Z92IzraVw4Vo8CYwOcw5fr7z
 ++m5xg1mmWdLBclmZ+WjARzDuTHIW6u/WCxNGg42AykWzfw==
  -----END RSA PRIVATE KEY-----
+diff -u mysql-5.6.10/mysql-test/r/ssl.result.orig mysql-5.6.10/mysql-test/r/ssl.result
+--- mysql-5.6.10/mysql-test/r/ssl.result.orig	2013-03-04 09:50:24.227923768 +0100
++++ mysql-5.6.10/mysql-test/r/ssl.result	2013-03-04 09:53:28.449873521 +0100
+@@ -3,10 +3,10 @@
+ Ssl_cipher	DHE-RSA-AES256-SHA
+ SHOW STATUS LIKE 'Ssl_server_not_before';
+ Variable_name	Value
+-Ssl_server_not_before	Jan 29 11:56:49 2010 GMT
++Ssl_server_not_before	Feb 20 02:55:06 2010 GMT
+ SHOW STATUS LIKE 'Ssl_server_not_after';
+ Variable_name	Value
+-Ssl_server_not_after	Jan 28 11:56:49 2015 GMT
++Ssl_server_not_after	Sep  3 02:55:06 2030 GMT
+ drop table if exists t1,t2,t3,t4;
+ CREATE TABLE t1 (
+ Period smallint(4) unsigned zerofill DEFAULT '0000' NOT NULL,

@@ -1,0 +1,115 @@
+------------------------------------------------------------
+revno: 5459
+committer: horst.hunger@oracle.com
+branch nick: mysql-trunk
+timestamp: Tue 2013-04-02 11:24:05 +0200
+message:
+  Changes concerning secure-file-prev.
+diff:
+=== added file 'mysql-test/suite/parts/t/partition_max_parts_hash_innodb-master.opt'
+--- mysql-test/suite/parts/t/partition_max_parts_hash_innodb-master.opt	1970-01-01 00:00:00 +0000
++++ mysql-test/suite/parts/t/partition_max_parts_hash_innodb-master.opt	revid:horst.hunger@oracle.com-20130402092405-rqh6m9smqjwozxh4
+@@ -0,0 +1,1 @@
++--secure-file-priv=$MYSQL_TMP_DIR
+
+=== added file 'mysql-test/suite/parts/t/partition_max_parts_hash_myisam-master.opt'
+--- mysql-test/suite/parts/t/partition_max_parts_hash_myisam-master.opt	1970-01-01 00:00:00 +0000
++++ mysql-test/suite/parts/t/partition_max_parts_hash_myisam-master.opt	revid:horst.hunger@oracle.com-20130402092405-rqh6m9smqjwozxh4
+@@ -0,0 +1,1 @@
++--secure-file-priv=$MYSQL_TMP_DIR
+
+=== added file 'mysql-test/suite/parts/t/partition_max_parts_inv_innodb-master.opt'
+--- mysql-test/suite/parts/t/partition_max_parts_inv_innodb-master.opt	1970-01-01 00:00:00 +0000
++++ mysql-test/suite/parts/t/partition_max_parts_inv_innodb-master.opt	revid:horst.hunger@oracle.com-20130402092405-rqh6m9smqjwozxh4
+@@ -0,0 +1,1 @@
++--secure-file-priv=$MYSQL_TMP_DIR
+
+=== added file 'mysql-test/suite/parts/t/partition_max_parts_inv_myisam-master.opt'
+--- mysql-test/suite/parts/t/partition_max_parts_inv_myisam-master.opt	1970-01-01 00:00:00 +0000
++++ mysql-test/suite/parts/t/partition_max_parts_inv_myisam-master.opt	revid:horst.hunger@oracle.com-20130402092405-rqh6m9smqjwozxh4
+@@ -0,0 +1,1 @@
++--secure-file-priv=$MYSQL_TMP_DIR
+
+=== added file 'mysql-test/suite/parts/t/partition_max_parts_key_innodb-master.opt'
+--- mysql-test/suite/parts/t/partition_max_parts_key_innodb-master.opt	1970-01-01 00:00:00 +0000
++++ mysql-test/suite/parts/t/partition_max_parts_key_innodb-master.opt	revid:horst.hunger@oracle.com-20130402092405-rqh6m9smqjwozxh4
+@@ -0,0 +1,1 @@
++--secure-file-priv=$MYSQL_TMP_DIR
+
+=== added file 'mysql-test/suite/parts/t/partition_max_parts_key_myisam-master.opt'
+--- mysql-test/suite/parts/t/partition_max_parts_key_myisam-master.opt	1970-01-01 00:00:00 +0000
++++ mysql-test/suite/parts/t/partition_max_parts_key_myisam-master.opt	revid:horst.hunger@oracle.com-20130402092405-rqh6m9smqjwozxh4
+@@ -0,0 +1,1 @@
++--secure-file-priv=$MYSQL_TMP_DIR
+
+=== added file 'mysql-test/suite/parts/t/partition_max_parts_list_innodb-master.opt'
+--- mysql-test/suite/parts/t/partition_max_parts_list_innodb-master.opt	1970-01-01 00:00:00 +0000
++++ mysql-test/suite/parts/t/partition_max_parts_list_innodb-master.opt	revid:horst.hunger@oracle.com-20130402092405-rqh6m9smqjwozxh4
+@@ -0,0 +1,1 @@
++--secure-file-priv=$MYSQL_TMP_DIR
+
+=== added file 'mysql-test/suite/parts/t/partition_max_parts_list_myisam-master.opt'
+--- mysql-test/suite/parts/t/partition_max_parts_list_myisam-master.opt	1970-01-01 00:00:00 +0000
++++ mysql-test/suite/parts/t/partition_max_parts_list_myisam-master.opt	revid:horst.hunger@oracle.com-20130402092405-rqh6m9smqjwozxh4
+@@ -0,0 +1,1 @@
++--secure-file-priv=$MYSQL_TMP_DIR
+
+=== added file 'mysql-test/suite/parts/t/partition_max_parts_range_innodb-master.opt'
+--- mysql-test/suite/parts/t/partition_max_parts_range_innodb-master.opt	1970-01-01 00:00:00 +0000
++++ mysql-test/suite/parts/t/partition_max_parts_range_innodb-master.opt	revid:horst.hunger@oracle.com-20130402092405-rqh6m9smqjwozxh4
+@@ -0,0 +1,1 @@
++--secure-file-priv=$MYSQL_TMP_DIR
+
+=== added file 'mysql-test/suite/parts/t/partition_max_parts_range_myisam-master.opt'
+--- mysql-test/suite/parts/t/partition_max_parts_range_myisam-master.opt	1970-01-01 00:00:00 +0000
++++ mysql-test/suite/parts/t/partition_max_parts_range_myisam-master.opt	revid:horst.hunger@oracle.com-20130402092405-rqh6m9smqjwozxh4
+@@ -0,0 +1,1 @@
++--secure-file-priv=$MYSQL_TMP_DIR
+
+=== added file 'mysql-test/suite/parts/t/partition_max_sub_parts_key_list_innodb-master.opt'
+--- mysql-test/suite/parts/t/partition_max_sub_parts_key_list_innodb-master.opt	1970-01-01 00:00:00 +0000
++++ mysql-test/suite/parts/t/partition_max_sub_parts_key_list_innodb-master.opt	revid:horst.hunger@oracle.com-20130402092405-rqh6m9smqjwozxh4
+@@ -0,0 +1,1 @@
++--secure-file-priv=$MYSQL_TMP_DIR
+
+=== added file 'mysql-test/suite/parts/t/partition_max_sub_parts_key_list_myisam-master.opt'
+--- mysql-test/suite/parts/t/partition_max_sub_parts_key_list_myisam-master.opt	1970-01-01 00:00:00 +0000
++++ mysql-test/suite/parts/t/partition_max_sub_parts_key_list_myisam-master.opt	revid:horst.hunger@oracle.com-20130402092405-rqh6m9smqjwozxh4
+@@ -0,0 +1,1 @@
++--secure-file-priv=$MYSQL_TMP_DIR
+
+=== added file 'mysql-test/suite/parts/t/partition_max_sub_parts_key_range_innodb-master.opt'
+--- mysql-test/suite/parts/t/partition_max_sub_parts_key_range_innodb-master.opt	1970-01-01 00:00:00 +0000
++++ mysql-test/suite/parts/t/partition_max_sub_parts_key_range_innodb-master.opt	revid:horst.hunger@oracle.com-20130402092405-rqh6m9smqjwozxh4
+@@ -0,0 +1,1 @@
++--secure-file-priv=$MYSQL_TMP_DIR
+
+=== added file 'mysql-test/suite/parts/t/partition_max_sub_parts_key_range_myisam-master.opt'
+--- mysql-test/suite/parts/t/partition_max_sub_parts_key_range_myisam-master.opt	1970-01-01 00:00:00 +0000
++++ mysql-test/suite/parts/t/partition_max_sub_parts_key_range_myisam-master.opt	revid:horst.hunger@oracle.com-20130402092405-rqh6m9smqjwozxh4
+@@ -0,0 +1,1 @@
++--secure-file-priv=$MYSQL_TMP_DIR
+
+=== added file 'mysql-test/suite/parts/t/partition_max_sub_parts_list_innodb-master.opt'
+--- mysql-test/suite/parts/t/partition_max_sub_parts_list_innodb-master.opt	1970-01-01 00:00:00 +0000
++++ mysql-test/suite/parts/t/partition_max_sub_parts_list_innodb-master.opt	revid:horst.hunger@oracle.com-20130402092405-rqh6m9smqjwozxh4
+@@ -0,0 +1,1 @@
++--secure-file-priv=$MYSQL_TMP_DIR
+
+=== added file 'mysql-test/suite/parts/t/partition_max_sub_parts_list_myisam-master.opt'
+--- mysql-test/suite/parts/t/partition_max_sub_parts_list_myisam-master.opt	1970-01-01 00:00:00 +0000
++++ mysql-test/suite/parts/t/partition_max_sub_parts_list_myisam-master.opt	revid:horst.hunger@oracle.com-20130402092405-rqh6m9smqjwozxh4
+@@ -0,0 +1,1 @@
++--secure-file-priv=$MYSQL_TMP_DIR
+
+=== added file 'mysql-test/suite/parts/t/partition_max_sub_parts_range_innodb-master.opt'
+--- mysql-test/suite/parts/t/partition_max_sub_parts_range_innodb-master.opt	1970-01-01 00:00:00 +0000
++++ mysql-test/suite/parts/t/partition_max_sub_parts_range_innodb-master.opt	revid:horst.hunger@oracle.com-20130402092405-rqh6m9smqjwozxh4
+@@ -0,0 +1,1 @@
++--secure-file-priv=$MYSQL_TMP_DIR
+
+=== added file 'mysql-test/suite/parts/t/partition_max_sub_parts_range_myisam-master.opt'
+--- mysql-test/suite/parts/t/partition_max_sub_parts_range_myisam-master.opt	1970-01-01 00:00:00 +0000
++++ mysql-test/suite/parts/t/partition_max_sub_parts_range_myisam-master.opt	revid:horst.hunger@oracle.com-20130402092405-rqh6m9smqjwozxh4
+@@ -0,0 +1,1 @@
++--secure-file-priv=$MYSQL_TMP_DIR

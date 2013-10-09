@@ -13,11 +13,11 @@ of any real performance gain from optimizing these calls.  So I'm keeping
 this patch.
 
 
-diff -up mysql-5.5.28/include/m_string.h.p2 mysql-5.5.28/include/m_string.h
---- mysql-5.5.28/include/m_string.h.p2	2012-08-29 10:50:46.000000000 +0200
-+++ mysql-5.5.28/include/m_string.h	2012-12-06 14:12:31.225333542 +0100
-@@ -77,15 +77,6 @@ extern "C" {
- extern void *(*my_str_malloc)(size_t);
+diff -up mysql-5.6.10/include/m_string.h.orig mysql-5.6.10/include/m_string.h
+--- mysql-5.6.10/include/m_string.h.orig	2013-01-22 17:54:49.000000000 +0100
++++ mysql-5.6.10/include/m_string.h	2013-02-19 14:12:58.866241727 +0100
+@@ -65,15 +65,6 @@ extern void *(*my_str_malloc)(size_t);
+ extern void *(*my_str_realloc)(void *, size_t);
  extern void (*my_str_free)(void *);
  
 -#if defined(HAVE_STPCPY) && MY_GNUC_PREREQ(3, 4) && !defined(__INTEL_COMPILER)
