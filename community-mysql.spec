@@ -14,7 +14,7 @@
 
 Name:             community-mysql
 Version:          5.6.14
-Release:          1%{?dist}
+Release:          2%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -753,6 +753,10 @@ fi
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Fri Oct 11 2013 Honza Horak <hhorak@redhat.com> 5.6.14-2
+- Fix my.cnf to not conflict with mariadb
+  Resolves: #1003115
+
 * Wed Oct  9 2013 Honza Horak <hhorak@redhat.com> 5.6.14-1
 - Update to MySQL 5.6.14, for various fixes described at
   https://dev.mysql.com/doc/relnotes/mysql/5.6/en/news-5-6-14.html
