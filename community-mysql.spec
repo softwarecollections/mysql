@@ -13,8 +13,8 @@
 %global _default_patch_flags --no-backup-if-mismatch
 
 Name:             community-mysql
-Version:          5.6.14
-Release:          2%{?dist}
+Version:          5.6.15
+Release:          1%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -23,13 +23,7 @@ URL:              http://www.mysql.com
 # not only GPL code.  See README.mysql-license
 License:          GPLv2 with exceptions and LGPLv2 and BSD
 
-# mysql.info from upstream tarball must be removed, create tarball by:
-#  wget https://cdn.mysql.com/Downloads/MySQL-5.6/mysql-%{version}.tar.gz
-#  tar xvf mysql-%{version}.tar.gz
-#  rm mysql-%{version}/Docs/mysql.info
-#  tar cJvf mysql-%{version}-nodocs.tar.xz  mysql-%{version}
-Source0:          mysql-%{version}-nodocs.tar.xz
-Source2:          generate-tarball.sh
+Source0:          https://cdn.mysql.com/Downloads/MySQL-5.6/mysql-%{version}.tar.gz
 Source3:          my.cnf
 Source4:          mysql_config.sh
 Source5:          my_config.h
@@ -51,18 +45,15 @@ Patch3:           community-mysql-install-test.patch
 Patch4:           community-mysql-expired-certs.patch
 Patch6:           community-mysql-chain-certs.patch
 Patch11:          community-mysql-s390-tsc.patch
-Patch15:          community-mysql-netdevname.patch
 Patch16:          community-mysql-logrotate.patch
 Patch18:          community-mysql-5.6.11-cipherspec.patch
 Patch19:          community-mysql-file-contents.patch
-Patch20:          community-mysql-string-overflow.patch
 Patch21:          community-mysql-dh1024.patch
 Patch22:          community-mysql-sharedir.patch
 Patch23:          community-mysql-5.6.10-libmysql-version.patch
 Patch24:          community-mysql-man-pages.patch
 Patch25:          community-mysql-5.6.14-mysql-install.patch
 Patch26:          community-mysql-5.6.13-major.patch
-Patch27:          community-mysql-5.6.13-mtr-secure-file.patch
 Patch28:          community-mysql-5.6.13-truncate-file.patch
 Patch29:          community-mysql-tmpdir.patch
 Patch30:          community-mysql-cve-2013-1861.patch
@@ -249,11 +240,9 @@ the MySQL sources.
 %patch4 -p1
 %patch6 -p1
 %patch11 -p1
-%patch15 -p1
 %patch16 -p1
 %patch18 -p1
 %patch19 -p1
-%patch20 -p1
 %patch21 -p1
 %patch22 -p1
 %patch23 -p1
@@ -262,7 +251,6 @@ the MySQL sources.
 %if %{with_shared_lib_major_hack}
 %patch26 -p1
 %endif
-%patch27 -p0
 %patch28 -p0
 %patch29 -p1
 %patch30 -p1
@@ -753,6 +741,10 @@ fi
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Mon Dec  9 2013 Honza Horak <hhorak@redhat.com> 5.6.15-1
+- Update to MySQL 5.6.15, for various fixes described at
+  https://dev.mysql.com/doc/relnotes/mysql/5.6/en/news-5-6-15.html
+
 * Fri Oct 11 2013 Honza Horak <hhorak@redhat.com> 5.6.14-2
 - Fix my.cnf to not conflict with mariadb
   Resolves: #1003115
