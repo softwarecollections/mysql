@@ -234,7 +234,7 @@ the MySQL sources.
 
 
 %prep
-%setup -q
+%setup -q -n mysql-%{version}
 %patch2 -p1
 %patch3 -p1
 %patch4 -p1
