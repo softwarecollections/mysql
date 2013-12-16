@@ -14,7 +14,7 @@
 
 Name:             community-mysql
 Version:          5.6.15
-Release:          1%{?dist}
+Release:          2%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -234,7 +234,7 @@ the MySQL sources.
 
 
 %prep
-%setup -q -n mysql-%{version}
+%setup -q
 %patch2 -p1
 %patch3 -p1
 %patch4 -p1
@@ -401,8 +401,7 @@ touch %{buildroot}/var/log/mysqld.log
 mkdir -p %{buildroot}/var/run/mysqld
 install -p -m 0755 -d %{buildroot}/var/lib/mysql
 
-mkdir -p %{buildroot}/etc
-install -p -m 0644 %{SOURCE3} %{buildroot}/etc/my.cnf
+install -D -p -m 0644 %{SOURCE3} %{buildroot}/etc/my.cnf
 
 # install systemd unit files and scripts for handling server startup
 mkdir -p %{buildroot}%{_unitdir}
@@ -514,7 +513,8 @@ mkdir %{buildroot}%{_sysconfdir}/my.cnf.d
         --mem --parallel=auto --force --retry=0 \
         --skip-test-list=rh-skipped-tests.list \
         --mysqld=--binlog-format=mixed \
-        --suite-timeout=720 --testcase-timeout=30
+        --suite-timeout=720 --testcase-timeout=30 \
+        --clean-vardir
     rm -rf var/*
     popd
 %endif
@@ -594,7 +594,7 @@ fi
 %doc README COPYING README.mysql-license
 # although the default my.cnf contains only server settings, we put it in the
 # libs package because it can be used for client settings too.
-%config(noreplace) /etc/my.cnf
+%config(noreplace) %{_sysconfdir}/my.cnf
 %dir %{_libdir}/mysql
 %{_libdir}/mysql/libmysqlclient.so.*
 %config(noreplace) /etc/ld.so.conf.d/*
@@ -741,6 +741,9 @@ fi
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Mon Dec 16 2013 Honza Horak <hhorak@redhat.com> 5.6.15-2
+- Some spec file clean-up based on Bjorn Munch's suggestions
+
 * Mon Dec  9 2013 Honza Horak <hhorak@redhat.com> 5.6.15-1
 - Update to MySQL 5.6.15, for various fixes described at
   https://dev.mysql.com/doc/relnotes/mysql/5.6/en/news-5-6-15.html
