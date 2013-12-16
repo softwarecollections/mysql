@@ -327,6 +327,7 @@ cmake .. -DBUILD_CONFIG=mysql_release \
          -DMYSQL_UNIX_ADDR="/var/lib/mysql/mysql.sock" \
          -DENABLED_LOCAL_INFILE=ON \
          -DENABLE_DTRACE=ON \
+         -DWITH_INNODB_MEMCACHED=ON \
          -DWITH_EMBEDDED_SERVER=ON \
          -DWITH_EDITLINE=system \
          -DWITH_LIBEVENT=system \
@@ -743,6 +744,7 @@ fi
 %changelog
 * Mon Dec 16 2013 Honza Horak <hhorak@redhat.com> 5.6.15-2
 - Some spec file clean-up based on Bjorn Munch's suggestions
+- Enable InnoDB Memcached plugin
 
 * Mon Dec  9 2013 Honza Horak <hhorak@redhat.com> 5.6.15-1
 - Update to MySQL 5.6.15, for various fixes described at
