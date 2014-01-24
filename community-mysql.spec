@@ -14,7 +14,7 @@
 
 Name:             community-mysql
 Version:          5.6.15
-Release:          2%{?dist}
+Release:          3%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -267,6 +267,12 @@ cat %{SOURCE14} > mysql-test/rh-skipped-tests.list
 # Disable some tests failing on ARM architectures
 %ifarch %{arm}
 cat %{SOURCE15} >> mysql-test/rh-skipped-tests.list
+%endif
+%ifarch ppc ppc64 s390 s390x
+echo "innodb.innodb_ctype_ldml : rhbz#1056972" >> mysql-test/rh-skipped-tests.list
+echo "main.ctype_ldml : rhbz#1056972" >> mysql-test/rh-skipped-tests.list
+echo "main.ps_ddl : rhbz#1056972" >> mysql-test/rh-skipped-tests.list
+echo "main.ps_ddl1 : rhbz#1056972" >> mysql-test/rh-skipped-tests.list
 %endif
 
 %build
@@ -742,6 +748,11 @@ fi
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Fri Jan 24 2014 Honza Horak <hhorak@redhat.com> 5.6.15-3
+- Disable tests for ppc(64) and s390(x):
+  innodb.innodb_ctype_ldml main.ctype_ldml main.ps_ddl main.ps_ddl1
+  Related: #1056972
+
 * Mon Dec 16 2013 Honza Horak <hhorak@redhat.com> 5.6.15-2
 - Some spec file clean-up based on Bjorn Munch's suggestions
 - Enable InnoDB Memcached plugin
