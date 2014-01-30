@@ -62,6 +62,7 @@ Patch32:          community-mysql-covscan-signexpr.patch
 Patch33:          community-mysql-covscan-stroverflow.patch
 Patch34:          community-mysql-pluginerrmsg.patch
 Patch35:          community-mysql-rhbz1059545.patch
+Patch36:          community-mysql-ssltest.patch
 
 BuildRequires:    cmake
 BuildRequires:    dos2unix
@@ -260,6 +261,7 @@ the MySQL sources.
 %patch33 -p1
 %patch34 -p1
 %patch35 -p1
+%patch36 -p1
 
 # Workaround for upstream bug #http://bugs.mysql.com/56342
 rm -f mysql-test/t/ssl_8k_key-master.opt
@@ -753,6 +755,9 @@ fi
 * Thu Jan 30 2014 Honza Horak <hhorak@redhat.com> 5.6.15-4
   Fix for CVE-2014-0001
   Resolves: #1059545
+- Don't test EDH-RSA-DES-CBC-SHA cipher, it seems to be removed from openssl
+  which now makes mariadb/mysql FTBFS because openssl_1 test fails
+  Related: #1044565
 
 * Fri Jan 24 2014 Honza Horak <hhorak@redhat.com> 5.6.15-3
 - Disable tests for ppc(64) and s390(x):
