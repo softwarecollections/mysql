@@ -14,7 +14,7 @@
 
 Name:             community-mysql
 Version:          5.6.15
-Release:          3%{?dist}
+Release:          4%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -61,6 +61,7 @@ Patch31:          community-mysql-innodbwarn.patch
 Patch32:          community-mysql-covscan-signexpr.patch
 Patch33:          community-mysql-covscan-stroverflow.patch
 Patch34:          community-mysql-pluginerrmsg.patch
+Patch35:          community-mysql-rhbz1059545.patch
 
 BuildRequires:    cmake
 BuildRequires:    dos2unix
@@ -258,6 +259,7 @@ the MySQL sources.
 %patch32 -p1
 %patch33 -p1
 %patch34 -p1
+%patch35 -p1
 
 # Workaround for upstream bug #http://bugs.mysql.com/56342
 rm -f mysql-test/t/ssl_8k_key-master.opt
@@ -748,6 +750,10 @@ fi
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Thu Jan 30 2014 Honza Horak <hhorak@redhat.com> 5.6.15-4
+  Fix for CVE-2014-0001
+  Resolves: #1059545
+
 * Fri Jan 24 2014 Honza Horak <hhorak@redhat.com> 5.6.15-3
 - Disable tests for ppc(64) and s390(x):
   innodb.innodb_ctype_ldml main.ctype_ldml main.ps_ddl main.ps_ddl1
