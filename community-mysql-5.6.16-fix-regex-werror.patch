@@ -1,0 +1,26 @@
+diff --git a/plugin/innodb_memcached/daemon_memcached/CMakeLists.txt b/plugin/innodb_memcached/daemon_memcached/CMakeLists.txt
+index 0332658..29c6f46 100644
+--- a/plugin/innodb_memcached/daemon_memcached/CMakeLists.txt
++++ b/plugin/innodb_memcached/daemon_memcached/CMakeLists.txt
+@@ -32,7 +32,7 @@ SET(CMAKE_CPP_FLAGS "${CMAKE_CPP_FLAGS} ${CMAKE_SHARED_LIBRARY_C_FLAGS} -I${CMAK
+ 
+ # If current CMAKE_C_FLAGS is with Werror, turn it off to compile successfully
+ IF(CMAKE_C_FLAGS MATCHES "-Werror")
+-  STRING(REGEX REPLACE "-Werror" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
++  STRING(REGEX REPLACE "-Werror[^=]" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+   # Turn -Wdeclaration-after-statement off to reduce the number of warnings
+   STRING(REGEX REPLACE "-Wdeclaration-after-statement" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+ ENDIF(CMAKE_C_FLAGS MATCHES "-Werror")
+diff --git a/plugin/innodb_memcached/innodb_memcache/CMakeLists.txt b/plugin/innodb_memcached/innodb_memcache/CMakeLists.txt
+index 633a175..4c0b364 100644
+--- a/plugin/innodb_memcached/innodb_memcache/CMakeLists.txt
++++ b/plugin/innodb_memcached/innodb_memcache/CMakeLists.txt
+@@ -26,7 +26,7 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/plugin/innodb_memcached/innodb_memcache
+ 
+ # If current CMAKE_C_FLAGS is with Werror, turn it off to compile successfully
+ IF(CMAKE_C_FLAGS MATCHES "-Werror")
+-  STRING(REGEX REPLACE "-Werror" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
++  STRING(REGEX REPLACE "-Werror[^=]" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+   # Turn -Wdeclaration-after-statement off to reduce the number of warnings
+   STRING(REGEX REPLACE "-Wdeclaration-after-statement" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+ ENDIF(CMAKE_C_FLAGS MATCHES "-Werror")
