@@ -4,22 +4,22 @@ Upstream bug: http://bugs.mysql.com/bug.php?id=69342
 
 # ===== mysqladmin manual page =====
 
-diff -up mysql-5.6.15/man/mysql.1.p24 mysql-5.6.15/man/mysql.1
---- mysql-5.6.15/man/mysql.1.p24	2013-11-17 19:03:04.000000000 +0100
-+++ mysql-5.6.15/man/mysql.1	2013-12-10 12:28:29.055463911 +0100
-@@ -135,7 +135,8 @@ Section\ \&4.2.3.4, \(lqCommand-Line Opt
- .IP \(bu 2.3
- .\}
- .\" mysql: help option.\" help option: mysql\fB\-\-help\fR,
+diff -up mysql-5.6.16/man/mysql.1.p24 mysql-5.6.16/man/mysql.1
+--- mysql-5.6.16/man/mysql.1.p24	2014-01-14 16:38:10.000000000 +0100
++++ mysql-5.6.16/man/mysql.1	2014-02-03 15:37:23.064082223 +0100
+@@ -137,7 +137,8 @@ Section\ \&4.2.3.4, \(lqCommand-Line Opt
+ .\" mysql: help option
+ .\" help option: mysql
+ \fB\-\-help\fR,
 -\fB\-?\fR
 +\fB\-?\fR,
 +\fB\-I\fR
  .sp
  Display a help message and exit\&.
  .RE
-@@ -346,6 +347,21 @@ Section\ \&6.3.6, \(lqPassword Expiratio
- .sp -1
- .IP \(bu 2.3
+@@ -348,6 +349,21 @@ Compress all information sent between th
+ .ie n \{\
+ \h'-04'\(bu\h'+03'\c
  .\}
 +.\" mysql: connect-timeout option
 +.\" connect-timeout option: mysql
@@ -36,13 +36,13 @@ diff -up mysql-5.6.15/man/mysql.1.p24 mysql-5.6.15/man/mysql.1
 +.sp -1
 +.IP \(bu 2.3
 +.\}
- .\" mysql: database option.\" database option: mysql\fB\-\-database=\fR\fB\fIdb_name\fR\fR,
- \fB\-D \fR\fB\fIdb_name\fR\fR
- .sp
-@@ -445,6 +461,37 @@ Section\ \&10.5, \(lqCharacter Set Confi
+ .el \{\
  .sp -1
  .IP \(bu 2.3
- .\}
+@@ -447,6 +463,37 @@ Section\ \&6.3.7, \(lqPluggable Authenti
+ .sp
+ .RS 4
+ .ie n \{\
 +.\" mysql: defaults-file option
 +.\" defaults-file option: mysql
 +\fB\-\-defaults-file=\fR\fB\fIfilename\fR\fR
@@ -74,13 +74,13 @@ diff -up mysql-5.6.15/man/mysql.1.p24 mysql-5.6.15/man/mysql.1
 +.sp -1
 +.IP \(bu 2.3
 +.\}
- .\" mysql: delimiter option.\" delimiter option: mysql\fB\-\-delimiter=\fR\fB\fIstr\fR\fR
- .sp
- Set the statement delimiter\&. The default is the semicolon character (\(lq;\(rq)\&.
-@@ -636,6 +683,36 @@ has no effect if the server does not als
+ \h'-04'\(bu\h'+03'\c
+ .\}
+ .el \{\
+@@ -638,6 +685,36 @@ Section\ \&5.1.7, \(lqServer SQL Modes\(
+ .el \{\
  .sp -1
  .IP \(bu 2.3
- .\}
 +.\" mysql: max-allowed-packet option
 +.\" max-allowed-packet option: mysql
 +\fB\-\-max\-allowed\-packet=\fR\fB\fInum\fR\fR
@@ -111,41 +111,13 @@ diff -up mysql-5.6.15/man/mysql.1.p24 mysql-5.6.15/man/mysql.1
 +.sp -1
 +.IP \(bu 2.3
 +.\}
- .\" mysql: named-commands option.\" named-commands option: mysql\fB\-\-named\-commands\fR,
- \fB\-G\fR
- .sp
-@@ -659,11 +736,26 @@ the section called \(lqMYSQL COMMANDS\(r
- .sp -1
- .IP \(bu 2.3
  .\}
-+.\" mysql: net-buffer-length option
-+.\" net-buffer-length option: mysql
-+\fB\-\-net\-buffer\-lenght=\fR\fB\fIsize\fR\fR
-+.sp
-+Set the buffer size for TCP/IP and socket communication\&.
-+.RE
-+.sp
-+.RS 4
-+.ie n \{\
-+\h'-04'\(bu\h'+03'\c
-+.\}
-+.el \{\
-+.sp -1
-+.IP \(bu 2.3
-+.\}
- .\" mysql: no-auto-rehash option.\" no-auto-rehash option: mysql\fB\-\-no\-auto\-rehash\fR,
- \fB\-A\fR
- .sp
- This has the same effect as
--\fB\-skip\-auto\-rehash\fR\&. See the description for
-+\fB\-\-skip\-auto\-rehash\fR\&. See the description for
- \fB\-\-auto\-rehash\fR\&.
- .RE
- .sp
-@@ -689,6 +781,21 @@ Do not beep when errors occur\&.
- .sp -1
- .IP \(bu 2.3
- .\}
+ .\" mysql: init-command option
+ .\" init-command option: mysql
+@@ -691,6 +768,21 @@ has no effect if the server does not als
+ .RS 4
+ .ie n \{\
+ \h'-04'\(bu\h'+03'\c
 +.\" mysql: no-defaults option
 +.\" no-defaults option: mysql
 +\fB\-\-no\-defaults\fR
@@ -161,13 +133,13 @@ diff -up mysql-5.6.15/man/mysql.1.p24 mysql-5.6.15/man/mysql.1
 +.sp -1
 +.IP \(bu 2.3
 +.\}
- .\" mysql: one-database option.\" one-database option: mysql\fB\-\-one\-database\fR,
- \fB\-o\fR
- .sp
-@@ -884,6 +991,21 @@ The TCP/IP port number to use for the co
- .sp -1
- .IP \(bu 2.3
  .\}
+ .el \{\
+ .sp -1
+@@ -886,6 +978,21 @@ the section called \(lqMYSQL COMMANDS\(r
+ \fB\-\-password[=\fR\fB\fIpassword\fR\fR\fB]\fR,
+ \fB\-p[\fR\fB\fIpassword\fR\fR\fB]\fR
+ .sp
 +.\" mysql: print-defaults option
 +.\" print-defaults option: mysql
 +\fB\-\-print\-defaults\fR
@@ -183,13 +155,13 @@ diff -up mysql-5.6.15/man/mysql.1.p24 mysql-5.6.15/man/mysql.1
 +.sp -1
 +.IP \(bu 2.3
 +.\}
- .\" mysql: prompt option.\" prompt option: mysql\fB\-\-prompt=\fR\fB\fIformat_str\fR\fR
+ The password to use when connecting to the server\&. If you use the short option form (\fB\-p\fR), you
+ \fIcannot\fR
+ have a space between the option and the password\&. If you omit the
+@@ -1077,6 +1184,36 @@ If the connection to the server is lost,
+ \fB\-\-skip\-reconnect\fR\&.
+ .RE
  .sp
- Set the prompt to the specified format\&. The default is
-@@ -1075,6 +1197,36 @@ and renamed in 5\&.6\&.7 to
- .sp -1
- .IP \(bu 2.3
- .\}
 +.\" mysql: select-limit option
 +.\" select-limit option: mysql
 +\fB\-\-select\-limit=\fR\fB\fIlimit\fR\fR
@@ -220,13 +192,31 @@ diff -up mysql-5.6.15/man/mysql.1.p24 mysql-5.6.15/man/mysql.1
 +.sp -1
 +.IP \(bu 2.3
 +.\}
- .\" mysql: show-warnings option.\" show-warnings option: mysql\fB\-\-show\-warnings\fR
+ .RS 4
+ .ie n \{\
+ \h'-04'\(bu\h'+03'\c
+@@ -1121,9 +1258,39 @@ to disable it\&.
+ .if n \{\
  .sp
- Cause warnings to be shown after each statement if there are any\&. This option applies to interactive and batch mode\&.
-@@ -1122,6 +1274,21 @@ option\&.
- .sp -1
- .IP \(bu 2.3
  .\}
++.\" mysql: net-buffer-length option
++.\" net-buffer-length option: mysql
++\fB\-\-net\-buffer\-lenght=\fR\fB\fIsize\fR\fR
++.sp
++Set the buffer size for TCP/IP and socket communication\&.
++.RE
++.sp
++.RS 4
++.ie n \{\
++\h'-04'\(bu\h'+03'\c
++.\}
++.el \{\
++.sp -1
++.IP \(bu 2.3
++.\}
+ .RS 4
+ .it 1 an-trap
+ .nr an-no-space-flag 1
 +.\" mysql: skip-auto-rehash option
 +.\" skip-auto-rehash option: mysql
 +\fB\-\-skip\-auto\-rehash\fR
@@ -242,11 +232,11 @@ diff -up mysql-5.6.15/man/mysql.1.p24 mysql-5.6.15/man/mysql.1
 +.sp -1
 +.IP \(bu 2.3
 +.\}
- .\" mysql: skip-column-names option.\" skip-column-names option: mysql\fB\-\-skip\-column\-names\fR,
- \fB\-N\fR
- .sp
-@@ -1168,7 +1335,7 @@ localhost, the Unix socket file to use,
- .\" mysql: SSL options.\" SSL options: mysql\fB\-\-ssl*\fR
+ .nr an-break-flag 1
+ .br
+ .ps +1
+@@ -1279,7 +1446,7 @@ localhost, the Unix socket file to use,
+ \fB\-\-ssl*\fR
  .sp
  Options that begin with
 -\fB\-\-ssl\fR
@@ -254,7 +244,7 @@ diff -up mysql-5.6.15/man/mysql.1.p24 mysql-5.6.15/man/mysql.1
  specify whether to connect to the server using SSL and indicate where to find SSL keys and certificates\&. See
  Section\ \&6.3.9.4, \(lqSSL Command Options\(rq\&.
  .RE
-@@ -1326,7 +1493,7 @@ The XML output also uses an XML namespac
+@@ -1455,7 +1622,7 @@ The XML output also uses an XML namespac
  .RS 4
  .\}
  .nf
@@ -263,7 +253,7 @@ diff -up mysql-5.6.15/man/mysql.1.p24 mysql-5.6.15/man/mysql.1
  <?xml version="1\&.0"?>
  <resultset statement="SHOW VARIABLES LIKE \*(Aqversion%\*(Aq" xmlns:xsi="http://www\&.w3\&.org/2001/XMLSchema\-instance">
  <row>
-@@ -3188,16 +3355,16 @@ statements that probably need to examine
+@@ -3369,16 +3536,16 @@ statements that probably need to examine
  .RE
  .PP
  To specify limits different from 1,000 and 1,000,000, you can override the defaults by using the
@@ -283,10 +273,10 @@ diff -up mysql-5.6.15/man/mysql.1.p24 mysql-5.6.15/man/mysql.1
  .fi
  .if n \{\
  .RE
-diff -up mysql-5.6.15/man/mysqladmin.1.p24 mysql-5.6.15/man/mysqladmin.1
---- mysql-5.6.15/man/mysqladmin.1.p24	2013-11-17 19:03:04.000000000 +0100
-+++ mysql-5.6.15/man/mysqladmin.1	2013-12-10 13:05:23.105401084 +0100
-@@ -639,6 +639,21 @@ Compress all information sent between th
+diff -up mysql-5.6.16/man/mysqladmin.1.p24 mysql-5.6.16/man/mysqladmin.1
+--- mysql-5.6.16/man/mysqladmin.1.p24	2014-01-14 16:38:10.000000000 +0100
++++ mysql-5.6.16/man/mysqladmin.1	2014-02-03 15:31:31.984839986 +0100
+@@ -639,6 +639,21 @@ Section\ \&10.5, \(lqCharacter Set Confi
  .sp -1
  .IP \(bu 2.3
  .\}
@@ -305,13 +295,13 @@ diff -up mysql-5.6.15/man/mysqladmin.1.p24 mysql-5.6.15/man/mysqladmin.1
 +.sp -1
 +.IP \(bu 2.3
 +.\}
- .\" mysqladmin: count option.\" count option: mysqladmin\fB\-\-count=\fR\fB\fIN\fR\fR,
- \fB\-c \fR\fB\fIN\fR\fR
+ .\" mysqladmin: compress option
+ .\" compress option: mysqladmin
+ \fB\-\-compress\fR,
+@@ -729,6 +744,37 @@ Print debugging information and memory a
  .sp
-@@ -729,6 +744,37 @@ Section\ \&10.5, \(lqCharacter Set Confi
- .sp -1
- .IP \(bu 2.3
- .\}
+ The client\-side authentication plugin to use\&. See
+ Section\ \&6.3.7, \(lqPluggable Authentication\(rq\&.
 +.\" mysqladmin: defaults-extra-file option
 +.\" defaults-extra-file option: mysqladmin
 +\fB\-\-defaults\-extra\-file=\fR\fB\fIfilename\fR\fR
@@ -343,12 +333,12 @@ diff -up mysql-5.6.15/man/mysqladmin.1.p24 mysql-5.6.15/man/mysqladmin.1
 +.sp -1
 +.IP \(bu 2.3
 +.\}
- .\" mysqladmin: enable-cleartext-plugin option.\" enable-cleartext-plugin option: mysqladmin\fB\-\-enable\-cleartext\-plugin\fR
+ .RE
  .sp
- Enable the
-@@ -789,6 +835,21 @@ Suppress the warning beep that is emitte
- .sp -1
- .IP \(bu 2.3
+ .RS 4
+@@ -789,6 +835,21 @@ command\&. With multiple commands, conti
+ .ie n \{\
+ \h'-04'\(bu\h'+03'\c
  .\}
 +.\" mysqladmin: no-defaults option
 +.\" no-defaults option: mysqladmin
@@ -365,13 +355,13 @@ diff -up mysql-5.6.15/man/mysqladmin.1.p24 mysql-5.6.15/man/mysqladmin.1
 +.sp -1
 +.IP \(bu 2.3
 +.\}
- .\" mysqladmin: password option.\" password option: mysqladmin\fB\-\-password[=\fR\fB\fIpassword\fR\fR\fB]\fR,
- \fB\-p[\fR\fB\fIpassword\fR\fR\fB]\fR
- .sp
-@@ -862,6 +923,21 @@ The TCP/IP port number to use for the co
+ .el \{\
  .sp -1
  .IP \(bu 2.3
- .\}
+@@ -862,6 +923,21 @@ Section\ \&6.1.2.1, \(lqEnd-User Guideli
+ On Windows, connect to the server using a named pipe\&. This option applies only if the server supports named\-pipe connections\&.
+ .RE
+ .sp
 +.\" mysqladmin: print-defaults option
 +.\" print-defaults option: mysqladmin
 +\fB\-\-print\-defaults\fR
@@ -387,10 +377,10 @@ diff -up mysql-5.6.15/man/mysqladmin.1.p24 mysql-5.6.15/man/mysqladmin.1
 +.sp -1
 +.IP \(bu 2.3
 +.\}
- .\" mysqladmin: protocol option.\" protocol option: mysqladmin\fB\-\-protocol={TCP|SOCKET|PIPE|MEMORY}\fR
- .sp
- The connection protocol to use for connecting to the server\&. It is useful when the other connection parameters normally would cause a protocol to be used other than the one you want\&. For details on the permissible values, see
-@@ -938,6 +1014,21 @@ localhost, the Unix socket file to use,
+ .RS 4
+ .ie n \{\
+ \h'-04'\(bu\h'+03'\c
+@@ -935,6 +1011,21 @@ command\&.
  .RE
  .sp
  .RS 4
@@ -412,10 +402,10 @@ diff -up mysql-5.6.15/man/mysqladmin.1.p24 mysql-5.6.15/man/mysqladmin.1
  .ie n \{\
  \h'-04'\(bu\h'+03'\c
  .\}
-diff -up mysql-5.6.15/man/mysqlbinlog.1.p24 mysql-5.6.15/man/mysqlbinlog.1
---- mysql-5.6.15/man/mysqlbinlog.1.p24	2013-11-17 19:03:04.000000000 +0100
-+++ mysql-5.6.15/man/mysqlbinlog.1	2013-12-09 19:08:52.750074832 +0100
-@@ -602,6 +602,7 @@ Do not display any of the groups listed
+diff -up mysql-5.6.16/man/mysqlbinlog.1.p24 mysql-5.6.16/man/mysqlbinlog.1
+--- mysql-5.6.16/man/mysqlbinlog.1.p24	2014-01-14 16:38:10.000000000 +0100
++++ mysql-5.6.16/man/mysqlbinlog.1	2014-02-03 15:31:31.984839986 +0100
+@@ -629,6 +629,7 @@ Do not display any of the groups listed
  \fB\-F\fR
  .sp
  Read binary log files even if they are open or were not closed properly\&.
@@ -423,7 +413,7 @@ diff -up mysql-5.6.15/man/mysqlbinlog.1.p24 mysql-5.6.15/man/mysqlbinlog.1
  .RE
  .sp
  .RS 4
-@@ -715,6 +716,22 @@ entries in the log\&.
+@@ -736,6 +737,22 @@ or any other MySQL program\&.
  .RE
  .sp
  .RS 4
@@ -446,13 +436,13 @@ diff -up mysql-5.6.15/man/mysqlbinlog.1.p24 mysql-5.6.15/man/mysqlbinlog.1
  .ie n \{\
  \h'-04'\(bu\h'+03'\c
  .\}
-diff -up mysql-5.6.15/man/mysqlcheck.1.p24 mysql-5.6.15/man/mysqlcheck.1
---- mysql-5.6.15/man/mysqlcheck.1.p24	2013-11-17 19:03:04.000000000 +0100
-+++ mysql-5.6.15/man/mysqlcheck.1	2013-12-10 13:02:43.841276619 +0100
-@@ -456,6 +456,38 @@ Section\ \&10.5, \(lqCharacter Set Confi
- .sp -1
+diff -up mysql-5.6.16/man/mysqlcheck.1.p24 mysql-5.6.16/man/mysqlcheck.1
+--- mysql-5.6.16/man/mysqlcheck.1.p24	2014-01-14 16:38:10.000000000 +0100
++++ mysql-5.6.16/man/mysqlcheck.1	2014-02-03 15:31:31.985839986 +0100
+@@ -456,6 +456,38 @@ Print some debugging information when th
  .IP \(bu 2.3
  .\}
+ .\" mysqlcheck: debug-info option
 +.\" mysqlcheck: defaults-extra-file option
 +.\" defaults-extra-file option: mysqlcheck
 +\fB\-\-defaults\-extra\-file=\fR\fB\fIfilename\fR\fR
@@ -485,13 +475,13 @@ diff -up mysql-5.6.15/man/mysqlcheck.1.p24 mysql-5.6.15/man/mysqlcheck.1
 +.sp -1
 +.IP \(bu 2.3
 +.\}
- .\" mysqlcheck: extended option.\" extended option: mysqlcheck\fB\-\-extended\fR,
- \fB\-e\fR
+ .\" debug-info option: mysqlcheck
+ \fB\-\-debug\-info\fR
  .sp
-@@ -572,6 +604,21 @@ operation\&. This finds only 99\&.99% of
- .sp -1
- .IP \(bu 2.3
+@@ -572,6 +604,21 @@ Convert table names to 5\&.1 format\&. O
  .\}
+ .\" mysqlcheck: force option
+ .\" force option: mysqlcheck
 +.\" mysqlcheck: no-defaults option
 +.\" no-defaults option: mysqlcheck
 +\fB\-\-no\-defaults\fR
@@ -507,10 +497,10 @@ diff -up mysql-5.6.15/man/mysqlcheck.1.p24 mysql-5.6.15/man/mysqlcheck.1
 +.sp -1
 +.IP \(bu 2.3
 +.\}
- .\" mysqlcheck: optimize option.\" optimize option: mysqlcheck\fB\-\-optimize\fR,
- \fB\-o\fR
+ \fB\-\-force\fR,
+ \fB\-f\fR
  .sp
-@@ -712,6 +759,22 @@ Silent mode\&. Print only error messages
+@@ -712,6 +759,22 @@ The TCP/IP port number to use for the co
  .RE
  .sp
  .RS 4
@@ -533,13 +523,13 @@ diff -up mysql-5.6.15/man/mysqlcheck.1.p24 mysql-5.6.15/man/mysqlcheck.1
  .ie n \{\
  \h'-04'\(bu\h'+03'\c
  .\}
-diff -up mysql-5.6.15/man/mysql_config.1.p24 mysql-5.6.15/man/mysql_config.1
---- mysql-5.6.15/man/mysql_config.1.p24	2013-12-09 19:08:52.751074834 +0100
-+++ mysql-5.6.15/man/mysql_config.1	2013-12-10 13:09:46.944577176 +0100
-@@ -174,6 +174,22 @@ The default Unix socket file, defined wh
- .sp -1
- .IP \(bu 2.3
- .\}
+diff -up mysql-5.6.16/man/mysql_config.1.p24 mysql-5.6.16/man/mysql_config.1
+--- mysql-5.6.16/man/mysql_config.1.p24	2014-01-14 16:38:10.000000000 +0100
++++ mysql-5.6.16/man/mysql_config.1	2014-02-03 15:31:31.985839986 +0100
+@@ -174,6 +174,22 @@ The default TCP/IP port number, defined
+ .sp
+ .RS 4
+ .ie n \{\
 +.\" mysql_config: variable option
 +.\" variable option: mysql_config
 +\fB\-\-variable=VAR\fR
@@ -556,26 +546,25 @@ diff -up mysql-5.6.15/man/mysql_config.1.p24 mysql-5.6.15/man/mysql_config.1
 +.sp -1
 +.IP \(bu 2.3
 +.\}
- .\" mysql_config: version option.\" version option: mysql_config\fB\-\-version\fR
- .sp
- Version number for the MySQL distribution\&.
-diff -up mysql-5.6.15/man/mysqldump.1.p24 mysql-5.6.15/man/mysqldump.1
---- mysql-5.6.15/man/mysqldump.1.p24	2013-11-17 19:03:04.000000000 +0100
-+++ mysql-5.6.15/man/mysqldump.1	2013-12-10 13:00:43.204169470 +0100
-@@ -1154,7 +1154,8 @@ statements that include column names\&.
- .sp -1
- .IP \(bu 2.3
+ \h'-04'\(bu\h'+03'\c
  .\}
--.\" mysqldump: create-options option.\" create-options option: mysqldump\fB\-\-create\-options\fR
-+.\" mysqldump: create-options option.\" create-options option: mysqldump\fB\-\-create\-options\fR,
-+\fB\-a\fR
+ .el \{\
+diff -up mysql-5.6.16/man/mysqldump.1.p24 mysql-5.6.16/man/mysqldump.1
+--- mysql-5.6.16/man/mysqldump.1.p24	2014-01-14 16:38:10.000000000 +0100
++++ mysql-5.6.16/man/mysqldump.1	2014-02-03 15:35:30.992008930 +0100
+@@ -1246,7 +1246,7 @@ statements that include column names\&.
+ .\}
+ .\" mysqldump: create-options option
+ .\" create-options option: mysqldump
+-\fB\-\-create\-options\fR
++\fB\-\-create\-options\fR, \fB\-a\fR
  .sp
  Include all MySQL\-specific table options in the
  CREATE TABLE
-@@ -1666,6 +1667,38 @@ transactional options, primarily for the
- .sp -1
- .IP \(bu 2.3
- .\}
+@@ -1666,6 +1666,38 @@ Do not dump the given table, which must
+ \fB\-d\fR
+ .sp
+ Do not write any table row information (that is, do not dump table contents)\&. This is useful if you want to dump only the
 +.\" mysqldump: defaults-extra-file option
 +.\" defaults-extra-file option: mysqldump
 +\fB\-\-defaults\-extra\-file=\fR\fB\fIfilename\fR\fR
@@ -608,13 +597,13 @@ diff -up mysql-5.6.15/man/mysqldump.1.p24 mysql-5.6.15/man/mysqldump.1
 +.sp -1
 +.IP \(bu 2.3
 +.\}
- .\" mysqldump: delayed-insert option.\" delayed-insert option: mysqldump\fB\-\-delayed\-insert\fR
- .sp
- For those nontransactional tables that support the
-@@ -1917,6 +1950,36 @@ at the end of the option list\&.
- .sp -1
+ CREATE TABLE
+ statement for the table (for example, to create an empty copy of the table by loading the dump file)\&.
+ .RE
+@@ -1917,6 +1949,36 @@ for information about selectively enabli
  .IP \(bu 2.3
  .\}
+ .\" mysqldump: quick option
 +.\" mysqldump: max-allowed-packet option
 +.\" max-allowed-packet option: mysqldump
 +\fB\-\-max\-allowed\-packet=\fR\fB\fIlength\fR\fR
@@ -645,10 +634,10 @@ diff -up mysql-5.6.15/man/mysqldump.1.p24 mysql-5.6.15/man/mysqldump.1
 +.sp -1
 +.IP \(bu 2.3
 +.\}
- .\" mysqldump: no-autocommit option.\" no-autocommit option: mysqldump\fB\-\-no\-autocommit\fR
- .sp
- Enclose the
-@@ -2012,6 +2075,21 @@ is on by default\&. Thus you rarely if e
+ .\" quick option: mysqldump
+ \fB\-\-quick\fR,
+ \fB\-q\fR
+@@ -2194,6 +2256,21 @@ is on by default\&. Thus you rarely if e
  .el \{\
  .sp -1
  .IP \(bu 2.3
@@ -670,7 +659,7 @@ diff -up mysql-5.6.15/man/mysqldump.1.p24 mysql-5.6.15/man/mysqldump.1
  .\}
  The
  \fB\-\-compact\fR
-@@ -2184,6 +2262,21 @@ is on by default\&.)
+@@ -2371,6 +2448,21 @@ is on by default\&.)
  .RE
  .sp
  .RS 4
@@ -692,10 +681,10 @@ diff -up mysql-5.6.15/man/mysqldump.1.p24 mysql-5.6.15/man/mysqldump.1
  .ie n \{\
  \h'-04'\(bu\h'+03'\c
  .\}
-diff -up mysql-5.6.15/man/mysqlimport.1.p24 mysql-5.6.15/man/mysqlimport.1
---- mysql-5.6.15/man/mysqlimport.1.p24	2013-11-17 19:03:04.000000000 +0100
-+++ mysql-5.6.15/man/mysqlimport.1	2013-12-10 12:55:58.039851937 +0100
-@@ -238,8 +238,40 @@ This option was added in MySQL 5\&.6\&.2
+diff -up mysql-5.6.16/man/mysqlimport.1.p24 mysql-5.6.16/man/mysqlimport.1
+--- mysql-5.6.16/man/mysqlimport.1.p24	2014-01-14 16:38:10.000000000 +0100
++++ mysql-5.6.16/man/mysqlimport.1	2014-02-03 15:36:17.680039918 +0100
+@@ -258,10 +258,42 @@ This option was added in MySQL 5\&.6\&.2
  .sp -1
  .IP \(bu 2.3
  .\}
@@ -731,16 +720,18 @@ diff -up mysql-5.6.15/man/mysqlimport.1.p24 mysql-5.6.15/man/mysqlimport.1
 +.sp -1
 +.IP \(bu 2.3
 +.\}
- .\" mysqlimport: delete option.\" delete option: mysqlimport\fB\-\-delete\fR,
+ .\" mysqlimport: delete option
+ .\" delete option: mysqlimport
+ \fB\-\-delete\fR,
 -\fB\-D\fR
 +\fB\-d\fR
  .sp
  Empty the table before importing the text file\&.
  .RE
-@@ -397,6 +429,22 @@ MERGE)\&.
- .sp -1
- .IP \(bu 2.3
- .\}
+@@ -397,6 +429,22 @@ Section\ \&13.2.6, \(lqLOAD DATA INFILE
+ Read input files locally from the client host\&.
+ .RE
+ .sp
 +.\" mysqlimport: no-defaults option
 +.\" no-defaults option: mysqlimport
 +\fB\-\-no\-defaults\fR
@@ -757,10 +748,10 @@ diff -up mysql-5.6.15/man/mysqlimport.1.p24 mysql-5.6.15/man/mysqlimport.1
 +.sp -1
 +.IP \(bu 2.3
 +.\}
- .\" mysqlimport: password option.\" password option: mysqlimport\fB\-\-password[=\fR\fB\fIpassword\fR\fR\fB]\fR,
- \fB\-p[\fR\fB\fIpassword\fR\fR\fB]\fR
- .sp
-@@ -513,6 +561,22 @@ Silent mode\&. Produce output only when
+ .RS 4
+ .ie n \{\
+ \h'-04'\(bu\h'+03'\c
+@@ -519,6 +567,22 @@ The TCP/IP port number to use for the co
  .RE
  .sp
  .RS 4
@@ -783,23 +774,22 @@ diff -up mysql-5.6.15/man/mysqlimport.1.p24 mysql-5.6.15/man/mysqlimport.1
  .ie n \{\
  \h'-04'\(bu\h'+03'\c
  .\}
-diff -up mysql-5.6.15/man/mysqlshow.1.p24 mysql-5.6.15/man/mysqlshow.1
---- mysql-5.6.15/man/mysqlshow.1.p24	2013-11-17 19:03:04.000000000 +0100
-+++ mysql-5.6.15/man/mysqlshow.1	2013-12-10 13:08:16.657520289 +0100
-@@ -167,7 +167,8 @@ This option is supported beginning with
- .sp -1
- .IP \(bu 2.3
+diff -up mysql-5.6.16/man/mysqlshow.1.p24 mysql-5.6.16/man/mysqlshow.1
+--- mysql-5.6.16/man/mysqlshow.1.p24	2014-01-14 16:38:10.000000000 +0100
++++ mysql-5.6.16/man/mysqlshow.1	2014-02-03 15:34:12.679955219 +0100
+@@ -173,7 +173,7 @@ This option is supported beginning with
  .\}
--.\" mysqlshow: character-sets-dir option.\" character-sets-dir option: mysqlshow\fB\-\-character\-sets\-dir=\fR\fB\fIpath\fR\fR
-+.\" mysqlshow: character-sets-dir option.\" character-sets-dir option: mysqlshow\fB\-\-character\-sets\-dir=\fR\fB\fIpath\fR\fR,
-+\fB\-c\fR
+ .\" mysqlshow: character-sets-dir option
+ .\" character-sets-dir option: mysqlshow
+-\fB\-\-character\-sets\-dir=\fR\fB\fIpath\fR\fR
++\fB\-\-character\-sets\-dir=\fR\fB\fIpath\fR\fR, \fB\-c\fR
  .sp
  The directory where character sets are installed\&. See
  Section\ \&10.5, \(lqCharacter Set Configuration\(rq\&.
-@@ -285,6 +286,38 @@ This option was added in MySQL 5\&.6\&.2
- .sp -1
- .IP \(bu 2.3
+@@ -285,6 +285,38 @@ Section\ \&10.5, \(lqCharacter Set Confi
  .\}
+ .el \{\
+ .sp -1
 +.\" mysqlshow: defaults-extra-file option
 +.\" defaults-extra-file option: mysqlshow
 +\fB\-\-defaults\-extra\-file=\fR\fB\fIfilename\fR\fR
@@ -832,13 +822,13 @@ diff -up mysql-5.6.15/man/mysqlshow.1.p24 mysql-5.6.15/man/mysqlshow.1
 +.sp -1
 +.IP \(bu 2.3
 +.\}
- .\" mysqlshow: host option.\" host option: mysqlshow\fB\-\-host=\fR\fB\fIhost_name\fR\fR,
- \fB\-h \fR\fB\fIhost_name\fR\fR
- .sp
-@@ -313,6 +346,22 @@ Show table indexes\&.
- .sp -1
  .IP \(bu 2.3
  .\}
+ .\" mysqlshow: default-auth option
+@@ -313,6 +345,22 @@ This option was added in MySQL 5\&.6\&.2
+ Connect to the MySQL server on the given host\&.
+ .RE
+ .sp
 +.\" mysqlshow: no-defaults option
 +.\" no-defaults option: mysqlshow
 +\fB\-\-no\-defaults\fR
@@ -855,10 +845,10 @@ diff -up mysql-5.6.15/man/mysqlshow.1.p24 mysql-5.6.15/man/mysqlshow.1
 +.sp -1
 +.IP \(bu 2.3
 +.\}
- .\" mysqlshow: password option.\" password option: mysqlshow\fB\-\-password[=\fR\fB\fIpassword\fR\fR\fB]\fR,
- \fB\-p[\fR\fB\fIpassword\fR\fR\fB]\fR
- .sp
-@@ -413,6 +462,22 @@ VIEW\&.
+ .RS 4
+ .ie n \{\
+ \h'-04'\(bu\h'+03'\c
+@@ -413,6 +461,22 @@ The TCP/IP port number to use for the co
  .RE
  .sp
  .RS 4
@@ -881,10 +871,10 @@ diff -up mysql-5.6.15/man/mysqlshow.1.p24 mysql-5.6.15/man/mysqlshow.1
  .ie n \{\
  \h'-04'\(bu\h'+03'\c
  .\}
-diff -up mysql-5.6.15/man/mysqlslap.1.p24 mysql-5.6.15/man/mysqlslap.1
---- mysql-5.6.15/man/mysqlslap.1.p24	2013-11-17 19:03:04.000000000 +0100
-+++ mysql-5.6.15/man/mysqlslap.1	2013-12-10 13:11:04.721623937 +0100
-@@ -531,6 +531,38 @@ Section\ \&6.3.7.7, \(lqThe Cleartext Cl
+diff -up mysql-5.6.16/man/mysqlslap.1.p24 mysql-5.6.16/man/mysqlslap.1
+--- mysql-5.6.16/man/mysqlslap.1.p24	2014-01-14 16:38:10.000000000 +0100
++++ mysql-5.6.16/man/mysqlslap.1	2014-02-03 15:31:31.989839989 +0100
+@@ -526,6 +526,38 @@ This option was added in MySQL 5\&.6\&.2
  .el \{\
  .sp -1
  .IP \(bu 2.3
@@ -921,12 +911,12 @@ diff -up mysql-5.6.15/man/mysqlslap.1.p24 mysql-5.6.15/man/mysqlslap.1
 +.IP \(bu 2.3
 +.\}
  .\}
- .\" mysqlslap: engine option.\" engine option: mysqlslap\fB\-\-engine=\fR\fB\fIengine_name\fR\fR,
+ .\" mysqlslap: delimiter option
+ .\" delimiter option: mysqlslap
+@@ -584,6 +616,37 @@ Section\ \&6.3.7.7, \(lqThe Cleartext Cl
  \fB\-e \fR\fB\fIengine_name\fR\fR
-@@ -589,6 +621,37 @@ from dropping any schema it creates duri
- .sp -1
- .IP \(bu 2.3
- .\}
+ .sp
+ The storage engine to use for creating tables\&.
 +.\" mysqlslap: no-defaults option
 +.\" no-defaults option: mysqlslap
 +\fB\-\-no\-defaults\fR
@@ -958,10 +948,10 @@ diff -up mysql-5.6.15/man/mysqlslap.1.p24 mysql-5.6.15/man/mysqlslap.1
 +.sp -1
 +.IP \(bu 2.3
 +.\}
- .\" mysqlslap: number-char-cols option.\" number-char-cols option: mysqlslap\fB\-\-number\-char\-cols=\fR\fB\fIN\fR\fR,
- \fB\-x \fR\fB\fIN\fR\fR
+ .RE
  .sp
-@@ -819,6 +882,22 @@ Section\ \&4.2.2, \(lqConnecting to the
+ .RS 4
+@@ -821,6 +884,22 @@ The file or string containing the statem
  .RE
  .sp
  .RS 4

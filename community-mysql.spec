@@ -13,8 +13,8 @@
 %global _default_patch_flags --no-backup-if-mismatch
 
 Name:             community-mysql
-Version:          5.6.15
-Release:          4%{?dist}
+Version:          5.6.16
+Release:          2%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -50,19 +50,15 @@ Patch18:          community-mysql-5.6.11-cipherspec.patch
 Patch19:          community-mysql-file-contents.patch
 Patch21:          community-mysql-dh1024.patch
 Patch22:          community-mysql-sharedir.patch
-Patch23:          community-mysql-5.6.10-libmysql-version.patch
+Patch23:          community-mysql-5.6.16-libmysql-version.patch
 Patch24:          community-mysql-man-pages.patch
-Patch25:          community-mysql-5.6.14-mysql-install.patch
+Patch25:          community-mysql-5.6.16-mysql-install.patch
 Patch26:          community-mysql-5.6.13-major.patch
 Patch28:          community-mysql-5.6.13-truncate-file.patch
-Patch29:          community-mysql-tmpdir.patch
-Patch30:          community-mysql-cve-2013-1861.patch
-Patch31:          community-mysql-innodbwarn.patch
-Patch32:          community-mysql-covscan-signexpr.patch
-Patch33:          community-mysql-covscan-stroverflow.patch
 Patch34:          community-mysql-pluginerrmsg.patch
 Patch35:          community-mysql-rhbz1059545.patch
 Patch36:          community-mysql-ssltest.patch
+Patch37:          community-mysql-5.6.16-fix-regex-werror.patch
 
 BuildRequires:    cmake
 BuildRequires:    dos2unix
@@ -254,14 +250,10 @@ the MySQL sources.
 %patch26 -p1
 %endif
 %patch28 -p0
-%patch29 -p1
-%patch30 -p1
-%patch31 -p1
-%patch32 -p1
-%patch33 -p1
 %patch34 -p1
 %patch35 -p1
 %patch36 -p1
+%patch37 -p1
 
 # Workaround for upstream bug #http://bugs.mysql.com/56342
 rm -f mysql-test/t/ssl_8k_key-master.opt
@@ -537,6 +529,8 @@ mkdir %{buildroot}%{_sysconfdir}/my.cnf.d
 
 %post libs -p /sbin/ldconfig
 
+%post embedded -p /sbin/ldconfig
+
 %post server
 %systemd_post mysqld.service
 /bin/touch /var/log/mysqld.log
@@ -560,6 +554,8 @@ fi
 %systemd_preun mysqld.service
 
 %postun libs -p /sbin/ldconfig
+
+%postun embedded -p /sbin/ldconfig
 
 %postun server
 %systemd_postun_with_restart mysqld.service
@@ -752,6 +748,23 @@ fi
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Mon Feb  3 2014 Honza Horak <hhorak@redhat.com> 5.6.16-2
+- Rebuild -man-pages.patch to apply smoothly
+
+* Fri Jan 31 2014 Bjorn Munch <bjorn.munch@oracle.com> 5.6.16-1
+- Update to MySQL 5.6.16, for various fixes described at
+  https://dev.mysql.com/doc/relnotes/mysql/5.6/en/news-5-6-16.html
+- Patches now upstream: tmpdir, cve-2013-1861, covscan-signexpr,
+  covscan-stroverflow
+- Fixed upstream: innodbwarn
+- ldconfig needed in embedded subpackage
+- Remove unused generate-tarball.sh from tree
+- Rediff mysql-install patch
+- Make symvers 18 default, provide symvers 16 for backward compat
+  (bz #1045013)
+- Man page patch disabled due too many conflicts
+- Memcached build patched to not remove -Werror=<something> in CFLAGS
+
 * Thu Jan 30 2014 Honza Horak <hhorak@redhat.com> 5.6.15-4
   Fix for CVE-2014-0001
   Resolves: #1059545
