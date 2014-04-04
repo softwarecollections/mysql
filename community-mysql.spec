@@ -12,9 +12,11 @@
 # Turn that off to ensure such files don't get included in RPMs (cf bz#884755).
 %global _default_patch_flags --no-backup-if-mismatch
 
+%global           skiplist platform-specific-tests.list
+
 Name:             community-mysql
-Version:          5.6.16
-Release:          2%{?dist}
+Version:          5.6.17
+Release:          1%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -29,13 +31,10 @@ Source4:          mysql_config.sh
 Source5:          my_config.h
 Source6:          README.mysql-docs
 Source7:          README.mysql-license
-Source9:          mysql-embedded-check.c
 Source10:         mysql.tmpfiles.d
 Source11:         mysqld.service
 Source12:         mysqld-prepare-db-dir
 Source13:         mysqld-wait-ready
-Source14:         rh-skipped-tests-base.list
-Source15:         rh-skipped-tests-arm.list
 # To track rpmlint warnings
 Source17:         mysql-5.6.10-rpmlintrc
 
@@ -54,11 +53,7 @@ Patch23:          community-mysql-5.6.16-libmysql-version.patch
 Patch24:          community-mysql-man-pages.patch
 Patch25:          community-mysql-5.6.16-mysql-install.patch
 Patch26:          community-mysql-5.6.13-major.patch
-Patch28:          community-mysql-5.6.13-truncate-file.patch
 Patch34:          community-mysql-pluginerrmsg.patch
-Patch35:          community-mysql-rhbz1059545.patch
-Patch36:          community-mysql-ssltest.patch
-Patch37:          community-mysql-5.6.16-fix-regex-werror.patch
 
 BuildRequires:    cmake
 BuildRequires:    dos2unix
@@ -144,10 +139,6 @@ Requires:         systemd
 Requires(post):   systemd
 Requires(preun):  systemd
 Requires(postun): systemd
-# This is actually needed for the %%triggerun script but Requires(triggerun)
-# is not valid.  We can use %%post because this particular %%triggerun script
-# should fire just after this package is installed.
-Requires(post):   systemd-sysv
 # mysqlhotcopy needs DBI/DBD support
 Requires:         perl(DBI)
 Requires:         perl(DBD::mysql)
@@ -249,27 +240,44 @@ the MySQL sources.
 %if %{with_shared_lib_major_hack}
 %patch26 -p1
 %endif
-%patch28 -p0
 %patch34 -p1
-%patch35 -p1
-%patch36 -p1
-%patch37 -p1
+
+# Modify tests to pass on all archs
+pushd mysql-test
+add_test () {
+    echo $1 >> %{skiplist}; 
+}
 
 # Workaround for upstream bug #http://bugs.mysql.com/56342
-rm -f mysql-test/t/ssl_8k_key-master.opt
+rm -f t/ssl_8k_key-master.opt
+touch %{skiplist}
 
-# Generate a list of tests that fail, but are not disabled by upstream
-cat %{SOURCE14} > mysql-test/rh-skipped-tests.list
-# Disable some tests failing on ARM architectures
-%ifarch %{arm}
-cat %{SOURCE15} >> mysql-test/rh-skipped-tests.list
+# Archs without hw performance counter, rh 741325
+%ifarch %{arm} aarch64 sparc64
+add_test 'perfschema.func_file_io  : rh 741325'
+add_test 'perfschema.func_mutex    : rh 741325'
+add_test 'perfschema.setup_objects : rh 741325'
 %endif
-%ifarch ppc ppc64 s390 s390x
-echo "innodb.innodb_ctype_ldml : rhbz#1056972" >> mysql-test/rh-skipped-tests.list
-echo "main.ctype_ldml : rhbz#1056972" >> mysql-test/rh-skipped-tests.list
-echo "main.ps_ddl : rhbz#1056972" >> mysql-test/rh-skipped-tests.list
-echo "main.ps_ddl1 : rhbz#1056972" >> mysql-test/rh-skipped-tests.list
+
+# Archs with collation issues, bugs.mysql.com/46895
+%ifarch %{arm} aarch64 ppc %{power64} s390 s390x
+add_test 'main.outfile_loaddata    :  46895'
+add_test 'innodb.innodb_ctype_ldml :  46895'
+add_test 'main.ctype_ldml          :  46895'
 %endif
+
+# Archs with ps_ddl issues
+%ifarch ppc s390
+add_test 'main.ps_ddl              : ps_ddl issue'
+add_test 'main.ps_ddl1             : ps_ddl issue'
+%endif
+
+# Arch with other issues
+%ifarch ppc
+add_test 'main.audit_plugin        : unknown'
+add_test 'main.upgrade             : unknown'
+%endif
+popd
 
 %build
 # fail quickly and obviously if user tries to build as root
@@ -282,27 +290,8 @@ echo "main.ps_ddl1 : rhbz#1056972" >> mysql-test/rh-skipped-tests.list
     fi
 %endif
 
-CFLAGS="%{optflags} -D_GNU_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE"
-# MySQL 4.1.10 definitely doesn't work under strict aliasing; also,
-# gcc 4.1 breaks MySQL 5.0.16 without -fwrapv
-CFLAGS="$CFLAGS -fno-strict-aliasing -fwrapv"
-# force PIC mode so that we can build libmysqld.so
-CFLAGS="$CFLAGS -fPIC"
-# gcc seems to have some bugs on sparc as of 4.4.1, back off optimization
-# submitted as bz #529298
-%ifarch sparc sparcv9 sparc64
-CFLAGS=$(echo $CFLAGS| sed -e "s|-O2|-O1|g" )
-%endif
-CXXFLAGS="$CFLAGS"
-export CFLAGS CXXFLAGS
-%if %{_hardened_build}
-LDFLAGS="$LDFLAGS -pie"
-export LDFLAGS
-%endif
-
-#  build out of source
-mkdir build
-pushd build
+# build out of source
+mkdir build && pushd build
 
 # The INSTALL_xxx macros have to be specified relative to CMAKE_INSTALL_PREFIX
 # so we can't use %%{_datadir} and so forth here.
@@ -331,72 +320,40 @@ cmake .. -DBUILD_CONFIG=mysql_release \
          -DENABLE_DTRACE=ON \
          -DWITH_INNODB_MEMCACHED=ON \
          -DWITH_EMBEDDED_SERVER=ON \
+         -DWITH_EMBEDDED_SHARED_LIBRARY=ON \
          -DWITH_EDITLINE=system \
          -DWITH_LIBEVENT=system \
          -DWITH_SSL=system \
          -DWITH_ZLIB=system \
-%if %{_hardened_build}
-         -DWITH_MYSQLD_LDFLAGS="-Wl,-z,relro,-z,now"
-%endif
+         -DCMAKE_C_FLAGS="%{optflags}" \
+         -DCMAKE_CXX_FLAGS="%{optflags}" \
+         %{?_hardened_build:-DWITH_MYSQLD_LDFLAGS="-pie -Wl,-z,relro,-z,now"}
 
 make %{?_smp_mflags} VERBOSE=1
-
-# Regular build will make libmysqld.a but not libmysqld.so :-(
-# Upstream bug: http://bugs.mysql.com/68559
-mkdir libmysqld/work
-pushd libmysqld/work
-ar -x ../libmysqld.a
-%{__cc} $CFLAGS $LDFLAGS -DEMBEDDED_LIBRARY -shared -Wl,-soname,libmysqld.so.18 -o libmysqld.so.18.1.0 \
-   *.o \
-  -lpthread -laio -lcrypt -lssl -lcrypto -lz -lrt -lstdc++ -ldl -lm -lc
-# This is to check that we built a complete library
-cp -p %{SOURCE9} .
-ln -s libmysqld.so.18.1.0 libmysqld.so.18
-%{__cc} -I../../../include -I../../include $CFLAGS mysql-embedded-check.c libmysqld.so.18
-LD_LIBRARY_PATH=. ldd ./a.out
-
 
 %install
 pushd build
 make DESTDIR=%{buildroot} install
 
-# List the installed tree for RPM package maintenance purposes.
-find %{buildroot} -print | sed "s|^%{buildroot}||" | sort > ROOTFILES
+# multilib header support
+%ifarch aarch64 %{ix86} x86_64 ppc %{power64} %{sparc} s390 s390x
+mv %{buildroot}%{_includedir}/mysql/my_config.h %{buildroot}%{_includedir}/mysql/my_config_$(uname -i).h
+install -p -m 644 %{SOURCE5} %{buildroot}%{_includedir}/mysql/
+mv %{buildroot}%{_bindir}/mysql_config %{buildroot}%{_bindir}/mysql_config-%{__isa_bits}
+install -p -m 0755 %{SOURCE4} %{buildroot}%{_bindir}/mysql_config
+%endif
 
-
-# cmake generates some completely wacko references to -lprobes_mysql when
-# building with dtrace support.  Haven't found where to shut that off,
-# so resort to this blunt instrument.  While at it, let's not reference
-# libmysqlclient_r anymore either.
-sed -e 's/-lprobes_mysql//' -e 's/-lmysqlclient_r/-lmysqlclient/' \
-  %{buildroot}%{_bindir}/mysql_config >mysql_config.tmp
-cp -p -f mysql_config.tmp %{buildroot}%{_bindir}/mysql_config
-chmod 0755 %{buildroot}%{_bindir}/mysql_config
-
-# Multilib header hacks
-# We only apply this to known Red Hat multilib arches, per bug #181335
-case $(uname -i) in
-  i386 | x86_64 | ppc | ppc64 | ppc64p7 | s390 | s390x | sparc | sparc64 | aarch64 )
-    mv %{buildroot}%{_includedir}/mysql/my_config.h %{buildroot}%{_includedir}/mysql/my_config_$(uname -i).h
-    install -p -m 644 %{SOURCE5} %{buildroot}%{_includedir}/mysql/
-    mv %{buildroot}%{_bindir}/mysql_config %{buildroot}%{_bindir}/mysql_config-%{__isa_bits}
-    install -p -m 0755 %{SOURCE4} %{buildroot}%{_bindir}/mysql_config
-    ;;
-  arm* )
-    mv %{buildroot}%{_includedir}/mysql/my_config.h %{buildroot}%{_includedir}/mysql/my_config_arm.h
-    install -p -m 644 %{SOURCE5} %{buildroot}%{_includedir}/mysql/
-    mv %{buildroot}%{_bindir}/mysql_config %{buildroot}%{_bindir}/mysql_config-%{__isa_bits}
-    install -p -m 0755 %{SOURCE4} %{buildroot}%{_bindir}/mysql_config
-    ;;
-  *)
-    ;;
-esac
+%ifarch %{arm}
+mv %{buildroot}%{_includedir}/mysql/my_config.h %{buildroot}%{_includedir}/mysql/my_config_arm.h
+install -p -m 644 %{SOURCE5} %{buildroot}%{_includedir}/mysql/
+mv %{buildroot}%{_bindir}/mysql_config %{buildroot}%{_bindir}/mysql_config-%{__isa_bits}
+install -p -m 0755 %{SOURCE4} %{buildroot}%{_bindir}/mysql_config
+%endif
 
 # install INFO_SRC, INFO_BIN into libdir (upstream thinks these are doc files,
 # but that's pretty wacko --- see also mysql-file-contents.patch)
 install -p -m 0644 Docs/INFO_SRC %{buildroot}%{_libdir}/mysql/
 install -p -m 0644 Docs/INFO_BIN %{buildroot}%{_libdir}/mysql/
-
 
 mkdir -p %{buildroot}/var/log
 touch %{buildroot}/var/log/mysqld.log
@@ -405,6 +362,7 @@ mkdir -p %{buildroot}/var/run/mysqld
 install -p -m 0755 -d %{buildroot}/var/lib/mysql
 
 install -D -p -m 0644 %{SOURCE3} %{buildroot}/etc/my.cnf
+mkdir %{buildroot}%{_sysconfdir}/my.cnf.d
 
 # install systemd unit files and scripts for handling server startup
 mkdir -p %{buildroot}%{_unitdir}
@@ -414,19 +372,6 @@ install -p -m 755 %{SOURCE13} %{buildroot}%{_libexecdir}/
 
 mkdir -p %{buildroot}%{_prefix}/lib/tmpfiles.d
 install -p -m 0644 %{SOURCE10} %{buildroot}%{_prefix}/lib/tmpfiles.d/%{name}.conf
-
-# Remove libmysqld.a, install libmysqld.so
-rm -f %{buildroot}%{_libdir}/mysql/libmysqld.a
-install -m 0755 libmysqld/work/libmysqld.so.18.1.0 %{buildroot}%{_libdir}/mysql/libmysqld.so.18.1.0
-ln -s libmysqld.so.18.1.0 %{buildroot}%{_libdir}/mysql/libmysqld.so.18
-ln -s libmysqld.so.18 %{buildroot}%{_libdir}/mysql/libmysqld.so
-
-# libmysqlclient_r is no more.  Upstream tries to replace it with symlinks
-# but that really doesn't work (wrong soname in particular).  We'll keep
-# just the devel libmysqlclient_r.so link, so that rebuilding without any
-# source change is enough to get rid of dependency on libmysqlclient_r.
-rm -f ${RPM_BUILD_ROOT}%{_libdir}/mysql/libmysqlclient_r.so*
-ln -s libmysqlclient.so ${RPM_BUILD_ROOT}%{_libdir}/mysql/libmysqlclient_r.so
 
 # mysql-test includes one executable that doesn't belong under /usr/share,
 # so move it and provide a symlink
@@ -458,11 +403,11 @@ echo "%{_libdir}/mysql" > %{buildroot}/etc/ld.so.conf.d/%{name}-%{_arch}.conf
 popd
 
 # copy additional docs into build tree so %%doc will find them
-cp -p %{SOURCE6} README.mysql-docs
-cp -p %{SOURCE7} README.mysql-license
+install -p -m 0644 %{SOURCE6} README.mysql-docs
+install -p -m 0644 %{SOURCE7} README.mysql-license
 
 # Install the list of skipped tests to be available for user runs
-install -p -m 0644 mysql-test/rh-skipped-tests.list %{buildroot}%{_datadir}/mysql-test
+install -p -m 0644 mysql-test/%{skiplist} %{buildroot}%{_datadir}/mysql-test
 
 # Upstream bugs: http://bugs.mysql.com/68517 http://bugs.mysql.com/68521
 chmod 0644 %{buildroot}%{_datadir}/%{name}/innodb_memcached_config.sql
@@ -482,44 +427,21 @@ rm %{buildroot}%{_mandir}/man1/{mysqltest,mysql_client_test}_embedded.1
 cp -p %{buildroot}%{_mandir}/man1/mysqltest.1 %{buildroot}%{_mandir}/man1/mysqltest_embedded.1
 cp -p %{buildroot}%{_mandir}/man1/mysql_client_test.1 %{buildroot}%{_mandir}/man1/mysql_client_test_embedded.1
 
-mkdir %{buildroot}%{_sysconfdir}/my.cnf.d
-
 %check
 %if %runselftest
-    pushd build
-    # Hack to let 32- and 64-bit tests run concurrently on same build machine
-    case $(uname -m) in
-        aarch64 | ppc64 | ppc64p7 | s390x | sparc64 | x86_64 )
-            MTR_BUILD_THREAD=7
-            ;;
-        *)
-            MTR_BUILD_THREAD=11
-            ;;
-    esac
-
-    export MTR_BUILD_THREAD
-
-    make test VERBOSE=1
-
-    # The cmake build scripts don't provide any simple way to control the
-    # options for mysql-test-run, so ignore the make target and just call it
-    # manually.  Nonstandard options chosen are:
-    # --force to continue tests after a failure
-    # no retries please
-    # skip tests that are listed in rh-skipped-tests.list
-    # avoid redundant test runs with --binlog-format=mixed
-    # increase timeouts to prevent unwanted failures during mass rebuilds
-    # todo: enable --ssl
-    pushd mysql-test
-    cp ../../mysql-test/rh-skipped-tests.list .
-    ./mtr \
-        --mem --parallel=auto --force --retry=0 \
-        --skip-test-list=rh-skipped-tests.list \
-        --mysqld=--binlog-format=mixed \
-        --suite-timeout=720 --testcase-timeout=30 \
-        --clean-vardir
-    rm -rf var/*
-    popd
+pushd build
+make test VERBOSE=1
+pushd mysql-test
+cp ../../mysql-test/%{skiplist} .
+./mtr \
+  --mem --parallel=auto --force --retry=0 \
+  --skip-test-list=%{skiplist} \
+  --mysqld=--binlog-format=mixed \
+  --suite-timeout=720 --testcase-timeout=30 \
+  --clean-vardir
+  rm -rf var/* $(readlink var)
+popd
+popd
 %endif
 
 %pre server
@@ -534,21 +456,6 @@ mkdir %{buildroot}%{_sysconfdir}/my.cnf.d
 %post server
 %systemd_post mysqld.service
 /bin/touch /var/log/mysqld.log
-
-# Handle upgrading from SysV initscript to native systemd unit.
-# We can tell if a SysV version of mysql was previously installed by
-# checking to see if the initscript is present.
-%triggerun server -- mysql-server
-if [ -f /etc/rc.d/init.d/mysqld ]; then
-  # Save the current service runlevel info
-  # User must manually run systemd-sysv-convert --apply mysqld
-  # to migrate them to systemd targets
-  /usr/bin/systemd-sysv-convert --save mysqld >/dev/null 2>&1 || :
-
-  # Run these because the SysV package being removed won't do them
-  /sbin/chkconfig --del mysqld >/dev/null 2>&1 || :
-  /bin/systemctl try-restart mysqld.service >/dev/null 2>&1 || :
-fi
 
 %preun server
 %systemd_preun mysqld.service
@@ -603,7 +510,7 @@ fi
 # libs package because it can be used for client settings too.
 %config(noreplace) %{_sysconfdir}/my.cnf
 %dir %{_libdir}/mysql
-%{_libdir}/mysql/libmysqlclient.so.*
+%{_libdir}/mysql/libmysqlclient*.so.*
 %config(noreplace) /etc/ld.so.conf.d/*
 
 %files common
@@ -748,6 +655,19 @@ fi
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Fri Apr 04 2014 Bjorn Munch <bjorn.munch@oracle.com> 5.6.17-1
+- Update to MySQL 5.6.17, for various fixes described at
+  https://dev.mysql.com/doc/relnotes/mysql/5.6/en/news-5-6-17.html
+- libmysqld built as shared lib now supported upstream
+- Remove patches now upstream: truncate-file, rhbz1059545, ssltest
+  and regex-werror
+- Use more standard (and tested) build flags, while still respect
+  optflags and hardened_build
+- libmysqlclient_r* symlinks are fixed upstream
+- Remove sysv to systemd logic
+- Rework skipping of arch specific tests
+- Multiple mtr sessions are supported by default
+
 * Mon Feb  3 2014 Honza Horak <hhorak@redhat.com> 5.6.16-2
 - Rebuild -man-pages.patch to apply smoothly
 
