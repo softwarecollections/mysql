@@ -16,7 +16,7 @@
 
 Name:             community-mysql
 Version:          5.6.17
-Release:          1%{?dist}
+Release:          2%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -245,7 +245,7 @@ the MySQL sources.
 # Modify tests to pass on all archs
 pushd mysql-test
 add_test () {
-    echo $1 >> %{skiplist}; 
+    echo $1 >> %{skiplist}
 }
 
 # Workaround for upstream bug #http://bugs.mysql.com/56342
@@ -433,6 +433,8 @@ pushd build
 make test VERBOSE=1
 pushd mysql-test
 cp ../../mysql-test/%{skiplist} .
+# builds might happen at the same host, avoid collision
+export MTR_BUILD_THREAD=%{__isa_bits}
 ./mtr \
   --mem --parallel=auto --force --retry=0 \
   --skip-test-list=%{skiplist} \
@@ -655,6 +657,9 @@ popd
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Fri Apr 18 2014 Bjorn Munch <bjorn.munch@oracle.com> 5.6.17-2
+- Fix multiple mtr sessions
+
 * Fri Apr 04 2014 Bjorn Munch <bjorn.munch@oracle.com> 5.6.17-1
 - Update to MySQL 5.6.17, for various fixes described at
   https://dev.mysql.com/doc/relnotes/mysql/5.6/en/news-5-6-17.html
