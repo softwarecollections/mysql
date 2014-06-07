@@ -16,7 +16,7 @@
 
 Name:             community-mysql
 Version:          5.6.17
-Release:          2%{?dist}
+Release:          3%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -657,6 +657,9 @@ popd
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 5.6.17-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
 * Fri Apr 18 2014 Bjorn Munch <bjorn.munch@oracle.com> 5.6.17-2
 - Fix multiple mtr sessions
 
