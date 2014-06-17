@@ -15,8 +15,8 @@
 %global           skiplist platform-specific-tests.list
 
 Name:             community-mysql
-Version:          5.6.17
-Release:          3%{?dist}
+Version:          5.6.19
+Release:          1%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -145,6 +145,7 @@ Requires:         perl(DBD::mysql)
 Provides:         mysql-server = %{version}-%{release} 
 Provides:         mysql-server%{?_isa} = %{version}-%{release}
 Conflicts:        mariadb-server
+Conflicts:        mariadb-galera-server
 
 %description      server
 MySQL is a multi-user, multi-threaded SQL database server. MySQL is a
@@ -261,7 +262,6 @@ add_test 'perfschema.setup_objects : rh 741325'
 
 # Archs with collation issues, bugs.mysql.com/46895
 %ifarch %{arm} aarch64 ppc %{power64} s390 s390x
-add_test 'main.outfile_loaddata    :  46895'
 add_test 'innodb.innodb_ctype_ldml :  46895'
 add_test 'main.ctype_ldml          :  46895'
 %endif
@@ -336,15 +336,12 @@ pushd build
 make DESTDIR=%{buildroot} install
 
 # multilib header support
-%ifarch aarch64 %{ix86} x86_64 ppc %{power64} %{sparc} s390 s390x
-mv %{buildroot}%{_includedir}/mysql/my_config.h %{buildroot}%{_includedir}/mysql/my_config_$(uname -i).h
-install -p -m 644 %{SOURCE5} %{buildroot}%{_includedir}/mysql/
-mv %{buildroot}%{_bindir}/mysql_config %{buildroot}%{_bindir}/mysql_config-%{__isa_bits}
-install -p -m 0755 %{SOURCE4} %{buildroot}%{_bindir}/mysql_config
-%endif
-
+unamei=$(uname -i)
 %ifarch %{arm}
-mv %{buildroot}%{_includedir}/mysql/my_config.h %{buildroot}%{_includedir}/mysql/my_config_arm.h
+unamei=arm
+%endif
+%ifarch %{arm} aarch64 %{ix86} x86_64 ppc %{power64} %{sparc} s390 s390x
+mv %{buildroot}%{_includedir}/mysql/my_config.h %{buildroot}%{_includedir}/mysql/my_config_$unamei.h
 install -p -m 644 %{SOURCE5} %{buildroot}%{_includedir}/mysql/
 mv %{buildroot}%{_bindir}/mysql_config %{buildroot}%{_bindir}/mysql_config-%{__isa_bits}
 install -p -m 0755 %{SOURCE4} %{buildroot}%{_bindir}/mysql_config
@@ -365,13 +362,11 @@ install -D -p -m 0644 %{SOURCE3} %{buildroot}/etc/my.cnf
 mkdir %{buildroot}%{_sysconfdir}/my.cnf.d
 
 # install systemd unit files and scripts for handling server startup
-mkdir -p %{buildroot}%{_unitdir}
-install -p -m 644 %{SOURCE11} %{buildroot}%{_unitdir}/
+install -D -p -m 644 %{SOURCE11} %{buildroot}%{_unitdir}/%{basename:%SOURCE11}
 install -p -m 755 %{SOURCE12} %{buildroot}%{_libexecdir}/
 install -p -m 755 %{SOURCE13} %{buildroot}%{_libexecdir}/
 
-mkdir -p %{buildroot}%{_prefix}/lib/tmpfiles.d
-install -p -m 0644 %{SOURCE10} %{buildroot}%{_prefix}/lib/tmpfiles.d/%{name}.conf
+install -D -p -m 0644 %{SOURCE10} %{buildroot}%{_prefix}/lib/tmpfiles.d/%{name}.conf
 
 # mysql-test includes one executable that doesn't belong under /usr/share,
 # so move it and provide a symlink
@@ -386,7 +381,6 @@ rm -f %{buildroot}%{_datadir}/%{name}/binary-configure
 rm -f %{buildroot}%{_datadir}/%{name}/magic
 rm -f %{buildroot}%{_datadir}/%{name}/mysql.server
 rm -f %{buildroot}%{_datadir}/%{name}/mysqld_multi.server
-rm -rf %{buildroot}%{_datadir}/%{name}/solaris
 rm -f %{buildroot}%{_mandir}/man1/comp_err.1*
 rm -f %{buildroot}%{_mandir}/man1/mysql-stress-test.pl.1*
 rm -f %{buildroot}%{_mandir}/man1/mysql-test-run.pl.1*
@@ -614,9 +608,9 @@ popd
 %{_datadir}/%{name}/mysql_system_tables_data.sql
 %{_datadir}/%{name}/mysql_test_data_timezone.sql
 %{_datadir}/%{name}/my-*.cnf
-%{_unitdir}/mysqld.service
-%{_libexecdir}/mysqld-prepare-db-dir
-%{_libexecdir}/mysqld-wait-ready
+%{_unitdir}/%{basename:%SOURCE11}
+%{_libexecdir}/%{basename:%SOURCE12}
+%{_libexecdir}/%{basename:%SOURCE13}
 
 %{_prefix}/lib/tmpfiles.d/%{name}.conf
 %attr(0755,mysql,mysql) %dir /var/run/mysqld
@@ -657,6 +651,15 @@ popd
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Wed Jun 11 2014 Bjorn Munch <bjorn.munch@oracle.com> - 5.6.19-1
+- Update to MySQL 5.6.19, for various fixes described at
+  https://dev.mysql.com/doc/relnotes/mysql/5.6/en/news-5-6-19.html
+- outfile_loaddata resolved on all archs
+- Solaris files not installed, no need to remove
+- Simplify multilib install
+- Use install's -D option some places 
+- Add explicit conflict with mariadb-galera-server
+
 * Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 5.6.17-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
 
