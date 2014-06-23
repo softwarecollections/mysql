@@ -16,7 +16,7 @@
 
 Name:             community-mysql
 Version:          5.6.19
-Release:          1%{?dist}
+Release:          2%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -54,6 +54,7 @@ Patch24:          community-mysql-man-pages.patch
 Patch25:          community-mysql-5.6.16-mysql-install.patch
 Patch26:          community-mysql-5.6.13-major.patch
 Patch34:          community-mysql-pluginerrmsg.patch
+Patch35:          community-mysql-5.6.19-gcc49-aarch64-opt.patch
 
 BuildRequires:    cmake
 BuildRequires:    dos2unix
@@ -242,6 +243,7 @@ the MySQL sources.
 %patch26 -p1
 %endif
 %patch34 -p1
+%patch35 -p1
 
 # Modify tests to pass on all archs
 pushd mysql-test
@@ -651,6 +653,10 @@ popd
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Thu Jun 12 2014 Bjorn Munch <bjorn.munch@oracle.com> - 5.6.19-2
+- Fix build on aarch64
+- Rebase cipherspec patch
+
 * Wed Jun 11 2014 Bjorn Munch <bjorn.munch@oracle.com> - 5.6.19-1
 - Update to MySQL 5.6.19, for various fixes described at
   https://dev.mysql.com/doc/relnotes/mysql/5.6/en/news-5-6-19.html

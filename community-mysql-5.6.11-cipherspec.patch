@@ -5,10 +5,10 @@ and tests are adjusted to specify the expected cipher explicitly.
 Upstream bug report: http://bugs.mysql.com/bug.php?id=64461
 
 diff --git a/client/mysqltest.cc b/client/mysqltest.cc
-index b6c8643..0e40b0d 100644
+index 2def9bd..128dc00 100644
 --- a/client/mysqltest.cc
 +++ b/client/mysqltest.cc
-@@ -5496,6 +5496,7 @@ void do_connect(struct st_command *command)
+@@ -5503,6 +5503,7 @@ void do_connect(struct st_command *command)
    my_bool con_pipe= 0, con_shm= 0, con_cleartext_enable= 0;
    my_bool con_secure_auth= 1;
    struct st_connection* con_slot;
@@ -16,7 +16,7 @@ index b6c8643..0e40b0d 100644
  
    static DYNAMIC_STRING ds_connection_name;
    static DYNAMIC_STRING ds_host;
-@@ -5588,6 +5589,8 @@ void do_connect(struct st_command *command)
+@@ -5595,6 +5596,8 @@ void do_connect(struct st_command *command)
        con_cleartext_enable= 1;
      else if (!strncmp(con_options, "SKIPSECUREAUTH",14))
        con_secure_auth= 0;
@@ -25,7 +25,7 @@ index b6c8643..0e40b0d 100644
      else
        die("Illegal option to connect: %.*s", 
            (int) (end - con_options), con_options);
-@@ -5635,8 +5638,11 @@ void do_connect(struct st_command *command)
+@@ -5642,8 +5645,11 @@ void do_connect(struct st_command *command)
    if (con_ssl)
    {
  #if defined(HAVE_OPENSSL) && !defined(EMBEDDED_LIBRARY)
@@ -38,8 +38,21 @@ index b6c8643..0e40b0d 100644
      mysql_options(&con_slot->mysql, MYSQL_OPT_SSL_CRL, opt_ssl_crl);
      mysql_options(&con_slot->mysql, MYSQL_OPT_SSL_CRLPATH, opt_ssl_crlpath);
  #if MYSQL_VERSION_ID >= 50000
+diff --git a/mysql-test/r/openssl_1.result b/mysql-test/r/openssl_1.result
+index a767a71..3c1ee27 100644
+--- a/mysql-test/r/openssl_1.result
++++ b/mysql-test/r/openssl_1.result
+@@ -197,8 +197,6 @@ Variable_name	Value
+ Ssl_cipher	EDH-RSA-DES-CBC3-SHA
+ Variable_name	Value
+ Ssl_cipher	AES256-SHA
+-Variable_name	Value
+-Ssl_cipher	RC4-SHA
+ select 'is still running; no cipher request crashed the server' as result from dual;
+ result
+ is still running; no cipher request crashed the server
 diff --git a/mysql-test/t/openssl_1.test b/mysql-test/t/openssl_1.test
-index 3e907f1..02b89ad 100644
+index 426de1e..f8c6203 100644
 --- a/mysql-test/t/openssl_1.test
 +++ b/mysql-test/t/openssl_1.test
 @@ -20,13 +20,13 @@ grant select on test.* to ssl_user4@localhost require cipher "DHE-RSA-AES256-SHA
@@ -70,7 +83,15 @@ index 3e907f1..02b89ad 100644
  --echo End of 5.0 tests
  
  #
-@@ -250,7 +250,7 @@ select 'is still running; no cipher request crashed the server' as result from d
+@@ -215,7 +215,6 @@ DROP TABLE t1;
+ --exec $MYSQL --host=localhost -e "SHOW STATUS LIKE 'Ssl_cipher';" --ssl-cipher=DHE-RSA-AES256-SHA
+ --exec $MYSQL --host=localhost -e "SHOW STATUS LIKE 'Ssl_cipher';" --ssl-cipher=EDH-RSA-DES-CBC3-SHA
+ --exec $MYSQL --host=localhost -e "SHOW STATUS LIKE 'Ssl_cipher';" --ssl-cipher=AES256-SHA
+---exec $MYSQL --host=localhost -e "SHOW STATUS LIKE 'Ssl_cipher';" --ssl-cipher=RC4-SHA
+ --disable_query_log
+ --disable_result_log
+ 
+@@ -250,7 +249,7 @@ select 'is still running; no cipher request crashed the server' as result from d
  
  GRANT SELECT ON test.* TO bug42158@localhost REQUIRE X509;
  FLUSH PRIVILEGES;
@@ -79,6 +100,19 @@ index 3e907f1..02b89ad 100644
  SHOW STATUS LIKE 'Ssl_cipher';
  disconnect con1;
  connection default;
+diff --git a/mysql-test/t/plugin_auth_sha256_tls.test b/mysql-test/t/plugin_auth_sha256_tls.test
+index f99df8a..1b38fda 100644
+--- a/mysql-test/t/plugin_auth_sha256_tls.test
++++ b/mysql-test/t/plugin_auth_sha256_tls.test
+@@ -1,7 +1,7 @@
+ --source include/not_embedded.inc
+ --source include/have_ssl.inc
+ 
+-connect (ssl_con,localhost,root,,,,,SSL);
++connect (ssl_con,localhost,root,,,,,SSL CIPHER:DHE-RSA-AES256-SHA);
+ SHOW STATUS LIKE 'Ssl_cipher';
+ 
+ CREATE USER 'kristofer' IDENTIFIED WITH 'sha256_password';
 diff --git a/mysql-test/t/ssl.test b/mysql-test/t/ssl.test
 index ea8be39..c61ca8b 100644
 --- a/mysql-test/t/ssl.test
