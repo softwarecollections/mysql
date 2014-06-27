@@ -16,7 +16,7 @@
 
 Name:             community-mysql
 Version:          5.6.19
-Release:          2%{?dist}
+Release:          3%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -145,6 +145,8 @@ Requires:         perl(DBI)
 Requires:         perl(DBD::mysql)
 Provides:         mysql-server = %{version}-%{release} 
 Provides:         mysql-server%{?_isa} = %{version}-%{release}
+Provides:         mysql-compat-server = %{version}-%{release}
+Provides:         mysql-compat-server%{?_isa} = %{version}-%{release}
 Conflicts:        mariadb-server
 Conflicts:        mariadb-galera-server
 
@@ -653,6 +655,10 @@ popd
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Fri Jun 27 2014 Honza Horak <hhorak@redhat.com> - 5.6.19-3
+- Add mysql-compat-server symbol, common symbol for arbitrary MySQL
+  implementation
+
 * Thu Jun 12 2014 Bjorn Munch <bjorn.munch@oracle.com> - 5.6.19-2
 - Fix build on aarch64
 - Rebase cipherspec patch
