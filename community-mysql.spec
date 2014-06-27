@@ -14,6 +14,9 @@
 
 %global           skiplist platform-specific-tests.list
 
+# When there is already another 
+%global ship_my_cnf 0
+
 Name:             community-mysql
 Version:          5.6.19
 Release:          3%{?dist}
@@ -118,6 +121,9 @@ MySQL server.
 %package          common
 Summary:          The shared files required for MySQL server and client
 Group:            Applications/Databases
+%if ! %{ship_my_cnf}
+Requires:         %{_sysconfdir}/my.cnf
+%endif
 
 %description      common
 The mysql-common package provides the essential shared files for any
@@ -362,8 +368,10 @@ touch %{buildroot}/var/log/mysqld.log
 mkdir -p %{buildroot}/var/run/mysqld
 install -p -m 0755 -d %{buildroot}/var/lib/mysql
 
-install -D -p -m 0644 %{SOURCE3} %{buildroot}/etc/my.cnf
-mkdir %{buildroot}%{_sysconfdir}/my.cnf.d
+%if %{ship_my_cnf}
+install -D -p -m 0644 %{SOURCE3} %{buildroot}%{_sysconfdir}/my.cnf
+%endif
+mkdir -p %{buildroot}%{_sysconfdir}/my.cnf.d
 
 # install systemd unit files and scripts for handling server startup
 install -D -p -m 644 %{SOURCE11} %{buildroot}%{_unitdir}/%{basename:%SOURCE11}
@@ -508,7 +516,9 @@ popd
 %doc README COPYING README.mysql-license
 # although the default my.cnf contains only server settings, we put it in the
 # libs package because it can be used for client settings too.
+%if %{ship_my_cnf}
 %config(noreplace) %{_sysconfdir}/my.cnf
+%endif
 %dir %{_libdir}/mysql
 %{_libdir}/mysql/libmysqlclient*.so.*
 %config(noreplace) /etc/ld.so.conf.d/*
@@ -658,6 +668,7 @@ popd
 * Fri Jun 27 2014 Honza Horak <hhorak@redhat.com> - 5.6.19-3
 - Add mysql-compat-server symbol, common symbol for arbitrary MySQL
   implementation
+- Require /etc/my.cnf instead of shipping it
 
 * Thu Jun 12 2014 Bjorn Munch <bjorn.munch@oracle.com> - 5.6.19-2
 - Fix build on aarch64
