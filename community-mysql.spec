@@ -138,7 +138,7 @@ Summary:          The MySQL server and related files
 Group:            Applications/Databases
 
 # note: no version here = %{version}-%{release}
-Requires:         mysql-compat-client%{?_isa} 
+Requires:         mysql-compat-client%{?_isa}
 Requires:         %{name}-common%{?_isa} = %{version}-%{release}
 Requires:         sh-utils
 Requires(pre):    /usr/sbin/useradd
