@@ -88,6 +88,8 @@ Requires:         fileutils
 Requires:         %{name}-common%{?_isa} = %{version}-%{release}
 Provides:         mysql = %{version}-%{release} 
 Provides:         mysql%{?_isa} = %{version}-%{release}
+Provides:         mysql-compat-client = %{version}-%{release}
+Provides:         mysql-compat-client%{?_isa} = %{version}-%{release}
 Conflicts:        mariadb
 # mysql-cluster used to be built from this SRPM, but no more
 Obsoletes:        mysql-cluster < 5.1.44
@@ -136,7 +138,7 @@ Summary:          The MySQL server and related files
 Group:            Applications/Databases
 
 # note: no version here = %{version}-%{release}
-Requires:         mysql%{?_isa} 
+Requires:         mysql-compat-client%{?_isa} 
 Requires:         %{name}-common%{?_isa} = %{version}-%{release}
 Requires:         sh-utils
 Requires(pre):    /usr/sbin/useradd
@@ -669,6 +671,7 @@ popd
 - Add mysql-compat-server symbol, common symbol for arbitrary MySQL
   implementation
 - Require /etc/my.cnf instead of shipping it
+- Server requires any compatible mysql-compat-client package
 
 * Thu Jun 12 2014 Bjorn Munch <bjorn.munch@oracle.com> - 5.6.19-2
 - Fix build on aarch64
