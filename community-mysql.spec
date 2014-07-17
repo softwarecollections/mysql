@@ -119,7 +119,6 @@ contains the standard MySQL client programs and generic MySQL files.
 %package          libs
 Summary:          The shared libraries required for MySQL clients
 Group:            Applications/Databases
-Requires:         /sbin/ldconfig
 Requires:         %{name}-common%{?_isa} = %{version}-%{release}
 Provides:         mysql-libs = %{version}-%{release}
 Provides:         mysql-libs%{?_isa} = %{version}-%{release}
