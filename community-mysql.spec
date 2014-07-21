@@ -6,6 +6,7 @@
 # set to 1 to enable
 %global with_shared_lib_major_hack 1
 
+# use Full RELRO for all binaries (RHBZ#1092548)
 %global _hardened_build 1
 
 # By default, patch(1) creates backup files when chunks apply with offsets.
@@ -14,12 +15,16 @@
 
 %global           skiplist platform-specific-tests.list
 
-# When there is already another 
+# When there is already another package that ships /etc/my.cnf,
+# rather include it than ship the file again, since conflicts between
+# those files may create issues
+# ship_my_cnf=1 means this is the only package in distro which ships
+# my.cnf and my.cnf.d
 %global ship_my_cnf 0
 
 Name:             community-mysql
 Version:          5.6.19
-Release:          3%{?dist}
+Release:          4%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -30,7 +35,7 @@ License:          GPLv2 with exceptions and LGPLv2 and BSD
 
 Source0:          https://cdn.mysql.com/Downloads/MySQL-5.6/mysql-%{version}.tar.gz
 Source3:          my.cnf
-Source4:          mysql_config.sh
+Source4:          mysql_config_multilib.sh
 Source5:          my_config.h
 Source6:          README.mysql-docs
 Source7:          README.mysql-license
@@ -83,8 +88,8 @@ BuildRequires:    perl(Time::HiRes)
 BuildRequires:    systemd
 
 Requires:         bash
-Requires:         grep
 Requires:         fileutils
+Requires:         grep
 Requires:         %{name}-common%{?_isa} = %{version}-%{release}
 Provides:         mysql = %{version}-%{release} 
 Provides:         mysql%{?_isa} = %{version}-%{release}
@@ -95,8 +100,14 @@ Conflicts:        mariadb
 Obsoletes:        mysql-cluster < 5.1.44
 
 # Filtering: https://fedoraproject.org/wiki/Packaging:AutoProvidesAndRequiresFiltering
+%if 0%{?__requires_exclude:1}
 %global __requires_exclude ^perl\\((hostnames|lib::mtr|lib::v1|mtr_|My::)
-%global __provides_exclude_from ^(/usr/share/(mysql|mysql-test)/.*|%{_libdir}/mysql/plugin/.*\\.so)$
+%global __provides_exclude_from ^(%{_datadir}/(mysql|mysql-test)/.*|%{_libdir}/mysql/plugin/.*\\.so)$
+%else
+%filter_from_requires /perl(\(hostnames\|lib::mtr\|lib::v1\|mtr_\|My::\)/d
+%filter_provides_in -P (%{_datadir}/(mysql|mysql-test)/.*|%{_libdir}/mysql/plugin/.*\\.so)$
+%filter_setup
+%endif
 
 %description
 MySQL is a multi-user, multi-threaded SQL database server. MySQL is a
@@ -133,6 +144,17 @@ MySQL program. You will need to install this package to use any other
 MySQL package.
 
 
+%package          errmsg
+
+Summary:          The error messages files required by server and embedded
+Group:            Applications/Databases
+Requires:         %{name}-common%{?_isa} = %{epoch}:%{version}-%{release}
+
+%description      errmsg
+The package provides error messages files for the MySQL daemon and the
+embedded server. You will need to install this package to use any of those
+MySQL packages.
+
 %package          server
 Summary:          The MySQL server and related files
 Group:            Applications/Databases
@@ -140,14 +162,13 @@ Group:            Applications/Databases
 # note: no version here = %{version}-%{release}
 Requires:         mysql-compat-client%{?_isa}
 Requires:         %{name}-common%{?_isa} = %{version}-%{release}
+Requires:         %{name}-errmsg%{?_isa} = %{version}-%{release}
 Requires:         sh-utils
 Requires(pre):    /usr/sbin/useradd
 # We require this to be present for %%{_prefix}/lib/tmpfiles.d
 Requires:         systemd
 # Make sure it's there when scriptlets run, too
-Requires(post):   systemd
-Requires(preun):  systemd
-Requires(postun): systemd
+%{?systemd_requires: %systemd_requires}
 # mysqlhotcopy needs DBI/DBD support
 Requires:         perl(DBI)
 Requires:         perl(DBD::mysql)
@@ -182,6 +203,8 @@ developing MySQL client applications.
 %package          embedded
 Summary:          MySQL as an embeddable library
 Group:            Applications/Databases
+Requires:         %{name}-common%{?_isa} = %{version}-%{release}
+Requires:         %{name}-errmsg%{?_isa} = %{version}-%{release}
 Provides:         mysql-embedded = %{version}-%{release}
 Provides:         mysql-embedded%{?_isa} = %{version}-%{release}
 
@@ -222,13 +245,13 @@ MySQL.
 Summary:          The test suite distributed with MySQL
 Group:            Applications/Databases
 Requires:         %{name}%{?_isa} = %{version}-%{release}
-Requires:         %{name}-libs%{?_isa} = %{version}-%{release}
+Requires:         %{name}-common%{?_isa} = %{version}-%{release}
 Requires:         %{name}-server%{?_isa} = %{version}-%{release}
 Conflicts:        mariadb-test
 Provides:         mysql-test = %{version}-%{release}
 Provides:         mysql-test%{?_isa} = %{version}-%{release}
 
-%description test
+%description      test
 MySQL is a multi-user, multi-threaded SQL database server. This
 package contains the regression test suite distributed with
 the MySQL sources.
@@ -314,6 +337,9 @@ cmake .. -DBUILD_CONFIG=mysql_release \
 %if 0%{?fedora} >= 20
          -DINSTALL_DOCDIR="share/doc/%{name}" \
          -DINSTALL_DOCREADMEDIR="share/doc/%{name}" \
+%else
+         -DINSTALL_DOCDIR="share/doc/%{name}-%{version}" \
+         -DINSTALL_DOCREADMEDIR="share/doc/%{name}-%{version}" \
 %endif
          -DINSTALL_INCLUDEDIR=include/mysql \
          -DINSTALL_INFODIR=share/info \
@@ -326,8 +352,8 @@ cmake .. -DBUILD_CONFIG=mysql_release \
          -DINSTALL_SCRIPTDIR=bin \
          -DINSTALL_SQLBENCHDIR=share \
          -DINSTALL_SUPPORTFILESDIR=share/%{name} \
-         -DMYSQL_DATADIR="/var/lib/mysql" \
-         -DMYSQL_UNIX_ADDR="/var/lib/mysql/mysql.sock" \
+         -DMYSQL_DATADIR="%{_localstatedir}/lib/mysql" \
+         -DMYSQL_UNIX_ADDR="%{_localstatedir}/lib/mysql/mysql.sock" \
          -DENABLED_LOCAL_INFILE=ON \
          -DENABLE_DTRACE=ON \
          -DWITH_INNODB_MEMCACHED=ON \
@@ -348,6 +374,7 @@ pushd build
 make DESTDIR=%{buildroot} install
 
 # multilib header support
+# we only apply this to known Red Hat multilib arches, per bug #181335
 unamei=$(uname -i)
 %ifarch %{arm}
 unamei=arm
@@ -364,23 +391,22 @@ install -p -m 0755 %{SOURCE4} %{buildroot}%{_bindir}/mysql_config
 install -p -m 0644 Docs/INFO_SRC %{buildroot}%{_libdir}/mysql/
 install -p -m 0644 Docs/INFO_BIN %{buildroot}%{_libdir}/mysql/
 
-mkdir -p %{buildroot}/var/log
-touch %{buildroot}/var/log/mysqld.log
+mkdir -p %{buildroot}%{_localstatedir}/log
+touch %{buildroot}%{_localstatedir}/log/mysqld.log
 
-mkdir -p %{buildroot}/var/run/mysqld
-install -p -m 0755 -d %{buildroot}/var/lib/mysql
+mkdir -p %{buildroot}%{_localstatedir}/run/mysqld
+install -p -m 0755 -d %{buildroot}%{_localstatedir}/lib/mysql
 
 %if %{ship_my_cnf}
 install -D -p -m 0644 %{SOURCE3} %{buildroot}%{_sysconfdir}/my.cnf
 %endif
-mkdir -p %{buildroot}%{_sysconfdir}/my.cnf.d
 
 # install systemd unit files and scripts for handling server startup
 install -D -p -m 644 %{SOURCE11} %{buildroot}%{_unitdir}/%{basename:%SOURCE11}
 install -p -m 755 %{SOURCE12} %{buildroot}%{_libexecdir}/
 install -p -m 755 %{SOURCE13} %{buildroot}%{_libexecdir}/
 
-install -D -p -m 0644 %{SOURCE10} %{buildroot}%{_prefix}/lib/tmpfiles.d/%{name}.conf
+install -D -p -m 0644 %{SOURCE10} %{buildroot}%{_tmpfilesdir}/%{name}.conf
 
 # mysql-test includes one executable that doesn't belong under /usr/share,
 # so move it and provide a symlink
@@ -456,7 +482,7 @@ popd
 
 %pre server
 /usr/sbin/groupadd -g 27 -o -r mysql >/dev/null 2>&1 || :
-/usr/sbin/useradd -M -N -g mysql -o -r -d /var/lib/mysql -s /bin/bash \
+/usr/sbin/useradd -M -N -g mysql -o -r -d %{_localstatedir}/lib/mysql -s /bin/bash \
   -c "MySQL Server" -u 27 mysql >/dev/null 2>&1 || :
 
 %post libs -p /sbin/ldconfig
@@ -465,7 +491,7 @@ popd
 
 %post server
 %systemd_post mysqld.service
-/bin/touch /var/log/mysqld.log
+/bin/touch %{_localstatedir}/log/mysqld.log
 
 %preun server
 %systemd_preun mysqld.service
@@ -478,13 +504,10 @@ popd
 %systemd_postun_with_restart mysqld.service
 
 %files
-%doc README COPYING README.mysql-license
 %doc README.mysql-docs
 
 %{_bindir}/msql2mysql
 %{_bindir}/mysql
-%{_bindir}/mysql_config
-%{_bindir}/mysql_config-%{__isa_bits}
 %{_bindir}/mysql_config_editor
 %{_bindir}/mysql_find_rows
 %{_bindir}/mysql_waitpid
@@ -500,7 +523,6 @@ popd
 
 %{_mandir}/man1/msql2mysql.1*
 %{_mandir}/man1/mysql.1*
-%{_mandir}/man1/mysql_config.1*
 %{_mandir}/man1/mysql_config_editor.1*
 %{_mandir}/man1/mysql_find_rows.1*
 %{_mandir}/man1/mysql_waitpid.1*
@@ -515,19 +537,23 @@ popd
 %{_mandir}/man1/my_print_defaults.1*
 
 %files libs
+%dir %{_libdir}/mysql
+%{_libdir}/mysql/libmysqlclient*.so.*
+%config(noreplace) %{_sysconfdir}/ld.so.conf.d/*
+
+%files common
 %doc README COPYING README.mysql-license
+%doc storage/innobase/COPYING.Percona storage/innobase/COPYING.Google
 # although the default my.cnf contains only server settings, we put it in the
 # libs package because it can be used for client settings too.
 %if %{ship_my_cnf}
 %config(noreplace) %{_sysconfdir}/my.cnf
-%endif
-%dir %{_libdir}/mysql
-%{_libdir}/mysql/libmysqlclient*.so.*
-%config(noreplace) /etc/ld.so.conf.d/*
-
-%files common
 %dir %{_sysconfdir}/my.cnf.d
+%endif
 %dir %{_datadir}/%{name}
+%{_datadir}/%{name}/charsets
+
+%files errmsg
 %{_datadir}/%{name}/english
 %lang(bg) %{_datadir}/%{name}/bulgarian
 %lang(cs) %{_datadir}/%{name}/czech
@@ -552,10 +578,8 @@ popd
 %lang(es) %{_datadir}/%{name}/spanish
 %lang(sv) %{_datadir}/%{name}/swedish
 %lang(uk) %{_datadir}/%{name}/ukrainian
-%{_datadir}/%{name}/charsets
 
 %files server
-%doc README COPYING README.mysql-license
 %{_bindir}/myisamchk    
 %{_bindir}/myisam_ftdump
 %{_bindir}/myisamlog
@@ -624,31 +648,30 @@ popd
 %{_datadir}/%{name}/mysql_system_tables_data.sql
 %{_datadir}/%{name}/mysql_test_data_timezone.sql
 %{_datadir}/%{name}/my-*.cnf
+
 %{_unitdir}/%{basename:%SOURCE11}
 %{_libexecdir}/%{basename:%SOURCE12}
 %{_libexecdir}/%{basename:%SOURCE13}
 
-%{_prefix}/lib/tmpfiles.d/%{name}.conf
-%attr(0755,mysql,mysql) %dir /var/run/mysqld
-%attr(0755,mysql,mysql) %dir /var/lib/mysql
-%attr(0640,mysql,mysql) %config(noreplace) %verify(not md5 size mtime) /var/log/mysqld.log
+%{_tmpfilesdir}/%{name}.conf
+%attr(0755,mysql,mysql) %dir %{_localstatedir}/run/mysqld
+%attr(0755,mysql,mysql) %dir %{_localstatedir}/lib/mysql
+%attr(0640,mysql,mysql) %config %ghost %verify(not md5 size mtime) %{_localstatedir}/log/mysqld.log
 %config(noreplace) %{_sysconfdir}/logrotate.d/mysqld
 
 %files devel
-%doc README COPYING README.mysql-license
 %{_bindir}/mysql_config
 %{_bindir}/mysql_config-%{__isa_bits}
 %{_includedir}/mysql
 %{_datadir}/aclocal/mysql.m4
 %{_libdir}/mysql/libmysqlclient.so
 %{_libdir}/mysql/libmysqlclient_r.so
+%{_mandir}/man1/mysql_config.1*
 
 %files embedded
-%doc README COPYING README.mysql-license
 %{_libdir}/mysql/libmysqld.so.*
 
 %files embedded-devel
-%doc README COPYING README.mysql-license
 %{_libdir}/mysql/libmysqld.so
 %{_bindir}/mysql_client_test_embedded
 %{_bindir}/mysqltest_embedded
@@ -656,17 +679,19 @@ popd
 %{_mandir}/man1/mysqltest_embedded.1*
 
 %files bench
-%doc README COPYING README.mysql-license
 %{_datadir}/sql-bench
 
 %files test
-%doc README COPYING README.mysql-license
 %{_bindir}/mysql_client_test
 %{_bindir}/my_safe_process
 %attr(-,mysql,mysql) %{_datadir}/mysql-test
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Mon Jul 21 2014 Honza Horak <hhorak@redhat.com> - 5.6.19-4
+- Port some latest changes from MariaDB package to sync those packages
+- Error messages now provided by a separate package (thanks Alexander Barkov)
+
 * Fri Jun 27 2014 Honza Horak <hhorak@redhat.com> - 5.6.19-3
 - Add mysql-compat-server symbol, common symbol for arbitrary MySQL
   implementation
