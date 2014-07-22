@@ -1,0 +1,1 @@
+d /var/run/@RPM_PACKAGE_PREFIX@mysqld 0755 mysql mysql -

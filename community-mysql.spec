@@ -22,9 +22,12 @@
 # my.cnf and my.cnf.d
 %global ship_my_cnf 0
 
+# Name for the systemd unit file
+%global daemon_name mysqld.service
+
 Name:             community-mysql
 Version:          5.6.19
-Release:          4%{?dist}
+Release:          5%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -39,10 +42,12 @@ Source4:          mysql_config_multilib.sh
 Source5:          my_config.h
 Source6:          README.mysql-docs
 Source7:          README.mysql-license
-Source10:         mysql.tmpfiles.d
-Source11:         mysqld.service
-Source12:         mysqld-prepare-db-dir
-Source13:         mysqld-wait-ready
+Source10:         mysql.tmpfiles.d.in
+Source11:         mysqld.service.in
+Source12:         mysqld-prepare-db-dir.sh
+Source13:         mysqld-wait-ready.sh
+Source14:         mysqld-check-socket.sh
+Source15:         mysqld-scripts-common.sh
 # To track rpmlint warnings
 Source17:         mysql-5.6.10-rpmlintrc
 
@@ -63,6 +68,7 @@ Patch25:          community-mysql-5.6.16-mysql-install.patch
 Patch26:          community-mysql-5.6.13-major.patch
 Patch34:          community-mysql-pluginerrmsg.patch
 Patch35:          community-mysql-5.6.19-gcc49-aarch64-opt.patch
+Patch37:          community-mysql-scripts.patch
 
 BuildRequires:    cmake
 BuildRequires:    dos2unix
@@ -147,7 +153,7 @@ MySQL package.
 
 Summary:          The error messages files required by server and embedded
 Group:            Applications/Databases
-Requires:         %{name}-common%{?_isa} = %{epoch}:%{version}-%{release}
+Requires:         %{name}-common%{?_isa} = %{version}-%{release}
 
 %description      errmsg
 The package provides error messages files for the MySQL daemon and the
@@ -276,6 +282,7 @@ the MySQL sources.
 %endif
 %patch34 -p1
 %patch35 -p1
+%patch37 -p1
 
 # Modify tests to pass on all archs
 pushd mysql-test
@@ -313,6 +320,9 @@ add_test 'main.upgrade             : unknown'
 %endif
 popd
 
+cp %{SOURCE10} %{SOURCE11} %{SOURCE12} %{SOURCE13} %{SOURCE14} \
+    %{SOURCE15} scripts
+
 %build
 # fail quickly and obviously if user tries to build as root
 %if %runselftest
@@ -332,6 +342,7 @@ mkdir build && pushd build
 cmake .. -DBUILD_CONFIG=mysql_release \
          -DFEATURE_SET="community" \
          -DINSTALL_LAYOUT=RPM \
+         -DDAEMON_NAME="%{daemon_name}" \
          -DCMAKE_INSTALL_PREFIX="%{_prefix}" \
 %if 0%{?fedora} >= 20
          -DINSTALL_DOCDIR="share/doc/%{name}" \
@@ -401,11 +412,13 @@ install -D -p -m 0644 %{SOURCE3} %{buildroot}%{_sysconfdir}/my.cnf
 %endif
 
 # install systemd unit files and scripts for handling server startup
-install -D -p -m 644 %{SOURCE11} %{buildroot}%{_unitdir}/%{basename:%SOURCE11}
-install -p -m 755 %{SOURCE12} %{buildroot}%{_libexecdir}/
-install -p -m 755 %{SOURCE13} %{buildroot}%{_libexecdir}/
+install -D -p -m 644 scripts/mysqld.service %{buildroot}%{_unitdir}/%{daemon_name}
+install -p -m 755 scripts/mysqld-prepare-db-dir %{buildroot}%{_libexecdir}/mysqld-prepare-db-dir
+install -p -m 755 scripts/mysqld-wait-ready %{buildroot}%{_libexecdir}/mysqld-wait-ready
+install -p -m 755 scripts/mysqld-check-socket %{buildroot}%{_libexecdir}/mysqld-check-socket
+install -p -m 644 scripts/mysqld-scripts-common %{buildroot}%{_libexecdir}/mysqld-scripts-common
 
-install -D -p -m 0644 %{SOURCE10} %{buildroot}%{_tmpfilesdir}/%{name}.conf
+install -D -p -m 0644 scripts/mysql.tmpfiles.d %{buildroot}%{_tmpfilesdir}/%{name}.conf
 
 # mysql-test includes one executable that doesn't belong under /usr/share,
 # so move it and provide a symlink
@@ -489,18 +502,18 @@ popd
 %post embedded -p /sbin/ldconfig
 
 %post server
-%systemd_post mysqld.service
+%systemd_post %{daemon_name}
 /bin/touch %{_localstatedir}/log/mysqld.log
 
 %preun server
-%systemd_preun mysqld.service
+%systemd_preun %{daemon_name}
 
 %postun libs -p /sbin/ldconfig
 
 %postun embedded -p /sbin/ldconfig
 
 %postun server
-%systemd_postun_with_restart mysqld.service
+%systemd_postun_with_restart %{daemon_name}
 
 %files
 %doc README.mysql-docs
@@ -648,9 +661,11 @@ popd
 %{_datadir}/%{name}/mysql_test_data_timezone.sql
 %{_datadir}/%{name}/my-*.cnf
 
-%{_unitdir}/%{basename:%SOURCE11}
-%{_libexecdir}/%{basename:%SOURCE12}
-%{_libexecdir}/%{basename:%SOURCE13}
+%{_unitdir}/%{daemon_name}
+%{_libexecdir}/mysqld-prepare-db-dir
+%{_libexecdir}/mysqld-wait-ready
+%{_libexecdir}/mysqld-check-socket
+%{_libexecdir}/mysqld-scripts-common
 
 %{_tmpfilesdir}/%{name}.conf
 %attr(0755,mysql,mysql) %dir %{_localstatedir}/run/mysqld
@@ -687,6 +702,9 @@ popd
 %{_mandir}/man1/mysql_client_test.1*
 
 %changelog
+* Tue Jul 22 2014 Honza Horak <hhorak@redhat.com> - 5.6.19-5
+- Port scripts for systemd unit from MariaDB
+
 * Mon Jul 21 2014 Honza Horak <hhorak@redhat.com> - 5.6.19-4
 - Port some latest changes from MariaDB package to sync those packages
 - Error messages now provided by a separate package (thanks Alexander Barkov)
