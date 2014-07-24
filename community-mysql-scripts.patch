@@ -1,7 +1,7 @@
 diff -rup mysql-5.6.19-orig/scripts/CMakeLists.txt mysql-5.6.19/scripts/CMakeLists.txt
 --- mysql-5.6.19-orig/scripts/CMakeLists.txt	2014-07-22 10:07:12.053410263 +0200
 +++ mysql-5.6.19/scripts/CMakeLists.txt	2014-07-22 10:10:44.102502369 +0200
-@@ -381,6 +381,28 @@ ELSE()
+@@ -381,6 +381,30 @@ ELSE()
      ENDIF()
      INSTALL_SCRIPT(${CMAKE_CURRENT_BINARY_DIR}/${file} COMPONENT ${${file}_COMPONENT})
    ENDFOREACH()
@@ -9,11 +9,13 @@ diff -rup mysql-5.6.19-orig/scripts/CMakeLists.txt mysql-5.6.19/scripts/CMakeLis
 +  # files for systemd
 +  SET(SYSTEMD_SCRIPTS
 +    mysql.tmpfiles.d
-+    mysqld.service
-+    mysqld-prepare-db-dir
-+    mysqld-wait-ready
-+    mysqld-check-socket
-+    mysqld-scripts-common
++    mysql.service
++    mysql-prepare-db-dir
++    mysql-wait-ready
++    mysql-check-socket
++    mysql-scripts-common
++    mysql_config_multilib
++    mysql.init
 +  )
 +  FOREACH(file ${SYSTEMD_SCRIPTS})
 +    IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${file}.sh)

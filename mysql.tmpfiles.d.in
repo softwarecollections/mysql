@@ -1,1 +1,1 @@
-d /var/run/@RPM_PACKAGE_PREFIX@mysqld 0755 mysql mysql -
+d /var/run/@DAEMON_NAME@ 0755 mysql mysql -

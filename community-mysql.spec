@@ -1,3 +1,6 @@
+# Name of the package without any prefixes
+%global pkgname   community-mysql
+
 # Regression tests may take a long time (many cores recommended), skip them by 
 # passing --nocheck to rpmbuild or by setting runselftest to 0 if defining
 # --nocheck is not possible (e.g. in koji build)
@@ -22,10 +25,40 @@
 # my.cnf and my.cnf.d
 %global ship_my_cnf 0
 
-# Name for the systemd unit file
-%global daemon_name mysqld.service
+# For some use cases we do not need some parts of the package
+%bcond_without clibrary
+%bcond_without embedded
+%bcond_without devel
+%bcond_without client
+%bcond_without common
+%bcond_without errmsg
+%bcond_without bench
+%bcond_without test
 
-Name:             community-mysql
+# Include files for SysV init or systemd
+%if 0%{?fedora} >= 15
+%bcond_without init_systemd
+%bcond_with init_sysv
+%global daemon_name mysqld
+%else
+%bcond_with init_systemd
+%bcond_without init_sysv
+%global daemon_name mysqld
+%endif
+
+# We define some system's well known locations here so we can use them easily
+# later when building to another location (like SCL)
+%global logrotateddir %{_sysconfdir}/logrotate.d
+%global logfiledir %{_localstatedir}/log
+%global logfile %{_localstatedir}/log/%{name}.log
+
+# Home directory of mysql user should be same for all packages that create it
+%global mysqluserhome /var/lib/mysql
+
+# Make long macros shorter
+%global sameevp   %{?epoch:%{epoch}:}%{version}-%{release}
+
+Name:             %{pkgname}
 Version:          5.6.19
 Release:          5%{?dist}
 Summary:          MySQL client programs and shared libraries
@@ -37,38 +70,42 @@ URL:              http://www.mysql.com
 License:          GPLv2 with exceptions and LGPLv2 and BSD
 
 Source0:          https://cdn.mysql.com/Downloads/MySQL-5.6/mysql-%{version}.tar.gz
+Source2:          mysql_config_multilib.sh
 Source3:          my.cnf
-Source4:          mysql_config_multilib.sh
-Source5:          my_config.h
+Source4:          my_config.h
 Source6:          README.mysql-docs
 Source7:          README.mysql-license
 Source10:         mysql.tmpfiles.d.in
-Source11:         mysqld.service.in
-Source12:         mysqld-prepare-db-dir.sh
-Source13:         mysqld-wait-ready.sh
-Source14:         mysqld-check-socket.sh
-Source15:         mysqld-scripts-common.sh
+Source11:         mysql.service.in
+Source12:         mysql-prepare-db-dir.sh
+Source13:         mysql-wait-ready.sh
+Source14:         mysql-check-socket.sh
+Source15:         mysql-scripts-common.sh
+Source17:         mysql.init.in
 # To track rpmlint warnings
-Source17:         mysql-5.6.10-rpmlintrc
+Source30:         mysql-5.6.10-rpmlintrc
 
 # Comments for these patches are in the patch files
-Patch2:           community-mysql-strmov.patch
-Patch3:           community-mysql-install-test.patch
-Patch4:           community-mysql-expired-certs.patch
-Patch6:           community-mysql-chain-certs.patch
-Patch11:          community-mysql-s390-tsc.patch
-Patch16:          community-mysql-logrotate.patch
-Patch18:          community-mysql-5.6.11-cipherspec.patch
-Patch19:          community-mysql-file-contents.patch
-Patch21:          community-mysql-dh1024.patch
-Patch22:          community-mysql-sharedir.patch
-Patch23:          community-mysql-5.6.16-libmysql-version.patch
-Patch24:          community-mysql-man-pages.patch
-Patch25:          community-mysql-5.6.16-mysql-install.patch
-Patch26:          community-mysql-5.6.13-major.patch
-Patch34:          community-mysql-pluginerrmsg.patch
-Patch35:          community-mysql-5.6.19-gcc49-aarch64-opt.patch
-Patch37:          community-mysql-scripts.patch
+# Patches common for more mysql-like packages
+Patch1:           %{pkgname}-strmov.patch
+Patch2:           %{pkgname}-install-test.patch
+Patch3:           %{pkgname}-s390-tsc.patch
+Patch4:           %{pkgname}-logrotate.patch
+Patch5:           %{pkgname}-cipherspec.patch
+Patch6:           %{pkgname}-file-contents.patch
+Patch7:           %{pkgname}-dh1024.patch
+Patch8:           %{pkgname}-scripts.patch
+
+# Patches specific for this mysql package
+Patch50:          %{pkgname}-expired-certs.patch
+Patch51:          %{pkgname}-chain-certs.patch
+Patch52:          %{pkgname}-sharedir.patch
+Patch53:          %{pkgname}-5.6.16-libmysql-version.patch
+Patch54:          %{pkgname}-man-pages.patch
+Patch55:          %{pkgname}-5.6.16-mysql-install.patch
+Patch56:          %{pkgname}-pluginerrmsg.patch
+Patch57:          %{pkgname}-5.6.19-gcc49-aarch64-opt.patch
+Patch70:          %{pkgname}-5.6.13-major.patch
 
 BuildRequires:    cmake
 BuildRequires:    dos2unix
@@ -86,21 +123,25 @@ BuildRequires:    perl(Env)
 BuildRequires:    perl(Exporter)
 BuildRequires:    perl(Fcntl)
 BuildRequires:    perl(File::Temp)
+BuildRequires:    perl(Data::Dumper)
 BuildRequires:    perl(Getopt::Long)
 BuildRequires:    perl(IPC::Open3)
 BuildRequires:    perl(Socket)
 BuildRequires:    perl(Sys::Hostname)
+BuildRequires:    perl(Test::More)
 BuildRequires:    perl(Time::HiRes)
-BuildRequires:    systemd
+%{?with_init_systemd:BuildRequires: systemd}
 
 Requires:         bash
 Requires:         fileutils
 Requires:         grep
-Requires:         %{name}-common%{?_isa} = %{version}-%{release}
-Provides:         mysql = %{version}-%{release} 
-Provides:         mysql%{?_isa} = %{version}-%{release}
-Provides:         mysql-compat-client = %{version}-%{release}
-Provides:         mysql-compat-client%{?_isa} = %{version}-%{release}
+Requires:         %{name}-common%{?_isa} = %{sameevp}
+
+Provides:         mysql = %{sameevp}
+Provides:         mysql%{?_isa} = %{sameevp}
+Provides:         mysql-compat-client = %{sameevp}
+Provides:         mysql-compat-client%{?_isa} = %{sameevp}
+
 Conflicts:        mariadb
 # mysql-cluster used to be built from this SRPM, but no more
 Obsoletes:        mysql-cluster < 5.1.44
@@ -122,20 +163,23 @@ and many different client programs and libraries. The base package
 contains the standard MySQL client programs and generic MySQL files.
 
 
+%if %{with clibrary}
 %package          libs
 Summary:          The shared libraries required for MySQL clients
 Group:            Applications/Databases
-Requires:         %{name}-common%{?_isa} = %{version}-%{release}
-Provides:         mysql-libs = %{version}-%{release}
-Provides:         mysql-libs%{?_isa} = %{version}-%{release}
+Requires:         %{name}-common%{?_isa} = %{sameevp}
+Provides:         mysql-libs = %{sameevp}
+Provides:         mysql-libs%{?_isa} = %{sameevp}
 
 %description      libs
 The mysql-libs package provides the essential shared libraries for any 
 MySQL client program or interface. You will need to install this package
 to use any other MySQL package or any clients that need to connect to a
 MySQL server.
+%endif
 
 
+%if %{with common}
 %package          common
 Summary:          The shared files required for MySQL server and client
 Group:            Applications/Databases
@@ -147,40 +191,49 @@ Requires:         %{_sysconfdir}/my.cnf
 The mysql-common package provides the essential shared files for any
 MySQL program. You will need to install this package to use any other
 MySQL package.
+%endif
 
 
+%if %{with errmsg}
 %package          errmsg
-
 Summary:          The error messages files required by server and embedded
 Group:            Applications/Databases
-Requires:         %{name}-common%{?_isa} = %{version}-%{release}
+Requires:         %{name}-common%{?_isa} = %{sameevp}
 
 %description      errmsg
 The package provides error messages files for the MySQL daemon and the
 embedded server. You will need to install this package to use any of those
 MySQL packages.
+%endif
+
 
 %package          server
 Summary:          The MySQL server and related files
 Group:            Applications/Databases
 
-# note: no version here = %{version}-%{release}
+# note: no version here = %{sameevp}
 Requires:         mysql-compat-client%{?_isa}
-Requires:         %{name}-common%{?_isa} = %{version}-%{release}
-Requires:         %{name}-errmsg%{?_isa} = %{version}-%{release}
+Requires:         %{name}-common%{?_isa} = %{sameevp}
+%if %{without common}
+Requires:         %{_sysconfdir}/my.cnf
+Requires:         %{_sysconfdir}/my.cnf.d
+%endif
+Requires:         %{name}-errmsg%{?_isa} = %{sameevp}
 Requires:         sh-utils
 Requires(pre):    /usr/sbin/useradd
-# We require this to be present for %%{_prefix}/lib/tmpfiles.d
+%if %{with init_systemd}
+# We require this to be present for %%{_tmpfilesdir}
 Requires:         systemd
 # Make sure it's there when scriptlets run, too
 %{?systemd_requires: %systemd_requires}
+%endif
 # mysqlhotcopy needs DBI/DBD support
 Requires:         perl(DBI)
 Requires:         perl(DBD::mysql)
-Provides:         mysql-server = %{version}-%{release} 
-Provides:         mysql-server%{?_isa} = %{version}-%{release}
-Provides:         mysql-compat-server = %{version}-%{release}
-Provides:         mysql-compat-server%{?_isa} = %{version}-%{release}
+Provides:         mysql-server = %{sameevp}
+Provides:         mysql-server%{?_isa} = %{sameevp}
+Provides:         mysql-compat-server = %{sameevp}
+Provides:         mysql-compat-server%{?_isa} = %{sameevp}
 Conflicts:        mariadb-server
 Conflicts:        mariadb-galera-server
 
@@ -191,11 +244,11 @@ and many different client programs and libraries. This package contains
 the MySQL server and some accompanying files and directories.
 
 
+%if %{with devel}
 %package          devel
 Summary:          Files for development of MySQL applications
 Group:            Applications/Databases
-Requires:         %{name}%{?_isa} = %{version}-%{release}
-Requires:         %{name}-libs%{?_isa} = %{version}-%{release}
+Requires:         %{name}-libs%{?_isa} = %{sameevp}
 Requires:         openssl-devel%{?_isa}
 Conflicts:        mariadb-devel
 
@@ -203,15 +256,17 @@ Conflicts:        mariadb-devel
 MySQL is a multi-user, multi-threaded SQL database server. This
 package contains the libraries and header files that are needed for
 developing MySQL client applications.
+%endif
 
 
+%if %{with embedded}
 %package          embedded
 Summary:          MySQL as an embeddable library
 Group:            Applications/Databases
-Requires:         %{name}-common%{?_isa} = %{version}-%{release}
-Requires:         %{name}-errmsg%{?_isa} = %{version}-%{release}
-Provides:         mysql-embedded = %{version}-%{release}
-Provides:         mysql-embedded%{?_isa} = %{version}-%{release}
+Requires:         %{name}-common%{?_isa} = %{sameevp}
+Requires:         %{name}-errmsg%{?_isa} = %{sameevp}
+Provides:         mysql-embedded = %{sameevp}
+Provides:         mysql-embedded%{?_isa} = %{sameevp}
 
 %description      embedded
 MySQL is a multi-user, multi-threaded SQL database server. This
@@ -222,67 +277,83 @@ into a client application instead of running as a separate process.
 %package          embedded-devel
 Summary:          Development files for MySQL as an embeddable library
 Group:            Applications/Databases
-Requires:         %{name}-embedded%{?_isa} = %{version}-%{release}
-Requires:         %{name}-devel%{?_isa} = %{version}-%{release}
+Requires:         %{name}-embedded%{?_isa} = %{sameevp}
+Requires:         %{name}-devel%{?_isa} = %{sameevp}
 Conflicts:        mariadb-embedded-devel
 
 %description      embedded-devel
 MySQL is a multi-user, multi-threaded SQL database server. This
 package contains files needed for developing and testing with
 the embedded version of the MySQL server.
+%endif
 
 
+%if %{with bench}
 %package          bench
 Summary:          MySQL benchmark scripts and data
 Group:            Applications/Databases
-Requires:         %{name}%{?_isa} = %{version}-%{release}
+Requires:         %{name}%{?_isa} = %{sameevp}
 Conflicts:        mariadb-bench
-Provides:         mysql-bench = %{version}-%{release}
-Provides:         mysql-bench%{?_isa} = %{version}-%{release}
+Provides:         mysql-bench = %{sameevp}
+Provides:         mysql-bench%{?_isa} = %{sameevp}
 
 %description      bench
 MySQL is a multi-user, multi-threaded SQL database server. This
 package contains benchmark scripts and data for use when benchmarking
 MySQL.
+%endif
 
 
+%if %{with test}
 %package          test
 Summary:          The test suite distributed with MySQL
 Group:            Applications/Databases
-Requires:         %{name}%{?_isa} = %{version}-%{release}
-Requires:         %{name}-common%{?_isa} = %{version}-%{release}
-Requires:         %{name}-server%{?_isa} = %{version}-%{release}
+Requires:         %{name}%{?_isa} = %{sameevp}
+Requires:         %{name}-common%{?_isa} = %{sameevp}
+Requires:         %{name}-server%{?_isa} = %{sameevp}
+Requires:         perl(Env)
+Requires:         perl(Exporter)
+Requires:         perl(Fcntl)
+Requires:         perl(File::Temp)
+Requires:         perl(Data::Dumper)
+Requires:         perl(Getopt::Long)
+Requires:         perl(IPC::Open3)
+Requires:         perl(Socket)
+Requires:         perl(Sys::Hostname)
+Requires:         perl(Test::More)
+Requires:         perl(Time::HiRes)
 Conflicts:        mariadb-test
-Provides:         mysql-test = %{version}-%{release}
-Provides:         mysql-test%{?_isa} = %{version}-%{release}
+Provides:         mysql-test = %{sameevp}
+Provides:         mysql-test%{?_isa} = %{sameevp}
 
 %description      test
 MySQL is a multi-user, multi-threaded SQL database server. This
 package contains the regression test suite distributed with
 the MySQL sources.
+%endif
 
 
 %prep
 %setup -q -n mysql-%{version}
+%patch1 -p1
 %patch2 -p1
 %patch3 -p1
 %patch4 -p1
+%patch5 -p1
 %patch6 -p1
-%patch11 -p1
-%patch16 -p1
-%patch18 -p1
-%patch19 -p1
-%patch21 -p1
-%patch22 -p1
-%patch23 -p1
-%patch24 -p1
-%patch25 -p1
+%patch7 -p1
+%patch8 -p1
+%patch50 -p1
+%patch51 -p1
+%patch52 -p1
+%patch53 -p1
+%patch54 -p1
+%patch55 -p1
+%patch56 -p1
+%patch57 -p1
 %if %{with_shared_lib_major_hack}
-%patch26 -p1
+%patch70 -p1
 %endif
-%patch34 -p1
-%patch35 -p1
-%patch37 -p1
 
 # Modify tests to pass on all archs
 pushd mysql-test
@@ -320,8 +391,8 @@ add_test 'main.upgrade             : unknown'
 %endif
 popd
 
-cp %{SOURCE10} %{SOURCE11} %{SOURCE12} %{SOURCE13} %{SOURCE14} \
-    %{SOURCE15} scripts
+cp %{SOURCE2} %{SOURCE10} %{SOURCE11} %{SOURCE12} %{SOURCE13} %{SOURCE14} \
+    %{SOURCE15} %{SOURCE17} scripts
 
 %build
 # fail quickly and obviously if user tries to build as root
@@ -337,12 +408,27 @@ cp %{SOURCE10} %{SOURCE11} %{SOURCE12} %{SOURCE13} %{SOURCE14} \
 # build out of source
 mkdir build && pushd build
 
+# significant performance gains can be achieved by compiling with -O3 optimization
+# rhbz#1051069
+%ifarch ppc64
+CFLAGS=`echo $CFLAGS| sed -e "s|-O2|-O3|g" `
+%endif
+CXXFLAGS="$CFLAGS"
+export CFLAGS CXXFLAGS
+
+%if 0%{?_hardened_build}
+# building with PIE
+LDFLAGS="$LDFLAGS -pie -Wl,-z,relro,-z,now"
+export LDFLAGS
+%endif
+
 # The INSTALL_xxx macros have to be specified relative to CMAKE_INSTALL_PREFIX
 # so we can't use %%{_datadir} and so forth here.
 cmake .. -DBUILD_CONFIG=mysql_release \
          -DFEATURE_SET="community" \
          -DINSTALL_LAYOUT=RPM \
          -DDAEMON_NAME="%{daemon_name}" \
+         -DNICE_PROJECT_NAME="MySQL" \
          -DCMAKE_INSTALL_PREFIX="%{_prefix}" \
 %if 0%{?fedora} >= 20
          -DINSTALL_DOCDIR="share/doc/%{name}" \
@@ -379,6 +465,8 @@ cmake .. -DBUILD_CONFIG=mysql_release \
 
 make %{?_smp_mflags} VERBOSE=1
 
+popd
+
 %install
 pushd build
 make DESTDIR=%{buildroot} install
@@ -390,19 +478,19 @@ unamei=$(uname -i)
 unamei=arm
 %endif
 %ifarch %{arm} aarch64 %{ix86} x86_64 ppc %{power64} %{sparc} s390 s390x
-mv %{buildroot}%{_includedir}/mysql/my_config.h %{buildroot}%{_includedir}/mysql/my_config_$unamei.h
-install -p -m 644 %{SOURCE5} %{buildroot}%{_includedir}/mysql/
+mv %{buildroot}%{_includedir}/mysql/my_config.h %{buildroot}%{_includedir}/mysql/my_config_${unamei}.h
+install -p -m 644 %{SOURCE4} %{buildroot}%{_includedir}/mysql/
 mv %{buildroot}%{_bindir}/mysql_config %{buildroot}%{_bindir}/mysql_config-%{__isa_bits}
-install -p -m 0755 %{SOURCE4} %{buildroot}%{_bindir}/mysql_config
+install -p -m 0755 scripts/mysql_config_multilib %{buildroot}%{_bindir}/mysql_config
 %endif
 
 # install INFO_SRC, INFO_BIN into libdir (upstream thinks these are doc files,
-# but that's pretty wacko --- see also mysql-file-contents.patch)
+# but that's pretty wacko --- see also %%{name}-file-contents.patch)
 install -p -m 0644 Docs/INFO_SRC %{buildroot}%{_libdir}/mysql/
 install -p -m 0644 Docs/INFO_BIN %{buildroot}%{_libdir}/mysql/
 
-mkdir -p %{buildroot}%{_localstatedir}/log
-touch %{buildroot}%{_localstatedir}/log/mysqld.log
+mkdir -p %{buildroot}%{logfiledir}
+touch %{buildroot}%{logfile}
 
 mkdir -p %{buildroot}%{_localstatedir}/run/mysqld
 install -p -m 0755 -d %{buildroot}%{_localstatedir}/lib/mysql
@@ -412,13 +500,21 @@ install -D -p -m 0644 %{SOURCE3} %{buildroot}%{_sysconfdir}/my.cnf
 %endif
 
 # install systemd unit files and scripts for handling server startup
-install -D -p -m 644 scripts/mysqld.service %{buildroot}%{_unitdir}/%{daemon_name}
-install -p -m 755 scripts/mysqld-prepare-db-dir %{buildroot}%{_libexecdir}/mysqld-prepare-db-dir
-install -p -m 755 scripts/mysqld-wait-ready %{buildroot}%{_libexecdir}/mysqld-wait-ready
-install -p -m 755 scripts/mysqld-check-socket %{buildroot}%{_libexecdir}/mysqld-check-socket
-install -p -m 644 scripts/mysqld-scripts-common %{buildroot}%{_libexecdir}/mysqld-scripts-common
-
+%if %{with init_systemd}
+install -D -p -m 644 scripts/mysql.service %{buildroot}%{_unitdir}/%{daemon_name}.service
 install -D -p -m 0644 scripts/mysql.tmpfiles.d %{buildroot}%{_tmpfilesdir}/%{name}.conf
+%endif
+
+# install SysV init script
+%if %{with init_sysv}
+install -D -p -m 755 scripts/mysql.init %{buildroot}%{_initddir}/%{daemon_name}
+%endif
+
+# helper scripts for service starting
+install -p -m 755 scripts/mysql-prepare-db-dir %{buildroot}%{_libexecdir}/mysql-prepare-db-dir
+install -p -m 755 scripts/mysql-wait-ready %{buildroot}%{_libexecdir}/mysql-wait-ready
+install -p -m 755 scripts/mysql-check-socket %{buildroot}%{_libexecdir}/mysql-check-socket
+install -p -m 644 scripts/mysql-scripts-common %{buildroot}%{_libexecdir}/mysql-scripts-common
 
 # mysql-test includes one executable that doesn't belong under /usr/share,
 # so move it and provide a symlink
@@ -438,19 +534,19 @@ rm -f %{buildroot}%{_mandir}/man1/mysql-stress-test.pl.1*
 rm -f %{buildroot}%{_mandir}/man1/mysql-test-run.pl.1*
 
 # put logrotate script where it needs to be
-mkdir -p %{buildroot}%{_sysconfdir}/logrotate.d
-mv %{buildroot}%{_datadir}/%{name}/mysql-log-rotate %{buildroot}%{_sysconfdir}/logrotate.d/mysqld
-chmod 644 %{buildroot}%{_sysconfdir}/logrotate.d/mysqld
+mkdir -p %{buildroot}%{logrotateddir}
+mv %{buildroot}%{_datadir}/%{name}/mysql-log-rotate %{buildroot}%{logrotateddir}/%{daemon_name}
+chmod 644 %{buildroot}%{logrotateddir}/%{daemon_name}
 
-mkdir -p %{buildroot}/etc/ld.so.conf.d
-echo "%{_libdir}/mysql" > %{buildroot}/etc/ld.so.conf.d/%{name}-%{_arch}.conf
+mkdir -p %{buildroot}%{_sysconfdir}/ld.so.conf.d
+echo "%{_libdir}/mysql" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/%{name}-%{_arch}.conf
 
 # Back to src dir
 popd
 
 # copy additional docs into build tree so %%doc will find them
-install -p -m 0644 %{SOURCE6} README.mysql-docs
-install -p -m 0644 %{SOURCE7} README.mysql-license
+install -p -m 0644 %{SOURCE6} %{basename:%{SOURCE6}}
+install -p -m 0644 %{SOURCE7} %{basename:%{SOURCE7}}
 
 # Install the list of skipped tests to be available for user runs
 install -p -m 0644 mysql-test/%{skiplist} %{buildroot}%{_datadir}/mysql-test
@@ -473,7 +569,57 @@ rm %{buildroot}%{_mandir}/man1/{mysqltest,mysql_client_test}_embedded.1
 cp -p %{buildroot}%{_mandir}/man1/mysqltest.1 %{buildroot}%{_mandir}/man1/mysqltest_embedded.1
 cp -p %{buildroot}%{_mandir}/man1/mysql_client_test.1 %{buildroot}%{_mandir}/man1/mysql_client_test_embedded.1
 
+%if %{without clibrary}
+rm -rf %{buildroot}%{_libdir}/mysql/libmysqlclient*.so.*
+rm -rf %{buildroot}%{_sysconfdir}/ld.so.conf.d
+%endif
+
+%if %{without embedded}
+rm -f %{buildroot}%{_libdir}/mysql/libmysqld.so*
+rm -f %{buildroot}%{_bindir}/{mysql_client_test_embedded,mysqltest_embedded}
+rm -f %{buildroot}%{_mandir}/man1/{mysql_client_test_embedded,mysqltest_embedded}.1*
+%endif
+
+%if %{without devel}
+rm -f %{buildroot}%{_bindir}/mysql_config*
+rm -rf %{buildroot}%{_includedir}/mysql
+rm -f %{buildroot}%{_datadir}/aclocal/mysql.m4
+rm -f %{buildroot}%{_libdir}/mysql/libmysqlclient*.so
+rm -f %{buildroot}%{_mandir}/man1/mysql_config.1*
+%endif
+
+%if %{without client}
+rm -f %{buildroot}%{_bindir}/{msql2mysql,mysql,mysql_config_editor,\
+mysql_find_rows,mysql_waitpid,mysqlaccess,mysqladmin,mysqlbinlog,mysqlcheck,\
+mysqldump,mysqlimport,mysqlshow,mysqlslap,my_print_defaults}
+rm -f %{buildroot}%{_mandir}/man1/{msql2mysql,mysql,mysql_config_editor,\
+mysql_find_rows,mysql_waitpid,mysqlaccess,mysqladmin,mysqlbinlog,mysqlcheck,\
+mysqldump,mysqlimport,mysqlshow,mysqlslap,my_print_defaults}.1*
+%endif
+
+%if %{without common}
+rm -f %{buildroot}%{_sysconfdir}/my.cnf
+rm -rf %{buildroot}%{_datadir}/%{name}/charsets
+%endif
+
+%if %{without errmsg}
+rm -rf %{buildroot}%{_datadir}/%{name}/{english,bulgarian,czech,danish,dutch,estonian,\
+french,german,greek,hungarian,italian,japanese,korean,norwegian,norwegian-ny,\
+polish,portuguese,romanian,russian,serbian,slovak,spanish,swedish,ukrainian}
+%endif
+
+%if %{without bench}
+rm -rf %{buildroot}%{_datadir}/sql-bench
+%endif
+
+%if %{without test}
+rm -f %{buildroot}%{_bindir}/{mysql_client_test,my_safe_process}
+rm -rf %{buildroot}%{_datadir}/mysql-test
+rm -f %{buildroot}%{_mandir}/man1/mysql_client_test.1*
+%endif
+
 %check
+%if %{with test}
 %if %runselftest
 pushd build
 make test VERBOSE=1
@@ -491,33 +637,65 @@ export MTR_BUILD_THREAD=%{__isa_bits}
 popd
 popd
 %endif
+%endif
 
 %pre server
 /usr/sbin/groupadd -g 27 -o -r mysql >/dev/null 2>&1 || :
-/usr/sbin/useradd -M -N -g mysql -o -r -d %{_localstatedir}/lib/mysql -s /bin/bash \
+/usr/sbin/useradd -M -N -g mysql -o -r -d %{mysqluserhome} -s /sbin/nologin \
   -c "MySQL Server" -u 27 mysql >/dev/null 2>&1 || :
 
+%if %{with clibrary}
 %post libs -p /sbin/ldconfig
+%endif
 
+%if %{with embedded}
 %post embedded -p /sbin/ldconfig
+%endif
 
 %post server
-%systemd_post %{daemon_name}
-/bin/touch %{_localstatedir}/log/mysqld.log
+%if %{with init_systemd}
+%systemd_post %{daemon_name}.service
+%endif
+%if %{with init_sysv}
+if [ $1 = 1 ]; then
+    /sbin/chkconfig --add %{daemon_name}
+fi
+%endif
+/bin/touch %{logfile}
 
 %preun server
-%systemd_preun %{daemon_name}
+%if %{with init_systemd}
+%systemd_preun %{daemon_name}.service
+%endif
+%if %{with init_sysv}
+if [ $1 = 0 ]; then
+    /sbin/service %{daemon_name} stop >/dev/null 2>&1
+    /sbin/chkconfig --del %{daemon_name}
+fi
+%endif
 
+%if %{with clibrary}
 %postun libs -p /sbin/ldconfig
+%endif
 
+%if %{with embedded}
 %postun embedded -p /sbin/ldconfig
+%endif
 
 %postun server
-%systemd_postun_with_restart %{daemon_name}
+%if %{with init_systemd}
+%systemd_postun_with_restart %{daemon_name}.service
+%endif
+%if %{with init_sysv}
+if [ $1 -ge 1 ]; then
+    /sbin/service %{daemon_name} condrestart >/dev/null 2>&1 || :
+fi
+%endif
 
 %files
 %doc README.mysql-docs
 
+%if %{with client}
 %{_bindir}/msql2mysql
 %{_bindir}/mysql
 %{_bindir}/mysql_config_editor
@@ -547,24 +725,30 @@ popd
 %{_mandir}/man1/mysqlshow.1*
 %{_mandir}/man1/mysqlslap.1*
 %{_mandir}/man1/my_print_defaults.1*
+%endif
 
+%if %{with clibrary}
 %files libs
 %dir %{_libdir}/mysql
 %{_libdir}/mysql/libmysqlclient*.so.*
 %config(noreplace) %{_sysconfdir}/ld.so.conf.d/*
+%endif
 
+%if %{with common}
 %files common
 %doc README COPYING README.mysql-license
 %doc storage/innobase/COPYING.Percona storage/innobase/COPYING.Google
 # although the default my.cnf contains only server settings, we put it in the
-# libs package because it can be used for client settings too.
+# common package because it can be used for client settings too.
 %if %{ship_my_cnf}
 %config(noreplace) %{_sysconfdir}/my.cnf
 %dir %{_sysconfdir}/my.cnf.d
 %endif
 %dir %{_datadir}/%{name}
 %{_datadir}/%{name}/charsets
+%endif
 
+%if %{with errmsg}
 %files errmsg
 %{_datadir}/%{name}/english
 %lang(bg) %{_datadir}/%{name}/bulgarian
@@ -590,9 +774,10 @@ popd
 %lang(es) %{_datadir}/%{name}/spanish
 %lang(sv) %{_datadir}/%{name}/swedish
 %lang(uk) %{_datadir}/%{name}/ukrainian
+%endif
 
 %files server
-%{_bindir}/myisamchk    
+%{_bindir}/myisamchk
 %{_bindir}/myisam_ftdump
 %{_bindir}/myisamlog
 %{_bindir}/myisampack
@@ -621,6 +806,10 @@ popd
 
 %{_libdir}/mysql/INFO_SRC
 %{_libdir}/mysql/INFO_BIN
+%if %{without common}
+%dir %{_datadir}/%{name}
+%endif
+
 %{_libdir}/mysql/plugin
 
 %{_mandir}/man1/myisamchk.1*
@@ -661,18 +850,20 @@ popd
 %{_datadir}/%{name}/mysql_test_data_timezone.sql
 %{_datadir}/%{name}/my-*.cnf
 
-%{_unitdir}/%{daemon_name}
-%{_libexecdir}/mysqld-prepare-db-dir
-%{_libexecdir}/mysqld-wait-ready
-%{_libexecdir}/mysqld-check-socket
-%{_libexecdir}/mysqld-scripts-common
+%{?with_init_systemd:%{_unitdir}/%{daemon_name}.service}
+%{?with_init_sysv:%{_initddir}/%{daemon_name}}
+%{_libexecdir}/mysql-prepare-db-dir
+%{_libexecdir}/mysql-wait-ready
+%{_libexecdir}/mysql-check-socket
+%{_libexecdir}/mysql-scripts-common
 
-%{_tmpfilesdir}/%{name}.conf
-%attr(0755,mysql,mysql) %dir %{_localstatedir}/run/mysqld
+%{?with_init_systemd:%{_tmpfilesdir}/%{name}.conf}
+%attr(0755,mysql,mysql) %dir %{_localstatedir}/run/%{daemon_name}
 %attr(0755,mysql,mysql) %dir %{_localstatedir}/lib/mysql
-%attr(0640,mysql,mysql) %config %ghost %verify(not md5 size mtime) %{_localstatedir}/log/mysqld.log
-%config(noreplace) %{_sysconfdir}/logrotate.d/mysqld
+%attr(0640,mysql,mysql) %config %ghost %verify(not md5 size mtime) %{logfile}
+%config(noreplace) %{logrotateddir}/%{daemon_name}
 
+%if %{with devel}
 %files devel
 %{_bindir}/mysql_config
 %{_bindir}/mysql_config-%{__isa_bits}
@@ -681,7 +872,9 @@ popd
 %{_libdir}/mysql/libmysqlclient.so
 %{_libdir}/mysql/libmysqlclient_r.so
 %{_mandir}/man1/mysql_config.1*
+%endif
 
+%if %{with embedded}
 %files embedded
 %{_libdir}/mysql/libmysqld.so.*
 
@@ -691,18 +884,26 @@ popd
 %{_bindir}/mysqltest_embedded
 %{_mandir}/man1/mysql_client_test_embedded.1*
 %{_mandir}/man1/mysqltest_embedded.1*
+%endif
 
+%if %{with bench}
 %files bench
 %{_datadir}/sql-bench
+%endif
 
+%if %{with test}
 %files test
 %{_bindir}/mysql_client_test
 %{_bindir}/my_safe_process
 %attr(-,mysql,mysql) %{_datadir}/mysql-test
 %{_mandir}/man1/mysql_client_test.1*
+%endif
 
 %changelog
 * Tue Jul 22 2014 Honza Horak <hhorak@redhat.com> - 5.6.19-5
+- Spec rewrite to be more similar to oterh MySQL implementations
+- Include SysV init script if built on older system
+- Add possibility to not ship some sub-packages
 - Port scripts for systemd unit from MariaDB
 
 * Mon Jul 21 2014 Honza Horak <hhorak@redhat.com> - 5.6.19-4
