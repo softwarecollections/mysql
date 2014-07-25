@@ -17,8 +17,8 @@ symbolic-links=0
 # /etc/my.cnf.d/server.cnf (part of mariadb-server).
 # It doesn't matter that we set these settings only for [mysqld] here,
 # because they will be read and used in mysqld_safe as well.
-log-error=/var/log/mysqld.log
-pid-file=/var/run/mysqld/mysqld.pid
+log-error=@LOG_LOCATION@
+pid-file=@PID_FILE_DIR@/@DAEMON_NAME@.pid
 
 [mysqld_safe]
 

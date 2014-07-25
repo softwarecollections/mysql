@@ -1,1 +1,1 @@
-d /var/run/@DAEMON_NAME@ 0755 mysql mysql -
+d @PID_FILE_DIR@ 0755 mysql mysql -

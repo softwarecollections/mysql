@@ -6,20 +6,39 @@ to know about this.
 Recommendation they change is at http://bugs.mysql.com/bug.php?id=61425
 
 
-diff -up mysql-5.6.15/mysql-test/t/file_contents.test.p19 mysql-5.6.15/mysql-test/t/file_contents.test
---- mysql-5.6.15/mysql-test/t/file_contents.test.p19	2013-12-09 18:44:48.425892516 +0100
-+++ mysql-5.6.15/mysql-test/t/file_contents.test	2013-12-09 18:48:02.247150032 +0100
-@@ -39,6 +39,14 @@ if ($dir_bin =~ m|/usr/|) {
+diff -up mysql-5.6.19/mysql-test/t/file_contents.test.file-contents mysql-5.6.19/mysql-test/t/file_contents.test
+--- mysql-5.6.19/mysql-test/t/file_contents.test.file-contents	2014-07-25 11:56:12.442153944 +0200
++++ mysql-5.6.19/mysql-test/t/file_contents.test	2014-07-25 12:00:11.578581702 +0200
+@@ -11,7 +11,7 @@
+ --perl
+ print "\nChecking 'INFO_SRC' and 'INFO_BIN'\n";
+ $dir_bin = $ENV{'MYSQL_BINDIR'};
+-if ($dir_bin =~ m|/usr/|) {
++if ($dir_bin =~ m|.*/usr/$|) {
+   # RPM package
+   $dir_docs = $dir_bin;
+   $dir_docs =~ s|/lib|/share/doc|;
+@@ -26,7 +26,7 @@ if ($dir_bin =~ m|/usr/|) {
+       $dir_docs = glob "$dir_bin/share/doc/mysql-community-server*";
+     }
+   }
+-} elsif ($dir_bin =~ m|/usr$|) {
++} elsif ($dir_bin =~ m|.*/usr$|) {
+   # RPM build during development
+   $dir_docs = "$dir_bin/share/doc";
+   if(-d "$dir_docs/packages") {
+@@ -39,6 +39,15 @@ if ($dir_bin =~ m|/usr/|) {
        # If not it might be ULN so try that
        $dir_docs = glob "$dir_bin/share/doc/mysql-community-server*";
      }
++
 +    # All the above is entirely wacko, because these files are not docs;
 +    # they should be kept in libdir instead.  mtr does not provide a nice
 +    # way to find libdir though, so we have to kluge it like this:
-+    if (-d "/usr/lib64/mysql") {
-+       $dir_docs = "/usr/lib64/mysql";
++    if (-d "$dir_bin/lib64/mysql") {
++       $dir_docs = "$dir_bin/lib64/mysql";
 +    } else {
-+       $dir_docs = "/usr/lib/mysql";
++       $dir_docs = "$dir_bin/lib/mysql";
 +    }
    }
  } else {

@@ -71,7 +71,7 @@ License:          GPLv2 with exceptions and LGPLv2 and BSD
 
 Source0:          https://cdn.mysql.com/Downloads/MySQL-5.6/mysql-%{version}.tar.gz
 Source2:          mysql_config_multilib.sh
-Source3:          my.cnf
+Source3:          my.cnf.in
 Source4:          my_config.h
 Source6:          README.mysql-docs
 Source7:          README.mysql-license
@@ -95,6 +95,7 @@ Patch5:           %{pkgname}-cipherspec.patch
 Patch6:           %{pkgname}-file-contents.patch
 Patch7:           %{pkgname}-dh1024.patch
 Patch8:           %{pkgname}-scripts.patch
+Patch9:           %{pkgname}-paths.patch
 
 # Patches specific for this mysql package
 Patch50:          %{pkgname}-expired-certs.patch
@@ -343,6 +344,7 @@ the MySQL sources.
 %patch6 -p1
 %patch7 -p1
 %patch8 -p1
+%patch9 -p1
 %patch50 -p1
 %patch51 -p1
 %patch52 -p1
@@ -391,8 +393,8 @@ add_test 'main.upgrade             : unknown'
 %endif
 popd
 
-cp %{SOURCE2} %{SOURCE10} %{SOURCE11} %{SOURCE12} %{SOURCE13} %{SOURCE14} \
-    %{SOURCE15} %{SOURCE17} scripts
+cp %{SOURCE2} %{SOURCE3} %{SOURCE10} %{SOURCE11} %{SOURCE12} %{SOURCE13} \
+   %{SOURCE14} %{SOURCE15} %{SOURCE17} scripts
 
 %build
 # fail quickly and obviously if user tries to build as root
@@ -428,8 +430,11 @@ cmake .. -DBUILD_CONFIG=mysql_release \
          -DFEATURE_SET="community" \
          -DINSTALL_LAYOUT=RPM \
          -DDAEMON_NAME="%{daemon_name}" \
+         -DLOG_LOCATION="%{logfile}" \
+         -DPID_FILE_DIR="%{_localstatedir}/run/%{daemon_name}" \
          -DNICE_PROJECT_NAME="MySQL" \
          -DCMAKE_INSTALL_PREFIX="%{_prefix}" \
+         -DSYSCONFDIR="%{_sysconfdir}" \
 %if 0%{?fedora} >= 20
          -DINSTALL_DOCDIR="share/doc/%{name}" \
          -DINSTALL_DOCREADMEDIR="share/doc/%{name}" \
@@ -461,6 +466,7 @@ cmake .. -DBUILD_CONFIG=mysql_release \
          -DWITH_ZLIB=system \
          -DCMAKE_C_FLAGS="%{optflags}" \
          -DCMAKE_CXX_FLAGS="%{optflags}" \
+         -DTMPDIR=/var/tmp \
          %{?_hardened_build:-DWITH_MYSQLD_LDFLAGS="-pie -Wl,-z,relro,-z,now"}
 
 make %{?_smp_mflags} VERBOSE=1
@@ -901,6 +907,7 @@ fi
 
 %changelog
 * Tue Jul 22 2014 Honza Horak <hhorak@redhat.com> - 5.6.19-5
+- Hardcoded paths removed to work fine in chroot
 - Spec rewrite to be more similar to oterh MySQL implementations
 - Include SysV init script if built on older system
 - Add possibility to not ship some sub-packages
