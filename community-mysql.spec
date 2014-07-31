@@ -50,7 +50,7 @@
 # later when building to another location (like SCL)
 %global logrotateddir %{_sysconfdir}/logrotate.d
 %global logfiledir %{_localstatedir}/log
-%global logfile %{_localstatedir}/log/%{name}.log
+%global logfile %{_localstatedir}/log/mysqld.log
 
 # Home directory of mysql user should be same for all packages that create it
 %global mysqluserhome /var/lib/mysql
@@ -59,8 +59,8 @@
 %global sameevp   %{?epoch:%{epoch}:}%{version}-%{release}
 
 Name:             %{pkgname}
-Version:          5.6.19
-Release:          5%{?dist}
+Version:          5.6.20
+Release:          1%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -109,7 +109,6 @@ Patch57:          %{pkgname}-5.6.19-gcc49-aarch64-opt.patch
 Patch70:          %{pkgname}-5.6.13-major.patch
 
 BuildRequires:    cmake
-BuildRequires:    dos2unix
 BuildRequires:    libaio-devel
 BuildRequires:    libedit-devel
 BuildRequires:    libevent-devel
@@ -148,7 +147,7 @@ Conflicts:        mariadb
 Obsoletes:        mysql-cluster < 5.1.44
 
 # Filtering: https://fedoraproject.org/wiki/Packaging:AutoProvidesAndRequiresFiltering
-%if 0%{?__requires_exclude:1}
+%if 0%{?fedora} > 14 || 0%{?rhel} > 6
 %global __requires_exclude ^perl\\((hostnames|lib::mtr|lib::v1|mtr_|My::)
 %global __provides_exclude_from ^(%{_datadir}/(mysql|mysql-test)/.*|%{_libdir}/mysql/plugin/.*\\.so)$
 %else
@@ -357,6 +356,10 @@ the MySQL sources.
 %patch70 -p1
 %endif
 
+# Avoid dtrace dep
+sed -i -e "1d" mysql-test/std_data/dtrace.d
+chmod 0644 mysql-test/std_data/dtrace.d
+
 # Modify tests to pass on all archs
 pushd mysql-test
 add_test () {
@@ -409,20 +412,6 @@ cp %{SOURCE2} %{SOURCE3} %{SOURCE10} %{SOURCE11} %{SOURCE12} %{SOURCE13} \
 
 # build out of source
 mkdir build && pushd build
-
-# significant performance gains can be achieved by compiling with -O3 optimization
-# rhbz#1051069
-%ifarch ppc64
-CFLAGS=`echo $CFLAGS| sed -e "s|-O2|-O3|g" `
-%endif
-CXXFLAGS="$CFLAGS"
-export CFLAGS CXXFLAGS
-
-%if 0%{?_hardened_build}
-# building with PIE
-LDFLAGS="$LDFLAGS -pie -Wl,-z,relro,-z,now"
-export LDFLAGS
-%endif
 
 # The INSTALL_xxx macros have to be specified relative to CMAKE_INSTALL_PREFIX
 # so we can't use %%{_datadir} and so forth here.
@@ -556,19 +545,6 @@ install -p -m 0644 %{SOURCE7} %{basename:%{SOURCE7}}
 
 # Install the list of skipped tests to be available for user runs
 install -p -m 0644 mysql-test/%{skiplist} %{buildroot}%{_datadir}/mysql-test
-
-# Upstream bugs: http://bugs.mysql.com/68517 http://bugs.mysql.com/68521
-chmod 0644 %{buildroot}%{_datadir}/%{name}/innodb_memcached_config.sql
-find %{buildroot}%{_datadir}/mysql-test/{r,suite,t} -type f -print0 | xargs --null chmod 0644
-chmod 0644 %{buildroot}%{_datadir}/mysql-test/include/{start_mysqld,shutdown_mysqld,check_ipv4_mapped}.inc
-for f in std_data/checkDBI_DBD-mysql.pl suite/engines/rr_trx/run_stress_tx_rr.pl \
-         suite/funcs_1/lib/DataGen_local.pl suite/funcs_1/lib/DataGen_modify.pl \
-         suite/funcs_2/lib/gen_charset_utf8.pl  suite/opt_trace/validate_json.py \
-         suite/rpl/extension/bhs.pl suite/rpl/extension/checksum.pl ; do
-    chmod 0755 %{buildroot}%{_datadir}/mysql-test/$f
-done
-chmod 0644 %{buildroot}%{_datadir}/sql-bench/graph-compare-results
-dos2unix -k %{buildroot}%{_datadir}/sql-bench/innotest*
 
 # These are in fact identical
 rm %{buildroot}%{_mandir}/man1/{mysqltest,mysql_client_test}_embedded.1
@@ -906,6 +882,20 @@ fi
 %endif
 
 %changelog
+* Thu Jul 31 2014 Bjorn Munch <bjorn.munch@oracle.com> - 5.6.20-1
+- Update to MySQL 5.6.20, for various fixes described at
+  https://dev.mysql.com/doc/relnotes/mysql/5.6/en/news-5-6-20.html
+- Rebase install and pluginerrmsg patch
+- Drop dos2unix from buildreq, files fixed upstream
+- No need to add -O3, it's default
+- LDFLAGS is passed by cmake option, not from environment
+- Using __requires_exclude in conditional don't seems to work, swap
+  to dist macros
+- Avoid unwanted dtrace dep
+- Fix mysql.init and mysql-prepare-db-dir
+- Logfile name must match value from /etc/my.cnf (and be known
+  by SELinux policy)
+
 * Tue Jul 22 2014 Honza Horak <hhorak@redhat.com> - 5.6.19-5
 - Hardcoded paths removed to work fine in chroot
 - Spec rewrite to be more similar to oterh MySQL implementations
