@@ -162,3 +162,15 @@ diff -up mysql-5.6.19/scripts/mysqld_multi.sh.cmakepaths mysql-5.6.19/scripts/my
  #
  IF(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
    SET(INSTALL_LIBDIR_RPM                "lib64")
+diff -up mysql-5.6.20/scripts/CMakeLists.txt.pathsmore mysql-5.6.20/scripts/CMakeLists.txt
+--- mysql-5.6.20/scripts/CMakeLists.txt.pathsmore	2014-08-05 16:41:28.900098862 +0200
++++ mysql-5.6.20/scripts/CMakeLists.txt	2014-08-05 16:41:52.474177142 +0200
+@@ -228,7 +228,7 @@ INSTALL_SCRIPT(
+   )
+ 
+ SET(prefix "${CMAKE_INSTALL_PREFIX}")
+-SET(sysconfdir ${prefix})
++SET(sysconfdir ${SYSCONFDIR})
+ SET(bindir ${prefix}/${INSTALL_BINDIR})
+ SET(libexecdir ${prefix}/${INSTALL_SBINDIR})
+ SET(scriptdir ${prefix}/${INSTALL_BINDIR})
