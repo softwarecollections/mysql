@@ -1,5 +1,5 @@
 # Name of the package without any prefixes
-%global pkgname   community-mysql
+%global pkgname      community-mysql
 %global pkgnamepatch community-mysql
 
 # Regression tests may take a long time (many cores recommended), skip them by 
@@ -19,13 +19,6 @@
 
 %global           skiplist platform-specific-tests.list
 
-# When there is already another package that ships /etc/my.cnf,
-# rather include it than ship the file again, since conflicts between
-# those files may create issues
-# ship_my_cnf=1 means this is the only package in distro which ships
-# my.cnf and my.cnf.d
-%global ship_my_cnf 0
-
 # For some use cases we do not need some parts of the package
 %bcond_without clibrary
 %bcond_without embedded
@@ -35,6 +28,11 @@
 %bcond_without errmsg
 %bcond_without bench
 %bcond_without test
+
+# When there is already another package that ships /etc/my.cnf,
+# rather include it than ship the file again, since conflicts between
+# those files may create issues
+%bcond_with config
 
 # Include files for SysV init or systemd
 %if 0%{?fedora} >= 15
@@ -61,7 +59,7 @@
 
 Name:             %{pkgname}
 Version:          5.6.20
-Release:          2%{?dist}
+Release:          3%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -180,13 +178,24 @@ MySQL server.
 %endif
 
 
+%if %{with config}
+%package          config
+Summary:          The config files required by server and client
+Group:            Applications/Databases
+
+%description      config
+The package provides the config file my.cnf and my.cnf.d directory used by any
+MariaDB or MySQL program. You will need to install this package to use any
+other MariaDB or MySQL package if the config files are not provided in the
+package itself.
+%endif
+
+
 %if %{with common}
 %package          common
 Summary:          The shared files required for MySQL server and client
 Group:            Applications/Databases
-%if ! %{ship_my_cnf}
 Requires:         %{_sysconfdir}/my.cnf
-%endif
 
 %description      common
 The mysql-common package provides the essential shared files for any
@@ -212,13 +221,11 @@ MySQL packages.
 Summary:          The MySQL server and related files
 Group:            Applications/Databases
 
-# note: no version here = %{sameevr}
+# note: no version here = %%{sameevr}
 Requires:         mysql-compat-client%{?_isa}
 Requires:         %{name}-common%{?_isa} = %{sameevr}
-%if %{without common}
 Requires:         %{_sysconfdir}/my.cnf
 Requires:         %{_sysconfdir}/my.cnf.d
-%endif
 Requires:         %{name}-errmsg%{?_isa} = %{sameevr}
 Requires:         sh-utils
 Requires(pre):    /usr/sbin/useradd
@@ -491,7 +498,7 @@ touch %{buildroot}%{logfile}
 mkdir -p %{buildroot}%{_localstatedir}/run/%{daemon_name}
 install -p -m 0755 -d %{buildroot}%{_localstatedir}/lib/mysql
 
-%if %{ship_my_cnf}
+%if %{with config}
 install -D -p -m 0644 scripts/my.cnf %{buildroot}%{_sysconfdir}/my.cnf
 %endif
 
@@ -580,8 +587,13 @@ mysql_find_rows,mysql_waitpid,mysqlaccess,mysqladmin,mysqlbinlog,mysqlcheck,\
 mysqldump,mysqlimport,mysqlshow,mysqlslap,my_print_defaults}.1*
 %endif
 
-%if %{without common}
+%if %{with config}
+mkdir -p %{buildroot}%{_sysconfdir}/my.cnf.d
+%else
 rm -f %{buildroot}%{_sysconfdir}/my.cnf
+%endif
+
+%if %{without common}
 rm -rf %{buildroot}%{_datadir}/%{name}/charsets
 %endif
 
@@ -715,16 +727,18 @@ fi
 %config(noreplace) %{_sysconfdir}/ld.so.conf.d/*
 %endif
 
+%if %{with config}
+%files config
+# although the default my.cnf contains only server settings, we put it in the
+# common package because it can be used for client settings too.
+%config(noreplace) %{_sysconfdir}/my.cnf
+%dir %{_sysconfdir}/my.cnf.d
+%endif
+
 %if %{with common}
 %files common
 %doc README COPYING README.mysql-license README.mysql-docs
 %doc storage/innobase/COPYING.Percona storage/innobase/COPYING.Google
-# although the default my.cnf contains only server settings, we put it in the
-# common package because it can be used for client settings too.
-%if %{ship_my_cnf}
-%config(noreplace) %{_sysconfdir}/my.cnf
-%dir %{_sysconfdir}/my.cnf.d
-%endif
 %dir %{_datadir}/%{name}
 %{_datadir}/%{name}/charsets
 %endif
@@ -881,6 +895,9 @@ fi
 %endif
 
 %changelog
+* Tue Aug 12 2014 Honza Horak <hhorak@redhat.com> - 5.6.20-3
+- Introduce -config subpackage and ship base config files here
+
 * Tue Aug 05 2014 Honza Horak <hhorak@redhat.com> - 5.6.20-2
 - Adopt changes from mariadb to sync spec files
 
