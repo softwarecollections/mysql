@@ -59,7 +59,7 @@
 
 Name:             %{pkgname}
 Version:          5.6.20
-Release:          3%{?dist}
+Release:          4%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -895,6 +895,9 @@ fi
 %endif
 
 %changelog
+* Sat Aug 16 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 5.6.20-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
+
 * Tue Aug 12 2014 Honza Horak <hhorak@redhat.com> - 5.6.20-3
 - Introduce -config subpackage and ship base config files here
 
