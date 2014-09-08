@@ -59,7 +59,7 @@
 
 Name:             %{pkgname}
 Version:          5.6.20
-Release:          4%{?dist}
+Release:          5%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -94,7 +94,8 @@ Patch5:           %{pkgnamepatch}-cipherspec.patch
 Patch6:           %{pkgnamepatch}-file-contents.patch
 Patch7:           %{pkgnamepatch}-dh1024.patch
 Patch8:           %{pkgnamepatch}-scripts.patch
-Patch9:           %{pkgnamepatch}-paths.patch
+Patch9:           %{pkgnamepatch}-install-db-sharedir.patch
+Patch10:          %{pkgnamepatch}-paths.patch
 
 # Patches specific for this mysql package
 Patch50:          %{pkgnamepatch}-expired-certs.patch
@@ -352,6 +353,7 @@ the MySQL sources.
 %patch7 -p1
 %patch8 -p1
 %patch9 -p1
+%patch10 -p1
 %patch50 -p1
 %patch51 -p1
 %patch52 -p1
@@ -898,6 +900,10 @@ fi
 %endif
 
 %changelog
+* Thu Sep 04 2014 Honza Horak <hhorak@redhat.com> - 5.6.20-5
+- Fix paths in mysql_install_db script
+  Related: #1134328
+
 * Sat Aug 16 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 5.6.20-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
 
