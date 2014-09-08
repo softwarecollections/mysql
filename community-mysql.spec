@@ -425,7 +425,8 @@ mkdir build && pushd build
 
 # The INSTALL_xxx macros have to be specified relative to CMAKE_INSTALL_PREFIX
 # so we can't use %%{_datadir} and so forth here.
-cmake .. -DBUILD_CONFIG=mysql_release \
+%cmake .. \
+         -DBUILD_CONFIG=mysql_release \
          -DFEATURE_SET="community" \
          -DINSTALL_LAYOUT=RPM \
          -DDAEMON_NAME="%{daemon_name}" \
@@ -903,6 +904,7 @@ fi
 * Thu Sep 04 2014 Honza Horak <hhorak@redhat.com> - 5.6.20-5
 - Fix paths in mysql_install_db script
   Related: #1134328
+- Use %%cmake macro
 
 * Sat Aug 16 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 5.6.20-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
