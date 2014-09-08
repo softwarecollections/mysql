@@ -35,7 +35,7 @@
 %bcond_with config
 
 # Include files for SysV init or systemd
-%if 0%{?fedora} >= 15
+%if 0%{?fedora} >= 15 || 0%{?rhel} >= 7
 %bcond_without init_systemd
 %bcond_with init_sysv
 %global daemon_name mysqld
@@ -223,7 +223,7 @@ Summary:          The MySQL server and related files
 Group:            Applications/Databases
 
 # note: no version here = %%{sameevr}
-Requires:         mysql-compat-client%{?_isa}
+Requires:         mysql%{?_isa}
 Requires:         %{name}-common%{?_isa} = %{sameevr}
 Requires:         %{_sysconfdir}/my.cnf
 Requires:         %{_sysconfdir}/my.cnf.d
@@ -905,6 +905,8 @@ fi
 - Fix paths in mysql_install_db script
   Related: #1134328
 - Use %%cmake macro
+- Install systemd service file on RHEL-7+
+  Server requires any mysql package, so it should be fine with older client
 
 * Sat Aug 16 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 5.6.20-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
