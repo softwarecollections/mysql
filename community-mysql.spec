@@ -58,8 +58,8 @@
 %global sameevr   %{?epoch:%{epoch}:}%{version}-%{release}
 
 Name:             %{pkgname}
-Version:          5.6.20
-Release:          5%{?dist}
+Version:          5.6.21
+Release:          1%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -872,6 +872,7 @@ fi
 %{_datadir}/aclocal/mysql.m4
 %{_libdir}/mysql/libmysqlclient.so
 %{_libdir}/mysql/libmysqlclient_r.so
+%{_libdir}/mysql/libmysqlservices.so
 %{_mandir}/man1/mysql_config.1*
 %endif
 
@@ -901,6 +902,10 @@ fi
 %endif
 
 %changelog
+* Wed Sep 24 2014 Honza Horak <hhorak@redhat.com> - 5.6.20-1
+- Update to MySQL 5.6.21, for various fixes described at
+  http://dev.mysql.com/doc/relnotes/mysql/5.6/en/news-5-6-21.html
+
 * Thu Sep 04 2014 Honza Horak <hhorak@redhat.com> - 5.6.20-5
 - Fix paths in mysql_install_db script
   Related: #1134328
