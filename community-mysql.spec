@@ -59,7 +59,7 @@
 
 Name:             %{pkgname}
 Version:          5.6.21
-Release:          1%{?dist}
+Release:          2%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -366,10 +366,6 @@ the MySQL sources.
 %patch70 -p1
 %endif
 
-# Avoid dtrace dep
-sed -i -e "1d" mysql-test/std_data/dtrace.d
-chmod 0644 mysql-test/std_data/dtrace.d
-
 # Modify tests to pass on all archs
 pushd mysql-test
 add_test () {
@@ -425,7 +421,7 @@ mkdir build && pushd build
 
 # The INSTALL_xxx macros have to be specified relative to CMAKE_INSTALL_PREFIX
 # so we can't use %%{_datadir} and so forth here.
-%cmake .. \
+cmake .. \
          -DBUILD_CONFIG=mysql_release \
          -DFEATURE_SET="community" \
          -DINSTALL_LAYOUT=RPM \
@@ -872,7 +868,6 @@ fi
 %{_datadir}/aclocal/mysql.m4
 %{_libdir}/mysql/libmysqlclient.so
 %{_libdir}/mysql/libmysqlclient_r.so
-%{_libdir}/mysql/libmysqlservices.so
 %{_mandir}/man1/mysql_config.1*
 %endif
 
@@ -902,6 +897,10 @@ fi
 %endif
 
 %changelog
+* Thu Sep 25 2014 Bjorn Munch <bjorn.munch@oracle.com> - 5.6.21-2
+- Using %%cmake macro break some tests, reverted
+- Unwanted dtrace dep fixed upstream
+
 * Wed Sep 24 2014 Honza Horak <hhorak@redhat.com> - 5.6.20-1
 - Update to MySQL 5.6.21, for various fixes described at
   http://dev.mysql.com/doc/relnotes/mysql/5.6/en/news-5-6-21.html
