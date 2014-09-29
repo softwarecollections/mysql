@@ -34,6 +34,9 @@
 # those files may create issues
 %bcond_with config
 
+# For deep debugging we need to build binaries with extra debug info
+%bcond_with debug
+
 # Include files for SysV init or systemd
 %if 0%{?fedora} >= 15 || 0%{?rhel} >= 7
 %bcond_without init_systemd
@@ -59,7 +62,7 @@
 
 Name:             %{pkgname}
 Version:          5.6.21
-Release:          3%{?dist}
+Release:          3%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -461,8 +464,9 @@ cmake .. \
          -DWITH_LIBEVENT=system \
          -DWITH_SSL=system \
          -DWITH_ZLIB=system \
-         -DCMAKE_C_FLAGS="%{optflags}" \
-         -DCMAKE_CXX_FLAGS="%{optflags}" \
+         -DCMAKE_C_FLAGS="%{optflags}%{?with_debug: -fno-strict-overflow -Wno-unused-result -Wno-unused-function -Wno-unused-but-set-variable}" \
+         -DCMAKE_CXX_FLAGS="%{optflags}%{?with_debug: -fno-strict-overflow -Wno-unused-result -Wno-unused-function -Wno-unused-but-set-variable}" \
+%{?with_debug: -DWITH_DEBUG=1}\
          -DTMPDIR=/var/tmp \
          %{?_hardened_build:-DWITH_MYSQLD_LDFLAGS="-pie -Wl,-z,relro,-z,now"}
 
@@ -547,6 +551,10 @@ chmod 644 %{buildroot}%{logrotateddir}/%{daemon_name}
 
 mkdir -p %{buildroot}%{_sysconfdir}/ld.so.conf.d
 echo "%{_libdir}/mysql" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/%{name}-%{_arch}.conf
+
+%if %{with debug}
+mv %{buildroot}%{_libexecdir}/mysqld-debug %{buildroot}%{_libexecdir}/mysqld
+%endif
 
 # Back to src dir
 popd
@@ -904,6 +912,7 @@ fi
 - Check upgrade script added to warn about need for mysql_upgrade
 - Move mysql_plugin into base and errmsg-utf8.txt into -errmsg to correspond
   with MariaDB upstream packages
+- Add with_debug option
 
 * Thu Sep 25 2014 Bjorn Munch <bjorn.munch@oracle.com> - 5.6.21-2
 - Using %%cmake macro break some tests, reverted
