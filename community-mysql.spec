@@ -584,11 +584,11 @@ rm -f %{buildroot}%{_mandir}/man1/mysql_config.1*
 
 %if %{without client}
 rm -f %{buildroot}%{_bindir}/{msql2mysql,mysql,mysql_config_editor,\
-mysql_find_rows,mysql_waitpid,mysqlaccess,mysqladmin,mysqlbinlog,mysqlcheck,\
-mysqldump,mysqlimport,mysqlshow,mysqlslap,my_print_defaults}
+mysql_find_rows,mysql_plugin,mysql_waitpid,mysqlaccess,mysqladmin,mysqlbinlog,\
+mysqlcheck,mysqldump,mysqlimport,mysqlshow,mysqlslap,my_print_defaults}
 rm -f %{buildroot}%{_mandir}/man1/{msql2mysql,mysql,mysql_config_editor,\
-mysql_find_rows,mysql_waitpid,mysqlaccess,mysqladmin,mysqlbinlog,mysqlcheck,\
-mysqldump,mysqlimport,mysqlshow,mysqlslap,my_print_defaults}.1*
+mysql_find_rows,mysql_plugin,mysql_waitpid,mysqlaccess,mysqladmin,mysqlbinlog,\
+mysqlcheck,mysqldump,mysqlimport,mysqlshow,mysqlslap,my_print_defaults}.1*
 %endif
 
 %if %{with config}
@@ -697,6 +697,7 @@ fi
 %{_bindir}/mysql
 %{_bindir}/mysql_config_editor
 %{_bindir}/mysql_find_rows
+%{_bindir}/mysql_plugin
 %{_bindir}/mysql_waitpid
 %{_bindir}/mysqlaccess
 %{_bindir}/mysqladmin
@@ -712,6 +713,7 @@ fi
 %{_mandir}/man1/mysql.1*
 %{_mandir}/man1/mysql_config_editor.1*
 %{_mandir}/man1/mysql_find_rows.1*
+%{_mandir}/man1/mysql_plugin.1*
 %{_mandir}/man1/mysql_waitpid.1*
 %{_mandir}/man1/mysqlaccess.1*
 %{_mandir}/man1/mysqladmin.1*
@@ -749,6 +751,7 @@ fi
 
 %if %{with errmsg}
 %files errmsg
+%{_datadir}/%{name}/errmsg-utf8.txt
 %{_datadir}/%{name}/english
 %lang(bg) %{_datadir}/%{name}/bulgarian
 %lang(cs) %{_datadir}/%{name}/czech
@@ -783,7 +786,6 @@ fi
 %{_bindir}/mysql_convert_table_format
 %{_bindir}/mysql_fix_extensions
 %{_bindir}/mysql_install_db
-%{_bindir}/mysql_plugin
 %{_bindir}/mysql_secure_installation
 %{_bindir}/mysql_setpermission
 %{_bindir}/mysql_tzinfo_to_sql
@@ -819,7 +821,6 @@ fi
 %{_mandir}/man1/mysql.server.1*
 %{_mandir}/man1/mysql_fix_extensions.1*
 %{_mandir}/man1/mysql_install_db.1*
-%{_mandir}/man1/mysql_plugin.1*
 %{_mandir}/man1/mysql_secure_installation.1*
 %{_mandir}/man1/mysql_upgrade.1*
 %{_mandir}/man1/mysql_zap.1*
@@ -840,7 +841,6 @@ fi
 %{_mandir}/man8/mysqld.8*
 
 %{_datadir}/%{name}/dictionary.txt
-%{_datadir}/%{name}/errmsg-utf8.txt
 %{_datadir}/%{name}/fill_help_tables.sql
 %{_datadir}/%{name}/innodb_memcached_config.sql
 %{_datadir}/%{name}/mysql_security_commands.sql
@@ -902,6 +902,8 @@ fi
 %changelog
 * Mon Sep 29 2014 Honza Horak <hhorak@redhat.com> - 5.6.21-3
 - Check upgrade script added to warn about need for mysql_upgrade
+- Move mysql_plugin into base and errmsg-utf8.txt into -errmsg to correspond
+  with MariaDB upstream packages
 
 * Thu Sep 25 2014 Bjorn Munch <bjorn.munch@oracle.com> - 5.6.21-2
 - Using %%cmake macro break some tests, reverted
