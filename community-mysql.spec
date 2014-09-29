@@ -59,7 +59,7 @@
 
 Name:             %{pkgname}
 Version:          5.6.21
-Release:          2%{?dist}
+Release:          3%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -80,7 +80,8 @@ Source12:         mysql-prepare-db-dir.sh
 Source13:         mysql-wait-ready.sh
 Source14:         mysql-check-socket.sh
 Source15:         mysql-scripts-common.sh
-Source18:         mysql.init.in
+Source16:         mysql-check-upgrade.sh
+Source19:         mysql.init.in
 # To track rpmlint warnings
 Source30:         mysql-5.6.10-rpmlintrc
 
@@ -403,7 +404,7 @@ add_test 'main.upgrade             : unknown'
 popd
 
 cp %{SOURCE2} %{SOURCE3} %{SOURCE10} %{SOURCE11} %{SOURCE12} %{SOURCE13} \
-   %{SOURCE14} %{SOURCE15} %{SOURCE18} scripts
+   %{SOURCE14} %{SOURCE15} %{SOURCE16} %{SOURCE19} scripts
 
 %build
 # fail quickly and obviously if user tries to build as root
@@ -519,6 +520,7 @@ install -D -p -m 755 scripts/mysql.init %{buildroot}%{_initddir}/%{daemon_name}
 install -p -m 755 scripts/mysql-prepare-db-dir %{buildroot}%{_libexecdir}/mysql-prepare-db-dir
 install -p -m 755 scripts/mysql-wait-ready %{buildroot}%{_libexecdir}/mysql-wait-ready
 install -p -m 755 scripts/mysql-check-socket %{buildroot}%{_libexecdir}/mysql-check-socket
+install -p -m 755 scripts/mysql-check-upgrade %{buildroot}%{_libexecdir}/mysql-check-upgrade
 install -p -m 644 scripts/mysql-scripts-common %{buildroot}%{_libexecdir}/mysql-scripts-common
 
 # mysql-test includes one executable that doesn't belong under /usr/share,
@@ -852,6 +854,7 @@ fi
 %{_libexecdir}/mysql-prepare-db-dir
 %{_libexecdir}/mysql-wait-ready
 %{_libexecdir}/mysql-check-socket
+%{_libexecdir}/mysql-check-upgrade
 %{_libexecdir}/mysql-scripts-common
 
 %{?with_init_systemd:%{_tmpfilesdir}/%{name}.conf}
@@ -897,6 +900,9 @@ fi
 %endif
 
 %changelog
+* Mon Sep 29 2014 Honza Horak <hhorak@redhat.com> - 5.6.21-3
+- Check upgrade script added to warn about need for mysql_upgrade
+
 * Thu Sep 25 2014 Bjorn Munch <bjorn.munch@oracle.com> - 5.6.21-2
 - Using %%cmake macro break some tests, reverted
 - Unwanted dtrace dep fixed upstream
