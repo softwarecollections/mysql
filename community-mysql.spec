@@ -57,12 +57,15 @@
 # Home directory of mysql user should be same for all packages that create it
 %global mysqluserhome /var/lib/mysql
 
+# Provide mysql names for compatibility
+%bcond_without mysql_names
+
 # Make long macros shorter
 %global sameevr   %{?epoch:%{epoch}:}%{version}-%{release}
 
 Name:             %{pkgname}
 Version:          5.6.21
-Release:          3%{?with_debug:.debug}%{?dist}
+Release:          4%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -141,10 +144,12 @@ Requires:         fileutils
 Requires:         grep
 Requires:         %{name}-common%{?_isa} = %{sameevr}
 
+%if %{with mysql_names}
 Provides:         mysql = %{sameevr}
 Provides:         mysql%{?_isa} = %{sameevr}
 Provides:         mysql-compat-client = %{sameevr}
 Provides:         mysql-compat-client%{?_isa} = %{sameevr}
+%endif
 
 Conflicts:        mariadb
 # mysql-cluster used to be built from this SRPM, but no more
@@ -172,8 +177,10 @@ contains the standard MySQL client programs and generic MySQL files.
 Summary:          The shared libraries required for MySQL clients
 Group:            Applications/Databases
 Requires:         %{name}-common%{?_isa} = %{sameevr}
+%if %{with mysql_names}
 Provides:         mysql-libs = %{sameevr}
 Provides:         mysql-libs%{?_isa} = %{sameevr}
+%endif
 
 %description      libs
 The mysql-libs package provides the essential shared libraries for any 
@@ -243,10 +250,12 @@ Requires:         systemd
 # mysqlhotcopy needs DBI/DBD support
 Requires:         perl(DBI)
 Requires:         perl(DBD::mysql)
+%if %{with mysql_names}
 Provides:         mysql-server = %{sameevr}
 Provides:         mysql-server%{?_isa} = %{sameevr}
 Provides:         mysql-compat-server = %{sameevr}
 Provides:         mysql-compat-server%{?_isa} = %{sameevr}
+%endif
 Conflicts:        mariadb-server
 Conflicts:        mariadb-galera-server
 
@@ -278,8 +287,10 @@ Summary:          MySQL as an embeddable library
 Group:            Applications/Databases
 Requires:         %{name}-common%{?_isa} = %{sameevr}
 Requires:         %{name}-errmsg%{?_isa} = %{sameevr}
+%if %{with mysql_names}
 Provides:         mysql-embedded = %{sameevr}
 Provides:         mysql-embedded%{?_isa} = %{sameevr}
+%endif
 
 %description      embedded
 MySQL is a multi-user, multi-threaded SQL database server. This
@@ -307,8 +318,10 @@ Summary:          MySQL benchmark scripts and data
 Group:            Applications/Databases
 Requires:         %{name}%{?_isa} = %{sameevr}
 Conflicts:        mariadb-bench
+%if %{with mysql_names}
 Provides:         mysql-bench = %{sameevr}
 Provides:         mysql-bench%{?_isa} = %{sameevr}
+%endif
 
 %description      bench
 MySQL is a multi-user, multi-threaded SQL database server. This
@@ -336,8 +349,10 @@ Requires:         perl(Sys::Hostname)
 Requires:         perl(Test::More)
 Requires:         perl(Time::HiRes)
 Conflicts:        mariadb-test
+%if %{with mysql_names}
 Provides:         mysql-test = %{sameevr}
 Provides:         mysql-test%{?_isa} = %{sameevr}
+%endif
 
 %description      test
 MySQL is a multi-user, multi-threaded SQL database server. This
@@ -909,6 +924,9 @@ fi
 %endif
 
 %changelog
+* Wed Oct 01 2014 Honza Horak <hhorak@redhat.com> - 5.6.21-4
+- Add bcond_without mysql_names
+
 * Mon Sep 29 2014 Honza Horak <hhorak@redhat.com> - 5.6.21-3
 - Check upgrade script added to warn about need for mysql_upgrade
 - Move mysql_plugin into base and errmsg-utf8.txt into -errmsg to correspond
