@@ -65,7 +65,7 @@
 
 Name:             %{pkgname}
 Version:          5.6.21
-Release:          4%{?with_debug:.debug}%{?dist}
+Release:          5%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -924,6 +924,9 @@ fi
 %endif
 
 %changelog
+* Wed Oct 08 2014 Bjorn Munch <bjorn.munch@oracle.com> - 5.6.21-5
+- Fix rhbz #1149986
+
 * Wed Oct 01 2014 Honza Horak <hhorak@redhat.com> - 5.6.21-4
 - Add bcond_without mysql_names
 

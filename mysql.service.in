@@ -32,6 +32,9 @@ Type=simple
 User=mysql
 Group=mysql
 
+# Execute pre and post scripts as root
+PermissionsStartOnly=true
+
 ExecStartPre=@libexecdir@/mysql-check-socket
 ExecStartPre=@libexecdir@/mysql-prepare-db-dir %n
 # Note: we set --basedir to prevent probes that might trigger SELinux alarms,
