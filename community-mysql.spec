@@ -64,8 +64,8 @@
 %global sameevr   %{?epoch:%{epoch}:}%{version}-%{release}
 
 Name:             %{pkgname}
-Version:          5.6.21
-Release:          5%{?with_debug:.debug}%{?dist}
+Version:          5.6.22
+Release:          1%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -387,13 +387,15 @@ the MySQL sources.
 
 # Modify tests to pass on all archs
 pushd mysql-test
+
 add_test () {
     echo $1 >> %{skiplist}
 }
 
+touch %{skiplist}
+
 # Workaround for upstream bug #http://bugs.mysql.com/56342
 rm -f t/ssl_8k_key-master.opt
-touch %{skiplist}
 
 # Archs without hw performance counter, rh 741325
 %ifarch %{arm} aarch64 sparc64
@@ -924,6 +926,9 @@ fi
 %endif
 
 %changelog
+* Wed Dec  3 2014 Jakub Dorňák <jdornak@redhat.com> - 5.6.22-1
+- Update to MySQL 5.6.22
+
 * Wed Oct 08 2014 Bjorn Munch <bjorn.munch@oracle.com> - 5.6.21-5
 - Fix rhbz #1149986
 

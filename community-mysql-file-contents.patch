@@ -6,9 +6,9 @@ to know about this.
 Recommendation they change is at http://bugs.mysql.com/bug.php?id=61425
 
 
-diff -up mysql-5.6.19/mysql-test/t/file_contents.test.file-contents mysql-5.6.19/mysql-test/t/file_contents.test
---- mysql-5.6.19/mysql-test/t/file_contents.test.file-contents	2014-07-25 11:56:12.442153944 +0200
-+++ mysql-5.6.19/mysql-test/t/file_contents.test	2014-07-25 12:00:11.578581702 +0200
+diff -up mysql-5.6.22/mysql-test/t/file_contents.test.file-contents mysql-5.6.22/mysql-test/t/file_contents.test
+--- mysql-5.6.22/mysql-test/t/file_contents.test.file-contents	2014-12-03 15:05:18.629731527 +0100
++++ mysql-5.6.22/mysql-test/t/file_contents.test	2014-12-03 15:09:36.082081039 +0100
 @@ -11,7 +11,7 @@
  --perl
  print "\nChecking 'INFO_SRC' and 'INFO_BIN'\n";
@@ -18,8 +18,8 @@ diff -up mysql-5.6.19/mysql-test/t/file_contents.test.file-contents mysql-5.6.19
    # RPM package
    $dir_docs = $dir_bin;
    $dir_docs =~ s|/lib|/share/doc|;
-@@ -26,7 +26,7 @@ if ($dir_bin =~ m|/usr/|) {
-       $dir_docs = glob "$dir_bin/share/doc/mysql-community-server*";
+@@ -30,7 +30,7 @@ if ($dir_bin =~ m|/usr/|) {
+       }
      }
    }
 -} elsif ($dir_bin =~ m|/usr$|) {
@@ -27,9 +27,9 @@ diff -up mysql-5.6.19/mysql-test/t/file_contents.test.file-contents mysql-5.6.19
    # RPM build during development
    $dir_docs = "$dir_bin/share/doc";
    if(-d "$dir_docs/packages") {
-@@ -39,6 +39,15 @@ if ($dir_bin =~ m|/usr/|) {
-       # If not it might be ULN so try that
-       $dir_docs = glob "$dir_bin/share/doc/mysql-community-server*";
+@@ -47,6 +47,15 @@ if ($dir_bin =~ m|/usr/|) {
+         $dir_docs = glob "$dir_bin/share/mysql/docs";
+       }
      }
 +
 +    # All the above is entirely wacko, because these files are not docs;
