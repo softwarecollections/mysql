@@ -65,7 +65,7 @@
 
 Name:             %{pkgname}
 Version:          5.6.22
-Release:          1%{?with_debug:.debug}%{?dist}
+Release:          2%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -90,6 +90,8 @@ Source16:         mysql-check-upgrade.sh
 Source19:         mysql.init.in
 # To track rpmlint warnings
 Source30:         mysql-5.6.10-rpmlintrc
+# Configuration for server
+Source31:         server.cnf.in
 
 # Comments for these patches are in the patch files
 # Patches common for more mysql-like packages
@@ -424,7 +426,7 @@ add_test 'main.upgrade             : unknown'
 popd
 
 cp %{SOURCE2} %{SOURCE3} %{SOURCE10} %{SOURCE11} %{SOURCE12} %{SOURCE13} \
-   %{SOURCE14} %{SOURCE15} %{SOURCE16} %{SOURCE19} scripts
+   %{SOURCE14} %{SOURCE15} %{SOURCE16} %{SOURCE19} %{SOURCE31} scripts
 
 %build
 # fail quickly and obviously if user tries to build as root
@@ -543,6 +545,7 @@ install -p -m 755 scripts/mysql-wait-ready %{buildroot}%{_libexecdir}/mysql-wait
 install -p -m 755 scripts/mysql-check-socket %{buildroot}%{_libexecdir}/mysql-check-socket
 install -p -m 755 scripts/mysql-check-upgrade %{buildroot}%{_libexecdir}/mysql-check-upgrade
 install -p -m 644 scripts/mysql-scripts-common %{buildroot}%{_libexecdir}/mysql-scripts-common
+install -D -p -m 0644 scripts/server.cnf %{buildroot}%{_sysconfdir}/my.cnf.d/server.cnf
 
 # mysql-test includes one executable that doesn't belong under /usr/share,
 # so move it and provide a symlink
@@ -829,6 +832,8 @@ fi
 %{_bindir}/resolve_stack_dump
 %{_bindir}/resolveip
 
+%config(noreplace) %{_sysconfdir}/my.cnf.d/server.cnf
+
 %{_libexecdir}/mysqld
 
 %{_libdir}/mysql/INFO_SRC
@@ -926,6 +931,9 @@ fi
 %endif
 
 %changelog
+* Mon Jan 12 2015 Honza Horak <hhorak@redhat.com> - 5.6.22-2
+- Add configuration file for server
+
 * Wed Dec  3 2014 Jakub Dorňák <jdornak@redhat.com> - 5.6.22-1
 - Update to MySQL 5.6.22
 
