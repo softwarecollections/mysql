@@ -236,7 +236,12 @@ Summary:          The MySQL server and related files
 Group:            Applications/Databases
 
 # note: no version here = %%{sameevr}
+%if %{with mysql_names}
+Requires:         mysql-compat-client%{?_isa}
 Requires:         mysql%{?_isa}
+%else
+Requires:         %{name}%{?_isa}
+%endif
 Requires:         %{name}-common%{?_isa} = %{sameevr}
 Requires:         %{_sysconfdir}/my.cnf
 Requires:         %{_sysconfdir}/my.cnf.d
