@@ -1,0 +1,176 @@
+Some hard-coded paths make problems when package is built into chroot like
+Software Collections. Removing these hard-coded paths should fix it.
+
+Upstream report: https://mariadb.atlassian.net/browse/MDEV-6485
+
+
+diff -up mysql-5.6.19/client/mysql_plugin.c.cmakepaths mysql-5.6.19/client/mysql_plugin.c
+--- mysql-5.6.19/client/mysql_plugin.c.cmakepaths	2014-05-06 12:45:57.000000000 +0200
++++ mysql-5.6.19/client/mysql_plugin.c	2014-07-25 13:12:36.991896193 +0200
+@@ -90,6 +90,7 @@ static int find_plugin(char *tp_path);
+ static int build_bootstrap_file(char *operation, char *bootstrap);
+ static int dump_bootstrap_file(char *bootstrap_file);
+ static int bootstrap_server(char *server_path, char *bootstrap_file);
++static int find_file_in_path(const char *name, char *to);
+ 
+ 
+ int main(int argc,char *argv[])
+@@ -121,7 +122,7 @@ int main(int argc,char *argv[])
+   */
+   if ((error= process_options(argc, argv, operation)) ||
+       (error= check_access()) ||
+-      (error= find_tool("mysqld" FN_EXEEXT, server_path)) ||
++      (error= find_file_in_path("mysqld" FN_EXEEXT, server_path)) ||
+       (error= find_plugin(tp_path)) ||
+       (error= build_bootstrap_file(operation, bootstrap)))
+     goto exit;
+@@ -324,7 +325,7 @@ static int get_default_values()
+   FILE *file= 0;
+ 
+   memset(tool_path, 0, FN_REFLEN);
+-  if ((error= find_tool("my_print_defaults" FN_EXEEXT, tool_path)))
++  if ((error= find_file_in_path("my_print_defaults" FN_EXEEXT, tool_path)))
+     goto exit;
+   else
+   {
+@@ -989,6 +990,55 @@ exit:
+ }
+ 
+ 
++#if defined(__WIN__)
++#define F_OK 0
++#define PATH_SEP ';'
++#define PROGRAM_EXTENSION ".exe"
++#else
++#define PATH_SEP ':'
++#endif
++
++static int find_file_in_path(const char *name, char *to)
++{
++  char *path,*pos,dir[2];
++  const char *ext="";
++
++  if (!(path=getenv("PATH")))
++    goto notfound;
++  dir[0]=FN_LIBCHAR; dir[1]=0;
++#ifdef PROGRAM_EXTENSION
++  if (!fn_ext(name)[0])
++    ext=PROGRAM_EXTENSION;
++#endif
++
++  for (pos=path ; (pos=strchr(pos,PATH_SEP)) ; path= ++pos)
++  {
++    if (path != pos)
++    {
++      strxmov(strnmov(to,path,(uint) (pos-path)),dir,name,ext,NullS);
++      if (!access(to,F_OK))
++      {
++        if (opt_verbose)
++          printf("# Found tool '%s' as '%s'.\n", name, to);
++	return 0;
++      }
++    }
++  }
++#ifdef __WIN__
++  to[0]=FN_CURLIB;
++  strxmov(to+1,dir,name,ext,NullS);
++  if (!access(to,F_OK))			/* Test in current dir */
++  {
++    if (opt_verbose)
++      printf("# Found tool '%s' as '%s'.\n", name, to);
++    return 0;
++  }
++#endif
++notfound:
++  fprintf(stderr, "WARNING: Cannot find %s.\n", name);
++  return 1;				/* File not found */
++}
++
+ /**
+   Locate the tool and form tool path.
+ 
+diff -up mysql-5.6.19/mysys_ssl/my_default.cc.cmakepaths mysql-5.6.19/mysys_ssl/my_default.cc
+--- mysql-5.6.19/mysys_ssl/my_default.cc.cmakepaths	2014-05-06 12:45:58.000000000 +0200
++++ mysql-5.6.19/mysys_ssl/my_default.cc	2014-07-25 13:19:12.587624249 +0200
+@@ -1389,12 +1389,12 @@ static const char **init_default_directo
+ 
+ #else
+ 
+-  errors += add_directory(alloc, "/etc/", dirs);
+-  errors += add_directory(alloc, "/etc/mysql/", dirs);
+-
+ #if defined(DEFAULT_SYSCONFDIR)
+   if (DEFAULT_SYSCONFDIR[0])
++  {
+     errors += add_directory(alloc, DEFAULT_SYSCONFDIR, dirs);
++    errors += add_directory(alloc, DEFAULT_SYSCONFDIR "/mysql", dirs);
++  }
+ #endif /* DEFAULT_SYSCONFDIR */
+ 
+ #endif
+diff -up mysql-5.6.19/scripts/mysqlaccess.sh.cmakepaths mysql-5.6.19/scripts/mysqlaccess.sh
+--- mysql-5.6.19/scripts/mysqlaccess.sh.cmakepaths	2014-05-06 12:45:58.000000000 +0200
++++ mysql-5.6.19/scripts/mysqlaccess.sh	2014-07-25 13:12:36.995896200 +0200
+@@ -483,9 +483,6 @@ MySQLaccess::Report::Print_Header();
+   elsif (-f "@sysconfdir@/$script_conf") {
+      require "@sysconfdir@/$script_conf";
+   }
+-  elsif (-f "/etc/$script_conf") {
+-     require "/etc/$script_conf";
+-  }
+ 
+ # ****************************
+ # Read in all parameters
+@@ -951,7 +948,6 @@ sub MergeConfigFile {
+ sub MergeConfigFiles {
+     my ($name,$pass,$uid,$gid,$quota,$comment,$gcos,$dir,$shell) = getpwuid $<;
+     MergeConfigFile("@sysconfdir@/my.cnf");
+-    MergeConfigFile("/etc/my.cnf");
+     MergeConfigFile("$dir/.my.cnf");
+ }
+ 
+diff -up mysql-5.6.19/scripts/mysqld_multi.sh.cmakepaths mysql-5.6.19/scripts/mysqld_multi.sh
+--- mysql-5.6.19/scripts/mysqld_multi.sh.cmakepaths	2014-05-06 12:45:58.000000000 +0200
++++ mysql-5.6.19/scripts/mysqld_multi.sh	2014-07-25 13:12:36.996896202 +0200
+@@ -573,9 +573,7 @@ sub list_defaults_files
+ 
+   my %seen;  # Don't list the same file more than once
+   return grep { defined $_ and not $seen{$_}++ and -f $_ and -r $_ }
+-              ('/etc/my.cnf',
+-               '/etc/mysql/my.cnf',
+-               '@sysconfdir@/my.cnf',
++              ('@sysconfdir@/my.cnf',
+                ($ENV{MYSQL_HOME} ? "$ENV{MYSQL_HOME}/my.cnf" : undef),
+                $opt{'extra-file'},
+                ($ENV{HOME} ? "$ENV{HOME}/.my.cnf" : undef));
+--- mysql-5.6.19/cmake/install_layout.cmake.cmakepaths	2014-07-25 14:21:56.063132378 +0200
++++ mysql-5.6.19/cmake/install_layout.cmake	2014-07-25 14:25:46.894644591 +0200
+@@ -94,7 +94,7 @@ IF(UNIX)
+     " Choose between ${VALID_INSTALL_LAYOUTS}" )
+   ENDIF()
+ 
+-  SET(SYSCONFDIR "${CMAKE_INSTALL_PREFIX}/etc"
++  SET(SYSCONFDIR "/etc"
+     CACHE PATH "config directory (for my.cnf)")
+   MARK_AS_ADVANCED(SYSCONFDIR)
+ ENDIF()
+@@ -145,6 +145,7 @@ SET(INSTALL_PLUGINTESTDIR_STANDALONE
+ SET(INSTALL_BINDIR_RPM                  "bin")
+ SET(INSTALL_SBINDIR_RPM                 "sbin")
+ SET(INSTALL_SCRIPTDIR_RPM               "bin")
++SET(INSTALL_SYSCONFDIR_RPM              "/etc")
+ #
+ IF(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
+   SET(INSTALL_LIBDIR_RPM                "lib64")
+diff -up mysql-5.6.20/scripts/CMakeLists.txt.pathsmore mysql-5.6.20/scripts/CMakeLists.txt
+--- mysql-5.6.20/scripts/CMakeLists.txt.pathsmore	2014-08-05 16:41:28.900098862 +0200
++++ mysql-5.6.20/scripts/CMakeLists.txt	2014-08-05 16:41:52.474177142 +0200
+@@ -228,7 +228,7 @@ INSTALL_SCRIPT(
+   )
+ 
+ SET(prefix "${CMAKE_INSTALL_PREFIX}")
+-SET(sysconfdir ${prefix})
++SET(sysconfdir ${SYSCONFDIR})
+ SET(bindir ${prefix}/${INSTALL_BINDIR})
+ SET(libexecdir ${prefix}/${INSTALL_SBINDIR})
+ SET(scriptdir ${prefix}/${INSTALL_BINDIR})
