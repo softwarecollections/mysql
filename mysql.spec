@@ -136,9 +136,7 @@ Patch57:          %{pkgnamepatch}-5.6.19-gcc49-aarch64-opt.patch
 Patch70:          %{pkgnamepatch}-5.6.13-major.patch
 
 # Patches specific for scl
-%if 0%{?scl:1}
 Patch90:          %{pkgnamepatch}-scl-env-check.patch
-%endif
 
 BuildRequires:    cmake
 BuildRequires:    libaio-devel
