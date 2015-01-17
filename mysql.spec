@@ -637,7 +637,7 @@ mkdir -p %{buildroot}%{logrotateddir}
 mv %{buildroot}%{_datadir}/%{name}/mysql-log-rotate %{buildroot}%{logrotateddir}/%{daemon_name}
 chmod 644 %{buildroot}%{logrotateddir}/%{daemon_name}
 
-%if 0%{?scl:1}
+%if ! 0%{?scl:1}
 mkdir -p %{buildroot}%{_sysconfdir}/ld.so.conf.d
 echo "%{_libdir}/mysql" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/%{name}-%{_arch}.conf
 %endif
@@ -1009,8 +1009,10 @@ fi
 
 %{?with_init_systemd:%{_tmpfilesdir}/%{name}.conf}
 %{?scl:%{?with_init_systemd:%{_scl_scripts}/register.content%{_tmpfilesdir}}}
+%attr(0755,mysql,mysql) %dir %{dbdatadir}
 %attr(0755,mysql,mysql) %dir %{_localstatedir}/run/%{daemon_name}
 %attr(0755,mysql,mysql) %dir %{_localstatedir}/lib/mysql
+%attr(0750,mysql,mysql) %dir %{logfiledir}
 %attr(0640,mysql,mysql) %config %ghost %verify(not md5 size mtime) %{logfile}
 %config(noreplace) %{logrotateddir}/%{daemon_name}
 %{?scl: %config(noreplace) %{_scl_scripts}/register.content%{logrotateddir}/%{daemon_name}}
