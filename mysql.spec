@@ -24,7 +24,6 @@
 %global           skiplist platform-specific-tests.list
 
 # For some use cases we do not need some parts of the package
-%bcond_without clibrary
 %bcond_without devel
 %bcond_without client
 %bcond_without common
@@ -34,8 +33,10 @@
 
 %if 0%{?scl:1}
 %bcond_with embedded
+%bcond_with clibrary
 %else
 %bcond_without embedded
+%bcond_without clibrary
 %endif
 
 # When there is already another package that ships /etc/my.cnf,
@@ -54,17 +55,30 @@
 %bcond_with init_systemd
 %bcond_without init_sysv
 %endif
-%global daemon_default %{?scl_prefix}mysqld
-%global daemon_name %{?scl_mysql_daemonname}%{!?scl_mysql_daemonname:%{daemon_default}}
+%global daemon_name %{?scl_prefix}mysqld
+
+# Define where to get propper SELinux context
+# and define names and locations specific for the whole collection
+%if 0%{?rhel} >= 7 || 0%{?fedora} >= 15
+%{?scl:%global se_daemon_source %{_unitdir}/mysqld}
+%global daemondir %{_unitdir}
+%else
+%{?scl:%global se_daemon_source %{_initddir}/mysqld}
+%global daemondir %{_initddir}
+%endif
+%{?scl:%global se_log_source %{?_root_localstatedir}/log/mysql}
+%if ! 0%{?scl:1} || 0%{?nfsmountable:1}
+%global logfiledir %{_localstatedir}/log/mysql
+%global dbdatadir %{_localstatedir}/lib/mysql
+%else
+%global logfiledir %{?_root_localstatedir}/log/%{?scl_prefix}mysql
+%global dbdatadir %{?_scl_root}/var/lib/mysql
+%endif
 
 # We define some system's well known locations here so we can use them easily
 # later when building to another location (like SCL)
 %global logrotateddir %{?scl:%_root_sysconfdir}%{!?scl:%_sysconfdir}/logrotate.d
-%global logfiledir %{?scl_mysql_logfiledir}%{!?scl_mysql_logfiledir:%{_localstatedir}/log/%{daemon_name}}
 %global logfile %{logfiledir}/%{daemon_name}.log
-
-# Defining where database data live
-%global dbdatadir %{?scl_mysql_dbdatadir}%{!?scl_mysql_dbdatadir:%{_localstatedir}/lib/mysql}
 
 # Home directory of mysql user should be same for all packages that create it
 %global mysqluserhome /var/lib/mysql
@@ -81,9 +95,13 @@
 # Make long macros shorter
 %global sameevr   %{?epoch:%{epoch}:}%{version}-%{release}
 
+%if 0%{?scl:1}
+%global scl_upper %{lua:print(string.upper(string.gsub(rpm.expand("%{scl}"), "-", "_")))}
+%endif
+
 Name:             %{?scl_prefix}%{pkgname}
 Version:          5.6.22
-Release:          2%{?with_debug:.debug}%{?dist}
+Release:          3%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -110,6 +128,8 @@ Source19:         mysql.init.in
 Source30:         mysql-5.6.10-rpmlintrc
 # Configuration for server
 Source31:         server.cnf.in
+# Helper script for scl register feature
+Source60:         scl-register-helper.sh
 
 # Comments for these patches are in the patch files
 # Patches common for more mysql-like packages
@@ -494,6 +514,7 @@ cmake .. \
          -DDAEMON_NAME="%{daemon_name}" \
 %if 0%{?scl:1}
          -DSCL_NAME="%{?scl}" \
+         -DSCL_NAME_UPPER="%{?scl_upper}" \
          -DSCL_SCRIPTS="%{?_scl_scripts}" \
 %endif
          -DLOG_LOCATION="%{logfile}" \
@@ -616,8 +637,10 @@ mkdir -p %{buildroot}%{logrotateddir}
 mv %{buildroot}%{_datadir}/%{name}/mysql-log-rotate %{buildroot}%{logrotateddir}/%{daemon_name}
 chmod 644 %{buildroot}%{logrotateddir}/%{daemon_name}
 
+%if 0%{?scl:1}
 mkdir -p %{buildroot}%{_sysconfdir}/ld.so.conf.d
 echo "%{_libdir}/mysql" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/%{name}-%{_arch}.conf
+%endif
 
 %if %{with debug}
 mv %{buildroot}%{_libexecdir}/mysqld-debug %{buildroot}%{_libexecdir}/mysqld
@@ -693,6 +716,47 @@ rm -rf %{buildroot}%{_datadir}/mysql-test
 rm -f %{buildroot}%{_mandir}/man1/mysql_client_test.1*
 %endif
 
+#include helper script for creating register stuff
+%include %{_sourcedir}/scl-register-helper.sh
+
+%if 0%{?scl:1}
+scl_reggen %{pkg_name}-server --cpfile %{daemondir}/%{daemon_name}%{?with_init_systemd:.service}
+scl_reggen %{pkg_name}-server --selinux %{daemondir}/%{daemon_name}%{?with_init_systemd:.service} %{se_daemon_source}
+%{?with_init_systemd: scl_reggen %{pkg_name}-server --cpfile %{_tmpfilesdir}/%{name}.conf}
+scl_reggen %{pkg_name}-server --cpfile %{logrotateddir}/%{daemon_name}
+scl_reggen %{pkg_name}-server --cpfile %{_sysconfdir}/my.cnf.d/server.cnf
+scl_reggen %{pkg_name}-server --selinux %{_sysconfdir}/my.cnf %{?_root_sysconfdir}/my.cnf
+scl_reggen %{pkg_name}-server --mkdir %{dbdatadir}
+scl_reggen %{pkg_name}-server --chown %{dbdatadir} mysql:mysql
+scl_reggen %{pkg_name}-server --chmod %{dbdatadir} 0755
+scl_reggen %{pkg_name}-server --selinux %{dbdatadir} /var/lib/mysql
+scl_reggen %{pkg_name}-server --mkdir %{_localstatedir}/run/%{daemon_name}
+scl_reggen %{pkg_name}-server --chown %{_localstatedir}/run/%{daemon_name} mysql:mysql
+scl_reggen %{pkg_name}-server --chmod %{_localstatedir}/run/%{daemon_name} 0755
+scl_reggen %{pkg_name}-server --selinux %{_localstatedir}/run/%{daemon_name} /var/run/mysqld
+scl_reggen %{pkg_name}-server --mkdir %{logfiledir}
+scl_reggen %{pkg_name}-server --chown %{logfiledir} mysql:mysql
+scl_reggen %{pkg_name}-server --chmod %{logfiledir} 0750
+scl_reggen %{pkg_name}-server --selinux %{logfiledir} %{se_log_source}
+scl_reggen %{pkg_name}-server --touch %{logfile}
+scl_reggen %{pkg_name}-server --chown %{logfile} mysql:mysql
+%{?with_config: scl_reggen %{pkg_name}-config --cpfile %{_sysconfdir}/my.cnf}
+%{?with_config: scl_reggen %{pkg_name}-config --mkdir %{_sysconfdir}/my.cnf.d}
+%{?with_init_systemd: scl_reggen %{pkg_name}-server --runafterregister 'systemctl daemon-reload'}
+%{?with_init_systemd: scl_reggen %{pkg_name}-server --runafterderegister 'systemctl daemon-reload'}
+
+# generate a configuration file for daemon
+cat << EOF | tee -a %{buildroot}%{?_scl_scripts}/service-environment
+# Services are started in a fresh environment without any influence of user's
+# environment (like environment variable values). As a consequence,
+# information of all enabled collections will be lost during service start up.
+# If user needs to run a service under any software collection enabled, this
+# collection has to be written into %{scl_upper}_SCLS_ENABLED variable 
+# in %{?_scl_scripts}/service-environment.
+%{scl_upper}_SCLS_ENABLED="%{scl}"
+EOF
+%endif #scl
+
 %check
 %if %{with test}
 %if %runselftest
@@ -737,6 +801,9 @@ if [ $1 = 1 ]; then
 fi
 %endif
 /bin/touch %{logfile}
+/bin/chmod 0755 %{dbdatadir}
+%{?scl:%{_scl_scripts}/register.d/*.%{pkg_name}-server.selinux-set}
+%{?scl:%{_scl_scripts}/register.d/*.%{pkg_name}-server.selinux-restore}
 
 %preun server
 %if %{with init_systemd}
@@ -804,23 +871,28 @@ fi
 
 %if %{with clibrary}
 %files libs
-%dir %{_libdir}/mysql
 %{_libdir}/mysql/libmysqlclient*.so.*
-%config(noreplace) %{_sysconfdir}/ld.so.conf.d/*
+%{!?scl:%config(noreplace) %{_sysconfdir}/ld.so.conf.d/*}
+
 %endif
 
 %if %{with config}
 %files config
 # although the default my.cnf contains only server settings, we put it in the
 # common package because it can be used for client settings too.
-%config(noreplace) %{_sysconfdir}/my.cnf
 %dir %{_sysconfdir}/my.cnf.d
+%config(noreplace) %{_sysconfdir}/my.cnf
+%{?scl: %config(noreplace) %{_scl_scripts}/register.content%{_sysconfdir}/my.cnf}
+%{?scl: %dir %{_scl_scripts}/register.content%{_sysconfdir}/my.cnf.d}
+%{?scl: %{_scl_scripts}/register.d/*.%{pkg_name}-config.*}
+%{?scl: %{_scl_scripts}/deregister.d/*.%{pkg_name}-config.*}
 %endif
 
 %if %{with common}
 %files common
 %doc README COPYING README.mysql-license README.mysql-docs
 %doc storage/innobase/COPYING.Percona storage/innobase/COPYING.Google
+%dir %{_libdir}/mysql
 %dir %{_datadir}/%{name}
 %{_datadir}/%{name}/charsets
 %endif
@@ -880,7 +952,7 @@ fi
 %{_bindir}/resolveip
 
 %config(noreplace) %{_sysconfdir}/my.cnf.d/server.cnf
-
+%{?scl: %config(noreplace) %{_scl_scripts}/register.content/%{_sysconfdir}/my.cnf.d/server.cnf}
 %{_libexecdir}/mysqld
 
 %{_libdir}/mysql/INFO_SRC
@@ -927,8 +999,8 @@ fi
 %{_datadir}/%{name}/mysql_test_data_timezone.sql
 %{_datadir}/%{name}/my-*.cnf
 
-%{?with_init_systemd:%{_unitdir}/%{daemon_name}.service}
-%{?with_init_sysv:%{_initddir}/%{daemon_name}}
+%{?scl:%{_scl_scripts}/register.content%{daemondir}}
+%{daemondir}/%{daemon_name}*
 %{_libexecdir}/mysql-prepare-db-dir
 %{_libexecdir}/mysql-wait-ready
 %{_libexecdir}/mysql-check-socket
@@ -936,10 +1008,17 @@ fi
 %{_libexecdir}/mysql-scripts-common
 
 %{?with_init_systemd:%{_tmpfilesdir}/%{name}.conf}
+%{?scl:%{?with_init_systemd:%{_scl_scripts}/register.content%{_tmpfilesdir}}}
 %attr(0755,mysql,mysql) %dir %{_localstatedir}/run/%{daemon_name}
 %attr(0755,mysql,mysql) %dir %{_localstatedir}/lib/mysql
 %attr(0640,mysql,mysql) %config %ghost %verify(not md5 size mtime) %{logfile}
 %config(noreplace) %{logrotateddir}/%{daemon_name}
+%{?scl: %config(noreplace) %{_scl_scripts}/register.content%{logrotateddir}/%{daemon_name}}
+%{?scl: %dir %{_scl_scripts}/register.content%{logrotateddir}}
+
+%{?scl: %{_scl_scripts}/register.d/*.%{pkg_name}-server.*}
+%{?scl: %{_scl_scripts}/deregister.d/*.%{pkg_name}-server.*}
+%{?scl:%config(noreplace) %{?_scl_scripts}/service-environment}
 
 %if %{with devel}
 %files devel
@@ -978,6 +1057,10 @@ fi
 %endif
 
 %changelog
+* Sat Jan 17 2015 Honza Horak <hhorak@redhat.com> - 5.6.22-3
+- Move service-environment into mariadb package
+- Implement scl register functionality
+
 * Mon Jan 12 2015 Honza Horak <hhorak@redhat.com> - 5.6.22-2
 - Add configuration file for server
 
