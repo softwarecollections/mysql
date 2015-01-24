@@ -101,7 +101,7 @@
 
 Name:             %{?scl_prefix}%{pkgname}
 Version:          5.6.22
-Release:          4%{?with_debug:.debug}%{?dist}
+Release:          5%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -1064,7 +1064,7 @@ fi
 %endif
 
 %changelog
-* Sat Jan 24 2015 Honza Horak <hhorak@redhat.com> - 5.6.22-4
+* Sat Jan 24 2015 Honza Horak <hhorak@redhat.com> - 5.6.22-5
 - Fix path for sysconfig file
   Filter provides in el6 properly
   Fix initscript file location
