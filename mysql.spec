@@ -63,8 +63,8 @@
 %{?scl:%global se_daemon_source %{_unitdir}/mysqld}
 %global daemondir %{_unitdir}
 %else
-%{?scl:%global se_daemon_source %{_initddir}/mysqld}
-%global daemondir %{_initddir}
+%{?scl:%global se_daemon_source %{?scl:%_root_sysconfdir}%{!?scl:%_sysconfdir}/rc.d/init.d/mysqld}
+%global daemondir %{?scl:%_root_sysconfdir}%{!?scl:%_sysconfdir}/rc.d/init.d
 %endif
 %{?scl:%global se_log_source %{?_root_localstatedir}/log/mysql}
 %if ! 0%{?scl:1} || 0%{?nfsmountable:1}
@@ -101,7 +101,7 @@
 
 Name:             %{?scl_prefix}%{pkgname}
 Version:          5.6.22
-Release:          3%{?with_debug:.debug}%{?dist}
+Release:          4%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -205,7 +205,7 @@ Obsoletes:        mysql-cluster < 5.1.44
 %global __provides_exclude_from ^(%{_datadir}/(mysql|mysql-test)/.*|%{_libdir}/mysql/plugin/.*\\.so)$
 %else
 %filter_from_requires /perl(\(hostnames\|lib::mtr\|lib::v1\|mtr_\|My::\)/d
-%filter_provides_in -P (%{_datadir}/(mysql|mysql-test)/.*|%{_libdir}/mysql/plugin/.*\\.so)$
+%filter_provides_in -P (%{_datadir}/(mysql|mysql-test)/.*|%{_libdir}/mysql/plugin/.*\.so)
 %filter_setup
 %endif
 
@@ -485,7 +485,7 @@ add_test 'main.upgrade             : unknown'
 popd
 
 cp %{SOURCE2} %{SOURCE3} %{SOURCE10} %{SOURCE11} %{SOURCE12} %{SOURCE13} \
-   %{SOURCE14} %{SOURCE15} %{SOURCE16} %{SOURCE19} %{SOURCE31} scripts
+   %{SOURCE14} %{SOURCE15} %{SOURCE16} %{SOURCE19} %{SOURCE31} %{SOURCE60} scripts
 
 %if 0%{?scl:1}
 %patch90 -p1
@@ -604,7 +604,7 @@ install -D -p -m 0644 scripts/mysql.tmpfiles.d %{buildroot}%{_tmpfilesdir}/%{nam
 
 # install SysV init script
 %if %{with init_sysv}
-install -D -p -m 755 scripts/mysql.init %{buildroot}%{_initddir}/%{daemon_name}
+install -D -p -m 755 scripts/mysql.init %{buildroot}%{daemondir}/%{daemon_name}
 %endif
 
 # helper scripts for service starting
@@ -637,7 +637,7 @@ mkdir -p %{buildroot}%{logrotateddir}
 mv %{buildroot}%{_datadir}/%{name}/mysql-log-rotate %{buildroot}%{logrotateddir}/%{daemon_name}
 chmod 644 %{buildroot}%{logrotateddir}/%{daemon_name}
 
-%if ! 0%{?scl:1}
+%if %{with clibrary} && 0%{!?scl:1}
 mkdir -p %{buildroot}%{_sysconfdir}/ld.so.conf.d
 echo "%{_libdir}/mysql" > %{buildroot}%{_sysconfdir}/ld.so.conf.d/%{name}-%{_arch}.conf
 %endif
@@ -716,10 +716,15 @@ rm -rf %{buildroot}%{_datadir}/mysql-test
 rm -f %{buildroot}%{_mandir}/man1/mysql_client_test.1*
 %endif
 
-#include helper script for creating register stuff
-%include %{_sourcedir}/scl-register-helper.sh
-
 %if 0%{?scl:1}
+#include helper script for creating register stuff
+source ./scripts/scl-register-helper.sh
+
+# configure variables for the helper function scl_reggen
+export _SR_BUILDROOT=%{buildroot}
+export _SR_SCL_SCRIPTS=%{?_scl_scripts}
+
+# backup files and generate register scripts for -server package
 scl_reggen %{pkg_name}-server --cpfile %{daemondir}/%{daemon_name}%{?with_init_systemd:.service}
 scl_reggen %{pkg_name}-server --selinux %{daemondir}/%{daemon_name}%{?with_init_systemd:.service} %{se_daemon_source}
 %{?with_init_systemd: scl_reggen %{pkg_name}-server --cpfile %{_tmpfilesdir}/%{name}.conf}
@@ -1059,6 +1064,11 @@ fi
 %endif
 
 %changelog
+* Sat Jan 24 2015 Honza Horak <hhorak@redhat.com> - 5.6.22-4
+- Fix path for sysconfig file
+  Filter provides in el6 properly
+  Fix initscript file location
+
 * Sat Jan 17 2015 Honza Horak <hhorak@redhat.com> - 5.6.22-3
 - Move service-environment into mariadb package
 - Implement scl register functionality
