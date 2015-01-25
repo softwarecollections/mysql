@@ -104,7 +104,7 @@
 
 Name:             %{?scl_prefix}mysql
 Version:          5.6.22
-Release:          6%{?with_debug:.debug}%{?dist}
+Release:          7%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -525,6 +525,7 @@ cmake .. \
          -DNICE_PROJECT_NAME="MySQL" \
          -DCMAKE_INSTALL_PREFIX="%{_prefix}" \
          -DSYSCONFDIR="%{_sysconfdir}" \
+         -DSYSCONF2DIR="%{_sysconfdir}/my.cnf.d" \
          -DINSTALL_DOCDIR="share/doc/%{_pkgdocdirname}" \
          -DINSTALL_DOCREADMEDIR="share/doc/%{_pkgdocdirname}" \
          -DINSTALL_INCLUDEDIR=include/mysql \
@@ -741,8 +742,6 @@ scl_reggen %{pkg_name}-server --mkdir %{logfiledir}
 scl_reggen %{pkg_name}-server --chown %{logfiledir} mysql:mysql
 scl_reggen %{pkg_name}-server --chmod %{logfiledir} 0750
 scl_reggen %{pkg_name}-server --selinux %{logfiledir} %{se_log_source}
-scl_reggen %{pkg_name}-server --touch %{logfile}
-scl_reggen %{pkg_name}-server --chown %{logfile} mysql:mysql
 %{?with_config: scl_reggen %{pkg_name}-config --cpfile %{_sysconfdir}/my.cnf}
 %{?with_config: scl_reggen %{pkg_name}-config --mkdir %{_sysconfdir}/my.cnf.d}
 %{?with_init_systemd: scl_reggen %{pkg_name}-server --runafterregister 'systemctl daemon-reload'}
@@ -803,8 +802,6 @@ if [ $1 = 1 ]; then
     /sbin/chkconfig --add %{daemon_name}
 fi
 %endif
-/bin/touch %{logfile}
-/bin/chmod 0755 %{dbdatadir}
 %{?scl:%{_scl_scripts}/register.d/*.%{pkg_name}-server.selinux-set}
 %{?scl:%{_scl_scripts}/register.d/*.%{pkg_name}-server.selinux-restore}
 
@@ -1062,6 +1059,9 @@ fi
 %endif
 
 %changelog
+* Sun Jan 25 2015 Honza Horak <hhorak@redhat.com> - 5.6.22-7
+- Do not create log file in post script
+
 * Sun Jan 25 2015 Honza Horak <hhorak@redhat.com> - 5.6.22-6
 - Use pkg_name for files in share
 

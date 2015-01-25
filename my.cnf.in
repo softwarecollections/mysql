@@ -1,6 +1,6 @@
 [mysqld]
 datadir=@MYSQL_DATADIR@
-socket=/var/lib/mysql/mysql.sock
+socket=@MYSQL_UNIX_ADDR@
 # Disabling symbolic-links is recommended to prevent assorted security risks
 symbolic-links=0
 # Settings user and group are ignored when systemd is used.
@@ -16,5 +16,5 @@ pid-file=@PID_FILE_DIR@/@DAEMON_NAME@.pid
 #
 # include all files from the config directory
 #
-!includedir /etc/my.cnf.d
+!includedir @SYSCONF2DIR@
 

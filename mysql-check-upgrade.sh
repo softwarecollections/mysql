@@ -27,9 +27,9 @@ if [ $version -ne $thisversion ] ; then
     cat <<EOF >&2
 The datadir located at $datadir needs to be upgraded using 'mysql_upgrade' tool. This can be done using the following steps:
 
-  1. Back-up your data before running 'mysql_upgrade'
-  2. Start the database daemon using 'systemctl start @DAEMON_NAME@.service'
-  3. Run 'mysql_upgrade' with a database user that has sufficent privileges
+  1. Back-up your data before with 'mysql_upgrade'
+  2. Start the database daemon using 'service @DAEMON_NAME@ start'
+  3. Run 'mysql_upgrade' with a database user that has sufficient privileges
 
 Read more about 'mysql_upgrade' usage at:
 http://dev.mysql.com/doc/refman/5.6/en/mysql-upgrade.html
