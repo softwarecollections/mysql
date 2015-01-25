@@ -104,7 +104,7 @@
 
 Name:             %{?scl_prefix}mysql
 Version:          5.6.22
-Release:          8%{?with_debug:.debug}%{?dist}
+Release:          9%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -209,6 +209,7 @@ Obsoletes:        mysql-cluster < 5.1.44
 %else
 %filter_from_requires /perl(\(hostnames\|lib::mtr\|lib::v1\|mtr_\|My::\)/d
 %filter_provides_in -P (%{_datadir}/(mysql|mysql-test)/.*|%{_libdir}/mysql/plugin/.*\.so)
+%filter_provides_in -P %{_libexecdir}/mysqld
 %filter_setup
 %endif
 
@@ -1059,6 +1060,9 @@ fi
 %endif
 
 %changelog
+* Sun Jan 25 2015 Honza Horak <hhorak@redhat.com> - 5.6.22-9
+- Filter provides from daemon binary
+
 * Sun Jan 25 2015 Honza Horak <hhorak@redhat.com> - 5.6.22-8
 - Use scl call in the logrotate script
 
