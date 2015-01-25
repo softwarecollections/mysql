@@ -104,7 +104,7 @@
 
 Name:             %{?scl_prefix}mysql
 Version:          5.6.22
-Release:          5%{?with_debug:.debug}%{?dist}
+Release:          6%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -1062,6 +1062,9 @@ fi
 %endif
 
 %changelog
+* Sun Jan 25 2015 Honza Horak <hhorak@redhat.com> - 5.6.22-6
+- Use pkg_name for files in share
+
 * Sat Jan 24 2015 Honza Horak <hhorak@redhat.com> - 5.6.22-5
 - Fix path for sysconfig file
   Filter provides in el6 properly
