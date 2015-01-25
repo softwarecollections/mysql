@@ -104,7 +104,7 @@
 
 Name:             %{?scl_prefix}mysql
 Version:          5.6.22
-Release:          7%{?with_debug:.debug}%{?dist}
+Release:          8%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -1059,6 +1059,9 @@ fi
 %endif
 
 %changelog
+* Sun Jan 25 2015 Honza Horak <hhorak@redhat.com> - 5.6.22-8
+- Use scl call in the logrotate script
+
 * Sun Jan 25 2015 Honza Horak <hhorak@redhat.com> - 5.6.22-7
 - Do not create log file in post script
 

@@ -135,3 +135,18 @@ diff -rup mysql-5.6.22-orig/scripts/mysql.service.in mysql-5.6.22/scripts/mysql.
  # Give a reasonable amount of time for the server to start up/shut down
  TimeoutSec=300
 Only in mysql-5.6.22/scripts: mysql.service.in.sclpatch
+diff -up mysql-5.6.22/support-files/mysql-log-rotate.sh.sclcall mysql-5.6.22/support-files/mysql-log-rotate.sh
+--- mysql-5.6.22/support-files/mysql-log-rotate.sh.sclcall	2015-01-25 20:13:54.601496995 +0100
++++ mysql-5.6.22/support-files/mysql-log-rotate.sh	2015-01-25 20:16:55.477767194 +0100
+@@ -30,9 +30,9 @@
+ #    postrotate
+ #	# just if mysqld is really running
+ #	if test -x @bindir@/mysqladmin && \
+-#	   @bindir@/mysqladmin ping &>/dev/null
++#	   /usr/bin/scl enable @SCL_NAME@ -- @bindir@/mysqladmin ping &>/dev/null
+ #	then
+-#	   @bindir@/mysqladmin flush-logs
++#	   /usr/bin/scl enable @SCL_NAME@ -- @bindir@/mysqladmin flush-logs
+ #	fi
+ #    endscript
+ #}
