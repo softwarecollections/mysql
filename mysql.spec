@@ -104,7 +104,7 @@
 
 Name:             %{?scl_prefix}mysql
 Version:          5.6.22
-Release:          9%{?with_debug:.debug}%{?dist}
+Release:          10%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -795,6 +795,9 @@ popd
 %endif
 
 %post server
+%{?scl:restorecon -r %{?_scl_root}/} >/dev/null 2>&1 || :
+%{?scl:%{_scl_scripts}/register.d/*.%{pkg_name}-server.selinux-set} >/dev/null 2>&1 || :
+%{?scl:%{_scl_scripts}/register.d/*.%{pkg_name}-server.selinux-restore} >/dev/null 2>&1 || :
 %if %{with init_systemd}
 %systemd_post %{daemon_name}.service
 %endif
@@ -803,8 +806,6 @@ if [ $1 = 1 ]; then
     /sbin/chkconfig --add %{daemon_name}
 fi
 %endif
-%{?scl:%{_scl_scripts}/register.d/*.%{pkg_name}-server.selinux-set}
-%{?scl:%{_scl_scripts}/register.d/*.%{pkg_name}-server.selinux-restore}
 
 %preun server
 %if %{with init_systemd}
@@ -1060,6 +1061,10 @@ fi
 %endif
 
 %changelog
+* Mon Jan 26 2015 Honza Horak <hhorak@redhat.com> - 5.6.22-10
+- Restorecon on sclroot in post script and move selinux actions before working
+  with the service
+
 * Sun Jan 25 2015 Honza Horak <hhorak@redhat.com> - 5.6.22-9
 - Filter provides from daemon binary
 
