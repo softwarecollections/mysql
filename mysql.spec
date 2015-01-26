@@ -104,7 +104,7 @@
 
 Name:             %{?scl_prefix}mysql
 Version:          5.6.22
-Release:          10%{?with_debug:.debug}%{?dist}
+Release:          11%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -146,6 +146,7 @@ Patch7:           %{pkgnamepatch}-dh1024.patch
 Patch8:           %{pkgnamepatch}-scripts.patch
 Patch9:           %{pkgnamepatch}-install-db-sharedir.patch
 Patch10:          %{pkgnamepatch}-paths.patch
+Patch11:          %{pkgnamepatch}-noclientlib.patch
 
 # Patches specific for this mysql package
 Patch50:          %{pkgnamepatch}-expired-certs.patch
@@ -438,6 +439,7 @@ the MySQL sources.
 %patch8 -p1
 %patch9 -p1
 %patch10 -p1
+%patch11 -p1
 %patch50 -p1
 %patch51 -p1
 %patch52 -p1
@@ -1061,6 +1063,9 @@ fi
 %endif
 
 %changelog
+* Mon Jan 26 2015 Honza Horak <hhorak@redhat.com> - 5.6.22-11
+- Do not set selinux context  scl root during scl register
+
 * Mon Jan 26 2015 Honza Horak <hhorak@redhat.com> - 5.6.22-10
 - Restorecon on sclroot in post script and move selinux actions before working
   with the service
