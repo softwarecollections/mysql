@@ -104,7 +104,7 @@
 
 Name:             %{?scl_prefix}mysql
 Version:          5.6.22
-Release:          12%{?with_debug:.debug}%{?dist}
+Release:          13%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -331,7 +331,7 @@ the MySQL server and some accompanying files and directories.
 %package          devel
 Summary:          Files for development of MySQL applications
 Group:            Applications/Databases
-Requires:         %{name}-libs%{?_isa} = %{sameevr}
+%{?with_clibrary:Requires:         %{name}-libs%{?_isa} = %{sameevr}}
 Requires:         openssl-devel%{?_isa}
 %{?scl:Requires:%scl_runtime}
 %{?with_conflicts:Conflicts:        mariadb-devel}
@@ -1061,6 +1061,9 @@ fi
 %endif
 
 %changelog
+* Tue Jan 27 2015 Honza Horak <hhorak@redhat.com> - 5.6.22-13
+- Do not require -libs in -devel if -libs not built
+
 * Tue Jan 27 2015 Honza Horak <hhorak@redhat.com> - 5.6.22-12
 - Do not define selinux specifically for /var/run and config, it is done
   generally for all /etc and /var
