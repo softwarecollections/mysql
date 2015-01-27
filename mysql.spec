@@ -664,6 +664,7 @@ cp -p %{buildroot}%{_mandir}/man1/mysqltest.1 %{buildroot}%{_mandir}/man1/mysqlt
 cp -p %{buildroot}%{_mandir}/man1/mysql_client_test.1 %{buildroot}%{_mandir}/man1/mysql_client_test_embedded.1
 
 %if %{without clibrary}
+unlink %{buildroot}%{_libdir}/mysql/libmysqlclient*.so
 rm -rf %{buildroot}%{_libdir}/mysql/libmysqlclient*.so.*
 rm -rf %{buildroot}%{_sysconfdir}/ld.so.conf.d
 %endif
@@ -1030,8 +1031,10 @@ fi
 %{_bindir}/mysql_config-%{__isa_bits}
 %{_includedir}/mysql
 %{_datadir}/aclocal/mysql.m4
+%if %{with clibrary}
 %{_libdir}/mysql/libmysqlclient.so
 %{_libdir}/mysql/libmysqlclient_r.so
+%endif
 %{_mandir}/man1/mysql_config.1*
 %endif
 
