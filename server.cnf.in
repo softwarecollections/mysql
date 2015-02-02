@@ -10,6 +10,8 @@
 
 # this is only for the mysqld standalone daemon
 [mysqld]
+datadir=@MYSQL_DATADIR@
+socket=@MYSQL_UNIX_ADDR@
 log-error=@LOG_LOCATION@
 pid-file=@PID_FILE_DIR@/@DAEMON_NAME@.pid
 

@@ -103,8 +103,8 @@
 %endif
 
 Name:             %{?scl_prefix}mysql
-Version:          5.6.22
-Release:          16%{?with_debug:.debug}%{?dist}
+Version:          5.6.23
+Release:          1%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -147,7 +147,6 @@ Patch10:          %{pkgnamepatch}-paths.patch
 Patch11:          %{pkgnamepatch}-noclientlib.patch
 
 # Patches specific for this mysql package
-Patch50:          %{pkgnamepatch}-expired-certs.patch
 Patch51:          %{pkgnamepatch}-chain-certs.patch
 Patch52:          %{pkgnamepatch}-sharedir.patch
 Patch53:          %{pkgnamepatch}-5.6.16-libmysql-version.patch
@@ -439,7 +438,6 @@ the MySQL sources.
 %patch9 -p1
 %patch10 -p1
 %patch11 -p1
-%patch50 -p1
 %patch51 -p1
 %patch52 -p1
 %patch53 -p1
@@ -1033,6 +1031,14 @@ fi
 %endif
 
 %changelog
+* Wed Feb 18 2015 Bjorn Munch <bjorn.munch@oracle.com> - 5.6.23-1
+- Update to MySQL 5.6.23, for various fixes described at
+  https://dev.mysql.com/doc/relnotes/mysql/5.6/en/news-5-6-23.html
+- Expired certs patch now obsolete
+- Fixed changelog
+- Refreshed file contents patch
+- Fix typo in server.cnf.in
+
 * Wed Feb 18 2015 Honza Horak <hhorak@redhat.com> - 5.6.22-16
 - Remove NFS register feature for questionable usage for DBs
 

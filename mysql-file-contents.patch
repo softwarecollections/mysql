@@ -42,4 +42,4 @@ diff -up mysql-5.6.22/mysql-test/t/file_contents.test.file-contents mysql-5.6.22
 +    }
    }
  } else {
-   # tar.gz package, Windows, or developer work (in BZR)
+   # tar.gz package, Windows, or developer work (in git)
