@@ -104,7 +104,7 @@
 
 Name:             %{?scl_prefix}mysql
 Version:          5.6.22
-Release:          15%{?with_debug:.debug}%{?dist}
+Release:          16%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -131,8 +131,6 @@ Source19:         mysql.init.in
 Source30:         mysql-5.6.10-rpmlintrc
 # Configuration for server
 Source31:         server.cnf.in
-# Helper script for scl register feature
-Source60:         scl-register-helper.sh
 
 # Comments for these patches are in the patch files
 # Patches common for more mysql-like packages
@@ -492,7 +490,7 @@ add_test 'main.upgrade             : unknown'
 popd
 
 cp %{SOURCE2} %{SOURCE3} %{SOURCE10} %{SOURCE11} %{SOURCE12} %{SOURCE13} \
-   %{SOURCE14} %{SOURCE15} %{SOURCE16} %{SOURCE19} %{SOURCE31} %{SOURCE60} scripts
+   %{SOURCE14} %{SOURCE15} %{SOURCE16} %{SOURCE19} %{SOURCE31} scripts
 
 %if 0%{?scl:1}
 %patch90 -p1
@@ -725,35 +723,6 @@ rm -f %{buildroot}%{_mandir}/man1/mysql_client_test.1*
 %endif
 
 %if 0%{?scl:1}
-#include helper script for creating register stuff
-source ./scripts/scl-register-helper.sh
-
-# configure variables for the helper function scl_reggen
-export _SR_BUILDROOT=%{buildroot}
-export _SR_SCL_SCRIPTS=%{?_scl_scripts}
-
-# backup files and generate register scripts for -server package
-scl_reggen %{pkg_name}-server --cpfile %{daemondir}/%{daemon_name}%{?with_init_systemd:.service}
-scl_reggen %{pkg_name}-server --selinux %{daemondir}/%{daemon_name}%{?with_init_systemd:.service} %{se_daemon_source}
-%{?with_init_systemd: scl_reggen %{pkg_name}-server --cpfile %{_tmpfilesdir}/%{name}.conf}
-scl_reggen %{pkg_name}-server --cpfile %{logrotateddir}/%{daemon_name}
-scl_reggen %{pkg_name}-server --cpfile %{_sysconfdir}/my.cnf.d/server.cnf
-scl_reggen %{pkg_name}-server --mkdir %{dbdatadir}
-scl_reggen %{pkg_name}-server --chown %{dbdatadir} mysql:mysql
-scl_reggen %{pkg_name}-server --chmod %{dbdatadir} 0755
-scl_reggen %{pkg_name}-server --selinux %{dbdatadir} /var/lib/mysql
-scl_reggen %{pkg_name}-server --mkdir %{_localstatedir}/run/%{daemon_name}
-scl_reggen %{pkg_name}-server --chown %{_localstatedir}/run/%{daemon_name} mysql:mysql
-scl_reggen %{pkg_name}-server --chmod %{_localstatedir}/run/%{daemon_name} 0755
-scl_reggen %{pkg_name}-server --mkdir %{logfiledir}
-scl_reggen %{pkg_name}-server --chown %{logfiledir} mysql:mysql
-scl_reggen %{pkg_name}-server --chmod %{logfiledir} 0750
-scl_reggen %{pkg_name}-server --selinux %{logfiledir} %{se_log_source}
-%{?with_config: scl_reggen %{pkg_name}-config --cpfile %{_sysconfdir}/my.cnf}
-%{?with_config: scl_reggen %{pkg_name}-config --mkdir %{_sysconfdir}/my.cnf.d}
-%{?with_init_systemd: scl_reggen %{pkg_name}-server --runafterregister 'systemctl daemon-reload'}
-%{?with_init_systemd: scl_reggen %{pkg_name}-server --runafterderegister 'systemctl daemon-reload'}
-
 # generate a configuration file for daemon
 cat << EOF | tee -a %{buildroot}%{?_scl_scripts}/service-environment
 # Services are started in a fresh environment without any influence of user's
@@ -801,9 +770,14 @@ popd
 %endif
 
 %post server
-%{?scl:restorecon -r %{?_scl_root}/} >/dev/null 2>&1 || :
-%{?scl:%{_scl_scripts}/register.d/*.%{pkg_name}-server.selinux-set} >/dev/null 2>&1 || :
-%{?scl:%{_scl_scripts}/register.d/*.%{pkg_name}-server.selinux-restore} >/dev/null 2>&1 || :
+%if 0%{?scl:1}
+semanage fcontext -a -e "%{se_daemon_source}" "%{daemondir}/%{daemon_name}%{?with_init_systemd:.service}" >/dev/null 2>&1 || :
+selinuxenabled && load_policy || :
+restorecon -R "%{?_scl_root}/" >/dev/null 2>&1 || :
+restorecon -R "%{_sysconfdir}" >/dev/null 2>&1 || :
+restorecon -R "%{_localstatedir}" >/dev/null 2>&1 || :
+restorecon -R "%{daemondir}/%{daemon_name}%{?with_init_systemd:.service}" >/dev/null 2>&1 || :
+%endif
 %if %{with init_systemd}
 %systemd_post %{daemon_name}.service
 %endif
@@ -890,10 +864,6 @@ fi
 # common package because it can be used for client settings too.
 %dir %{_sysconfdir}/my.cnf.d
 %config(noreplace) %{_sysconfdir}/my.cnf
-%{?scl: %config(noreplace) %{_scl_scripts}/register.content%{_sysconfdir}/my.cnf}
-%{?scl: %dir %{_scl_scripts}/register.content%{_sysconfdir}/my.cnf.d}
-%{?scl: %{_scl_scripts}/register.d/*.%{pkg_name}-config.*}
-%{?scl: %{_scl_scripts}/deregister.d/*.%{pkg_name}-config.*}
 %endif
 
 %if %{with common}
@@ -960,7 +930,6 @@ fi
 %{_bindir}/resolveip
 
 %config(noreplace) %{_sysconfdir}/my.cnf.d/server.cnf
-%{?scl: %config(noreplace) %{_scl_scripts}/register.content/%{_sysconfdir}/my.cnf.d/server.cnf}
 %{_libexecdir}/mysqld
 
 %{_libdir}/mysql/INFO_SRC
@@ -1007,7 +976,6 @@ fi
 %{_datadir}/%{pkg_name}/mysql_test_data_timezone.sql
 %{_datadir}/%{pkg_name}/my-*.cnf
 
-%{?scl:%{_scl_scripts}/register.content%{daemondir}}
 %{daemondir}/%{daemon_name}*
 %{_libexecdir}/mysql-prepare-db-dir
 %{_libexecdir}/mysql-wait-ready
@@ -1016,7 +984,6 @@ fi
 %{_libexecdir}/mysql-scripts-common
 
 %{?with_init_systemd:%{_tmpfilesdir}/%{name}.conf}
-%{?scl:%{?with_init_systemd:%{_scl_scripts}/register.content%{_tmpfilesdir}}}
 %attr(0755,mysql,mysql) %dir %{dbdatadir}
 %{?scl:%attr(0755,mysql,mysql) %dir /var/lib/mysql}
 %attr(0755,mysql,mysql) %dir %{_localstatedir}/run/%{daemon_name}
@@ -1024,11 +991,7 @@ fi
 %attr(0750,mysql,mysql) %dir %{logfiledir}
 %attr(0640,mysql,mysql) %config %ghost %verify(not md5 size mtime) %{logfile}
 %config(noreplace) %{logrotateddir}/%{daemon_name}
-%{?scl: %config(noreplace) %{_scl_scripts}/register.content%{logrotateddir}/%{daemon_name}}
-%{?scl: %dir %{_scl_scripts}/register.content%{logrotateddir}}
 
-%{?scl: %{_scl_scripts}/register.d/*.%{pkg_name}-server.*}
-%{?scl: %{_scl_scripts}/deregister.d/*.%{pkg_name}-server.*}
 %{?scl:%config(noreplace) %{?_scl_scripts}/service-environment}
 
 %if %{with devel}
@@ -1070,6 +1033,9 @@ fi
 %endif
 
 %changelog
+* Wed Feb 18 2015 Honza Horak <hhorak@redhat.com> - 5.6.22-16
+- Remove NFS register feature for questionable usage for DBs
+
 * Wed Feb 18 2015 Honza Horak <hhorak@redhat.com> - 5.6.22-15
 - Create directory for socket in build for SCL
 
