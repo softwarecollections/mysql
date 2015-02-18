@@ -104,7 +104,7 @@
 
 Name:             %{?scl_prefix}mysql
 Version:          5.6.22
-Release:          14%{?with_debug:.debug}%{?dist}
+Release:          15%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -595,6 +595,9 @@ touch %{buildroot}%{logfile}
 mkdir -p %{buildroot}%{_localstatedir}/run/%{daemon_name}
 install -p -m 0755 -d %{buildroot}%{dbdatadir}
 
+# create directory for socket
+%{?scl:install -p -m 0755 -d %{buildroot}/var/lib/mysql}
+
 %if %{with config}
 install -D -p -m 0644 scripts/my.cnf %{buildroot}%{_sysconfdir}/my.cnf
 %endif
@@ -1015,6 +1018,7 @@ fi
 %{?with_init_systemd:%{_tmpfilesdir}/%{name}.conf}
 %{?scl:%{?with_init_systemd:%{_scl_scripts}/register.content%{_tmpfilesdir}}}
 %attr(0755,mysql,mysql) %dir %{dbdatadir}
+%{?scl:%attr(0755,mysql,mysql) %dir /var/lib/mysql}
 %attr(0755,mysql,mysql) %dir %{_localstatedir}/run/%{daemon_name}
 %attr(0755,mysql,mysql) %dir %{_localstatedir}/lib/mysql
 %attr(0750,mysql,mysql) %dir %{logfiledir}
@@ -1066,6 +1070,9 @@ fi
 %endif
 
 %changelog
+* Wed Feb 18 2015 Honza Horak <hhorak@redhat.com> - 5.6.22-15
+- Create directory for socket in build for SCL
+
 * Wed Feb 18 2015 Honza Horak <hhorak@redhat.com> - 5.6.22-14
 - Require scl_source if building for scl
 
