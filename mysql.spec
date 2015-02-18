@@ -104,7 +104,7 @@
 
 Name:             %{?scl_prefix}mysql
 Version:          5.6.23
-Release:          1%{?with_debug:.debug}%{?dist}
+Release:          2%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -126,6 +126,7 @@ Source13:         mysql-wait-ready.sh
 Source14:         mysql-check-socket.sh
 Source15:         mysql-scripts-common.sh
 Source16:         mysql-check-upgrade.sh
+Source17:         mysql-wait-stop.sh
 Source19:         mysql.init.in
 # To track rpmlint warnings
 Source30:         mysql-5.6.10-rpmlintrc
@@ -488,7 +489,7 @@ add_test 'main.upgrade             : unknown'
 popd
 
 cp %{SOURCE2} %{SOURCE3} %{SOURCE10} %{SOURCE11} %{SOURCE12} %{SOURCE13} \
-   %{SOURCE14} %{SOURCE15} %{SOURCE16} %{SOURCE19} %{SOURCE31} scripts
+   %{SOURCE14} %{SOURCE15} %{SOURCE16} %{SOURCE17} %{SOURCE19} %{SOURCE31} scripts
 
 %if 0%{?scl:1}
 %patch90 -p1
@@ -612,6 +613,7 @@ install -D -p -m 755 scripts/mysql.init %{buildroot}%{daemondir}/%{daemon_name}
 # helper scripts for service starting
 install -p -m 755 scripts/mysql-prepare-db-dir %{buildroot}%{_libexecdir}/mysql-prepare-db-dir
 install -p -m 755 scripts/mysql-wait-ready %{buildroot}%{_libexecdir}/mysql-wait-ready
+install -p -m 755 scripts/mysql-wait-stop %{buildroot}%{_libexecdir}/mysql-wait-stop
 install -p -m 755 scripts/mysql-check-socket %{buildroot}%{_libexecdir}/mysql-check-socket
 install -p -m 755 scripts/mysql-check-upgrade %{buildroot}%{_libexecdir}/mysql-check-upgrade
 install -p -m 644 scripts/mysql-scripts-common %{buildroot}%{_libexecdir}/mysql-scripts-common
@@ -977,6 +979,7 @@ fi
 %{daemondir}/%{daemon_name}*
 %{_libexecdir}/mysql-prepare-db-dir
 %{_libexecdir}/mysql-wait-ready
+%{_libexecdir}/mysql-wait-stop
 %{_libexecdir}/mysql-check-socket
 %{_libexecdir}/mysql-check-upgrade
 %{_libexecdir}/mysql-scripts-common
@@ -1031,6 +1034,10 @@ fi
 %endif
 
 %changelog
+* Wed Feb 18 2015 Honza Horak <hhorak@redhat.com> - 5.6.23-2
+- Wait for daemon ends
+  Related: #1072958
+
 * Wed Feb 18 2015 Bjorn Munch <bjorn.munch@oracle.com> - 5.6.23-1
 - Update to MySQL 5.6.23, for various fixes described at
   https://dev.mysql.com/doc/relnotes/mysql/5.6/en/news-5-6-23.html

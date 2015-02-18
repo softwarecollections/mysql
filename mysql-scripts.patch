@@ -1,7 +1,7 @@
 diff -rup mysql-5.6.19-orig/scripts/CMakeLists.txt mysql-5.6.19/scripts/CMakeLists.txt
 --- mysql-5.6.19-orig/scripts/CMakeLists.txt	2014-07-22 10:07:12.053410263 +0200
 +++ mysql-5.6.19/scripts/CMakeLists.txt	2014-07-22 10:10:44.102502369 +0200
-@@ -381,6 +381,33 @@ ELSE()
+@@ -381,6 +381,34 @@ ELSE()
      ENDIF()
      INSTALL_SCRIPT(${CMAKE_CURRENT_BINARY_DIR}/${file} COMPONENT ${${file}_COMPONENT})
    ENDFOREACH()
@@ -12,6 +12,7 @@ diff -rup mysql-5.6.19-orig/scripts/CMakeLists.txt mysql-5.6.19/scripts/CMakeLis
 +    mysql.service
 +    mysql-prepare-db-dir
 +    mysql-wait-ready
++    mysql-wait-stop
 +    mysql-check-socket
 +    mysql-check-upgrade
 +    mysql-scripts-common
