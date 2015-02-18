@@ -104,7 +104,7 @@
 
 Name:             %{?scl_prefix}mysql
 Version:          5.6.22
-Release:          13%{?with_debug:.debug}%{?dist}
+Release:          14%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -311,6 +311,7 @@ Requires(posttrans): systemd
 Requires:         perl(DBI)
 Requires:         perl(DBD::mysql)
 %{?scl:Requires:%scl_runtime}
+%{?scl:Requires:%{_root_bindir}/scl_source}
 %if %{with mysql_names}
 Provides:         mysql-server = %{sameevr}
 Provides:         mysql-server%{?_isa} = %{sameevr}
@@ -1065,6 +1066,9 @@ fi
 %endif
 
 %changelog
+* Wed Feb 18 2015 Honza Horak <hhorak@redhat.com> - 5.6.22-14
+- Require scl_source if building for scl
+
 * Tue Jan 27 2015 Honza Horak <hhorak@redhat.com> - 5.6.22-13
 - Do not require -libs in -devel if -libs not built
 
