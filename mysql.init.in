@@ -53,7 +53,7 @@ start(){
 	    MYSQLDRUNNING=1
 	fi
     fi
-    RESPONSE=`@bindir@/mysqladmin --socket="$socketfile" --user=UNKNOWN_MYSQL_USER ping 2>&1`
+    RESPONSE=`@bindir@/mysqladmin --no-defaults --socket="$socketfile" --user=UNKNOWN_MYSQL_USER ping 2>&1`
     if [ $MYSQLDRUNNING = 1 ] && [ $? = 0 ]; then
 	# already running, do nothing
 	action $"Starting $prog: " /bin/true
