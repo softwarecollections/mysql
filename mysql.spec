@@ -104,7 +104,7 @@
 
 Name:             %{?scl_prefix}mysql
 Version:          5.6.23
-Release:          2%{?with_debug:.debug}%{?dist}
+Release:          3%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -1034,6 +1034,9 @@ fi
 %endif
 
 %changelog
+* Mon Feb 23 2015 Honza Horak <hhorak@redhat.com> - 5.6.23-3
+- Expand paths in perl scripts in mysql-test
+
 * Wed Feb 18 2015 Honza Horak <hhorak@redhat.com> - 5.6.23-2
 - Wait for daemon ends
   Related: #1072958
