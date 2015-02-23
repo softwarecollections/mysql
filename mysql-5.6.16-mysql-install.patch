@@ -1,3 +1,10 @@
+We have, for security hardening reasons, changed upstream sources to never
+create the test database in 5.7. This patch is a backport from 5.7.
+
+The patch in Fedora is the same that we apply in our own repos. Debian and
+Ubuntu are also skipping creation of the test database, so we're trying
+to align across distros in this issue.
+
 diff --git a/scripts/mysql_install_db.pl.in b/scripts/mysql_install_db.pl.in
 index 1fa5164..4aa49ca 100644
 --- a/scripts/mysql_install_db.pl.in
