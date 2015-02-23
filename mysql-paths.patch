@@ -4,9 +4,9 @@ Software Collections. Removing these hard-coded paths should fix it.
 Upstream report: https://mariadb.atlassian.net/browse/MDEV-6485
 
 
-diff -up mysql-5.6.19/client/mysql_plugin.c.cmakepaths mysql-5.6.19/client/mysql_plugin.c
---- mysql-5.6.19/client/mysql_plugin.c.cmakepaths	2014-05-06 12:45:57.000000000 +0200
-+++ mysql-5.6.19/client/mysql_plugin.c	2014-07-25 13:12:36.991896193 +0200
+diff -up mysql-5.6.23/client/mysql_plugin.c.hardpaths mysql-5.6.23/client/mysql_plugin.c
+--- mysql-5.6.23/client/mysql_plugin.c.hardpaths	2015-01-19 14:48:30.000000000 +0100
++++ mysql-5.6.23/client/mysql_plugin.c	2015-02-23 13:34:21.328484658 +0100
 @@ -90,6 +90,7 @@ static int find_plugin(char *tp_path);
  static int build_bootstrap_file(char *operation, char *bootstrap);
  static int dump_bootstrap_file(char *bootstrap_file);
@@ -89,9 +89,29 @@ diff -up mysql-5.6.19/client/mysql_plugin.c.cmakepaths mysql-5.6.19/client/mysql
  /**
    Locate the tool and form tool path.
  
-diff -up mysql-5.6.19/mysys_ssl/my_default.cc.cmakepaths mysql-5.6.19/mysys_ssl/my_default.cc
---- mysql-5.6.19/mysys_ssl/my_default.cc.cmakepaths	2014-05-06 12:45:58.000000000 +0200
-+++ mysql-5.6.19/mysys_ssl/my_default.cc	2014-07-25 13:19:12.587624249 +0200
+diff -up mysql-5.6.23/cmake/install_layout.cmake.hardpaths mysql-5.6.23/cmake/install_layout.cmake
+--- mysql-5.6.23/cmake/install_layout.cmake.hardpaths	2015-01-19 14:48:32.000000000 +0100
++++ mysql-5.6.23/cmake/install_layout.cmake	2015-02-23 13:34:21.330484657 +0100
+@@ -94,7 +94,7 @@ IF(UNIX)
+     " Choose between ${VALID_INSTALL_LAYOUTS}" )
+   ENDIF()
+ 
+-  SET(SYSCONFDIR "${CMAKE_INSTALL_PREFIX}/etc"
++  SET(SYSCONFDIR "/etc"
+     CACHE PATH "config directory (for my.cnf)")
+   MARK_AS_ADVANCED(SYSCONFDIR)
+ ENDIF()
+@@ -145,6 +145,7 @@ SET(INSTALL_PLUGINTESTDIR_STANDALONE
+ SET(INSTALL_BINDIR_RPM                  "bin")
+ SET(INSTALL_SBINDIR_RPM                 "sbin")
+ SET(INSTALL_SCRIPTDIR_RPM               "bin")
++SET(INSTALL_SYSCONFDIR_RPM              "/etc")
+ #
+ IF(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
+   SET(INSTALL_LIBDIR_RPM                "lib64")
+diff -up mysql-5.6.23/mysys_ssl/my_default.cc.hardpaths mysql-5.6.23/mysys_ssl/my_default.cc
+--- mysql-5.6.23/mysys_ssl/my_default.cc.hardpaths	2015-01-19 14:48:32.000000000 +0100
++++ mysql-5.6.23/mysys_ssl/my_default.cc	2015-02-23 13:34:21.329484658 +0100
 @@ -1389,12 +1389,12 @@ static const char **init_default_directo
  
  #else
@@ -108,9 +128,21 @@ diff -up mysql-5.6.19/mysys_ssl/my_default.cc.cmakepaths mysql-5.6.19/mysys_ssl/
  #endif /* DEFAULT_SYSCONFDIR */
  
  #endif
-diff -up mysql-5.6.19/scripts/mysqlaccess.sh.cmakepaths mysql-5.6.19/scripts/mysqlaccess.sh
---- mysql-5.6.19/scripts/mysqlaccess.sh.cmakepaths	2014-05-06 12:45:58.000000000 +0200
-+++ mysql-5.6.19/scripts/mysqlaccess.sh	2014-07-25 13:12:36.995896200 +0200
+diff -up mysql-5.6.23/scripts/CMakeLists.txt.hardpaths mysql-5.6.23/scripts/CMakeLists.txt
+--- mysql-5.6.23/scripts/CMakeLists.txt.hardpaths	2015-02-23 13:34:21.325484657 +0100
++++ mysql-5.6.23/scripts/CMakeLists.txt	2015-02-23 13:34:21.330484657 +0100
+@@ -219,7 +219,7 @@ INSTALL_SCRIPT(
+   )
+ 
+ SET(prefix "${CMAKE_INSTALL_PREFIX}")
+-SET(sysconfdir ${prefix})
++SET(sysconfdir ${SYSCONFDIR})
+ SET(bindir ${prefix}/${INSTALL_BINDIR})
+ SET(libexecdir ${prefix}/${INSTALL_SBINDIR})
+ SET(scriptdir ${prefix}/${INSTALL_BINDIR})
+diff -up mysql-5.6.23/scripts/mysqlaccess.sh.hardpaths mysql-5.6.23/scripts/mysqlaccess.sh
+--- mysql-5.6.23/scripts/mysqlaccess.sh.hardpaths	2015-01-19 14:48:32.000000000 +0100
++++ mysql-5.6.23/scripts/mysqlaccess.sh	2015-02-23 13:34:21.329484658 +0100
 @@ -483,9 +483,6 @@ MySQLaccess::Report::Print_Header();
    elsif (-f "@sysconfdir@/$script_conf") {
       require "@sysconfdir@/$script_conf";
@@ -129,9 +161,9 @@ diff -up mysql-5.6.19/scripts/mysqlaccess.sh.cmakepaths mysql-5.6.19/scripts/mys
      MergeConfigFile("$dir/.my.cnf");
  }
  
-diff -up mysql-5.6.19/scripts/mysqld_multi.sh.cmakepaths mysql-5.6.19/scripts/mysqld_multi.sh
---- mysql-5.6.19/scripts/mysqld_multi.sh.cmakepaths	2014-05-06 12:45:58.000000000 +0200
-+++ mysql-5.6.19/scripts/mysqld_multi.sh	2014-07-25 13:12:36.996896202 +0200
+diff -up mysql-5.6.23/scripts/mysqld_multi.sh.hardpaths mysql-5.6.23/scripts/mysqld_multi.sh
+--- mysql-5.6.23/scripts/mysqld_multi.sh.hardpaths	2015-01-19 14:48:32.000000000 +0100
++++ mysql-5.6.23/scripts/mysqld_multi.sh	2015-02-23 13:34:21.329484658 +0100
 @@ -573,9 +573,7 @@ sub list_defaults_files
  
    my %seen;  # Don't list the same file more than once
@@ -143,34 +175,15 @@ diff -up mysql-5.6.19/scripts/mysqld_multi.sh.cmakepaths mysql-5.6.19/scripts/my
                 ($ENV{MYSQL_HOME} ? "$ENV{MYSQL_HOME}/my.cnf" : undef),
                 $opt{'extra-file'},
                 ($ENV{HOME} ? "$ENV{HOME}/.my.cnf" : undef));
---- mysql-5.6.19/cmake/install_layout.cmake.cmakepaths	2014-07-25 14:21:56.063132378 +0200
-+++ mysql-5.6.19/cmake/install_layout.cmake	2014-07-25 14:25:46.894644591 +0200
-@@ -94,7 +94,7 @@ IF(UNIX)
-     " Choose between ${VALID_INSTALL_LAYOUTS}" )
-   ENDIF()
- 
--  SET(SYSCONFDIR "${CMAKE_INSTALL_PREFIX}/etc"
-+  SET(SYSCONFDIR "/etc"
-     CACHE PATH "config directory (for my.cnf)")
-   MARK_AS_ADVANCED(SYSCONFDIR)
- ENDIF()
-@@ -145,6 +145,7 @@ SET(INSTALL_PLUGINTESTDIR_STANDALONE
- SET(INSTALL_BINDIR_RPM                  "bin")
- SET(INSTALL_SBINDIR_RPM                 "sbin")
- SET(INSTALL_SCRIPTDIR_RPM               "bin")
-+SET(INSTALL_SYSCONFDIR_RPM              "/etc")
- #
- IF(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
-   SET(INSTALL_LIBDIR_RPM                "lib64")
-diff -up mysql-5.6.20/scripts/CMakeLists.txt.pathsmore mysql-5.6.20/scripts/CMakeLists.txt
---- mysql-5.6.20/scripts/CMakeLists.txt.pathsmore	2014-08-05 16:41:28.900098862 +0200
-+++ mysql-5.6.20/scripts/CMakeLists.txt	2014-08-05 16:41:52.474177142 +0200
-@@ -228,7 +228,7 @@ INSTALL_SCRIPT(
-   )
- 
- SET(prefix "${CMAKE_INSTALL_PREFIX}")
--SET(sysconfdir ${prefix})
-+SET(sysconfdir ${SYSCONFDIR})
- SET(bindir ${prefix}/${INSTALL_BINDIR})
- SET(libexecdir ${prefix}/${INSTALL_SBINDIR})
- SET(scriptdir ${prefix}/${INSTALL_BINDIR})
+diff -up mysql-5.6.23/scripts/mysql_install_db.pl.in.hardpaths mysql-5.6.23/scripts/mysql_install_db.pl.in
+--- mysql-5.6.23/scripts/mysql_install_db.pl.in.hardpaths	2015-02-23 13:34:37.995485386 +0100
++++ mysql-5.6.23/scripts/mysql_install_db.pl.in	2015-02-23 13:35:15.505487028 +0100
+@@ -922,7 +922,7 @@ if ( open(PIPE, "| $mysqld_install_cmd_l
+ 	      "The new default config file was created as $copy_cfg_file,",
+ 	      "please compare it with your file and take the changes you need.");
+     }
+-    foreach my $cfg ( "/etc/my.$cnfext", "/etc/mysql/my.$cnfext" )
++    foreach my $cfg ( "@SYSCONFDIR@/my.$cnfext", "@SYSCONFDIR@/mysql/my.$cnfext" )
+     {
+       check_sys_cfg_file ($opt, $cfg);
+     }
