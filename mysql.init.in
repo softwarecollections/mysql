@@ -7,7 +7,7 @@
 # description:	MySQL database server.
 # processname: mysqld
 # config: @sysconfdir@/my.cnf
-# pidfile: /var/run/@DAEMON_NAME@/@DAEMON_NAME@.pid
+# pidfile: /var/run/@DAEMON_NAME@/@DAEMON_NO_PREFIX@.pid
 ### BEGIN INIT INFO
 # Provides: mysqld
 # Required-Start: $local_fs $remote_fs $network $named $syslog $time
@@ -36,7 +36,7 @@ MYGROUP=mysql
 
 # Edit the following file in order to re-write some of the environment
 # variables defined above, like $STARTTIMEOUT, $STOPTIMEOUT, $exec
-[ -e @sysconfdir@/sysconfig/$prog ] && . @sysconfdir@/sysconfig/$prog
+[ -e @sysconfdir@/sysconfig/@DAEMON_NO_PREFIX@ ] && . @sysconfdir@/sysconfig/@DAEMON_NO_PREFIX@
 
 lockfile=/var/lock/subsys/$prog
 

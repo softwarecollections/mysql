@@ -59,6 +59,7 @@
 %bcond_without init_sysv
 %endif
 %global daemon_name %{?scl_prefix}mysqld
+%global daemon_no_prefix mysqld
 
 # Define where to get propper SELinux context
 # and define names and locations specific for the whole collection
@@ -78,10 +79,13 @@
 %global dbdatadir %{?_scl_root}/var/lib/mysql
 %endif
 
+# Directory for storing pid file
+%global pidfiledir %{?scl:%{_root_localstatedir}}%{!?scl:%{_localstatedir}}/run/%{daemon_name}
+
 # We define some system's well known locations here so we can use them easily
 # later when building to another location (like SCL)
 %global logrotateddir %{?scl:%_root_sysconfdir}%{!?scl:%_sysconfdir}/logrotate.d
-%global logfile %{logfiledir}/%{daemon_name}.log
+%global logfile %{logfiledir}/%{daemon_no_prefix}.log
 
 # Home directory of mysql user should be same for all packages that create it
 %global mysqluserhome /var/lib/mysql
@@ -104,7 +108,7 @@
 
 Name:             %{?scl_prefix}mysql
 Version:          5.6.23
-Release:          3%{?with_debug:.debug}%{?dist}
+Release:          4%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -516,13 +520,14 @@ cmake .. \
          -DFEATURE_SET="community" \
          -DINSTALL_LAYOUT=RPM \
          -DDAEMON_NAME="%{daemon_name}" \
+         -DDAEMON_NO_PREFIX="%{daemon_no_prefix}" \
 %if 0%{?scl:1}
          -DSCL_NAME="%{?scl}" \
          -DSCL_NAME_UPPER="%{?scl_upper}" \
          -DSCL_SCRIPTS="%{?_scl_scripts}" \
 %endif
          -DLOG_LOCATION="%{logfile}" \
-         -DPID_FILE_DIR="%{_localstatedir}/run/%{daemon_name}" \
+         -DPID_FILE_DIR="%{pidfiledir}" \
          -DNICE_PROJECT_NAME="MySQL" \
          -DCMAKE_INSTALL_PREFIX="%{_prefix}" \
          -DSYSCONFDIR="%{_sysconfdir}" \
@@ -589,7 +594,7 @@ install -p -m 0644 Docs/INFO_BIN %{buildroot}%{_libdir}/mysql/
 mkdir -p %{buildroot}%{logfiledir}
 touch %{buildroot}%{logfile}
 
-mkdir -p %{buildroot}%{_localstatedir}/run/%{daemon_name}
+mkdir -p %{buildroot}%{pidfiledir}
 install -p -m 0755 -d %{buildroot}%{dbdatadir}
 
 # create directory for socket
@@ -987,7 +992,7 @@ fi
 %{?with_init_systemd:%{_tmpfilesdir}/%{name}.conf}
 %attr(0755,mysql,mysql) %dir %{dbdatadir}
 %{?scl:%attr(0755,mysql,mysql) %dir /var/lib/mysql}
-%attr(0755,mysql,mysql) %dir %{_localstatedir}/run/%{daemon_name}
+%attr(0755,mysql,mysql) %dir %{pidfiledir}
 %attr(0755,mysql,mysql) %dir %{_localstatedir}/lib/mysql
 %attr(0750,mysql,mysql) %dir %{logfiledir}
 %attr(0640,mysql,mysql) %config %ghost %verify(not md5 size mtime) %{logfile}
@@ -1034,6 +1039,10 @@ fi
 %endif
 
 %changelog
+* Tue Mar 03 2015 Honza Horak <hhorak@redhat.com> - 5.6.23-4
+- Do not use scl prefix more than once in paths
+  Based on https://www.redhat.com/archives/sclorg/2015-February/msg00038.html
+
 * Mon Feb 23 2015 Honza Horak <hhorak@redhat.com> - 5.6.23-3
 - Expand paths in perl scripts in mysql-test
 - Use correct path in install_db script warning
