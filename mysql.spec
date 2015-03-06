@@ -777,11 +777,13 @@ popd
 %post server
 %if 0%{?scl:1}
 semanage fcontext -a -e "%{se_daemon_source}" "%{daemondir}/%{daemon_name}%{?with_init_systemd:.service}" >/dev/null 2>&1 || :
+semanage fcontext -a -e "/var/run/mysql" "%{pidfiledir}" >/dev/null 2>&1 || :
 selinuxenabled && load_policy || :
 restorecon -R "%{?_scl_root}/" >/dev/null 2>&1 || :
 restorecon -R "%{_sysconfdir}" >/dev/null 2>&1 || :
 restorecon -R "%{_localstatedir}" >/dev/null 2>&1 || :
 restorecon -R "%{daemondir}/%{daemon_name}%{?with_init_systemd:.service}" >/dev/null 2>&1 || :
+restorecon -R "%{pidfiledir}" >/dev/null 2>&1 || :
 %endif
 %if %{with init_systemd}
 %systemd_post %{daemon_name}.service
@@ -1044,6 +1046,7 @@ fi
   Based on https://www.redhat.com/archives/sclorg/2015-February/msg00038.html
 - Check permissions when starting service on RHEL-6
   Resolves: #1194699
+- Add SELinux rules for pid file
 
 * Mon Feb 23 2015 Honza Horak <hhorak@redhat.com> - 5.6.23-3
 - Expand paths in perl scripts in mysql-test
