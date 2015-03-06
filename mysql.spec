@@ -1042,6 +1042,8 @@ fi
 * Tue Mar 03 2015 Honza Horak <hhorak@redhat.com> - 5.6.23-4
 - Do not use scl prefix more than once in paths
   Based on https://www.redhat.com/archives/sclorg/2015-February/msg00038.html
+- Check permissions when starting service on RHEL-6
+  Resolves: #1194699
 
 * Mon Feb 23 2015 Honza Horak <hhorak@redhat.com> - 5.6.23-3
 - Expand paths in perl scripts in mysql-test
