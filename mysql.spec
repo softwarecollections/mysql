@@ -155,7 +155,6 @@ Patch11:          %{pkgnamepatch}-noclientlib.patch
 Patch51:          %{pkgnamepatch}-chain-certs.patch
 Patch52:          %{pkgnamepatch}-sharedir.patch
 Patch53:          %{pkgnamepatch}-5.6.16-libmysql-version.patch
-Patch54:          %{pkgnamepatch}-man-pages.patch
 Patch55:          %{pkgnamepatch}-5.6.16-mysql-install.patch
 Patch56:          %{pkgnamepatch}-pluginerrmsg.patch
 Patch57:          %{pkgnamepatch}-5.6.19-gcc49-aarch64-opt.patch
@@ -446,7 +445,6 @@ the MySQL sources.
 %patch51 -p1
 %patch52 -p1
 %patch53 -p1
-%patch54 -p1
 %patch55 -p1
 %patch56 -p1
 %patch57 -p1
