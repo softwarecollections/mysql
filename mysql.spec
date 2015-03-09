@@ -108,7 +108,7 @@
 
 Name:             %{?scl_prefix}mysql
 Version:          5.6.23
-Release:          5%{?with_debug:.debug}%{?dist}
+Release:          6%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -1039,6 +1039,10 @@ fi
 %endif
 
 %changelog
+* Mon Mar 09 2015 Honza Horak <hhorak@redhat.com> - 5.6.23-6
+- Rebuild due to 'scls' removal
+  Resolves: #1200052
+
 * Mon Mar 09 2015 Honza Horak <hhorak@redhat.com> - 5.6.23-5
 - Release bump
 
