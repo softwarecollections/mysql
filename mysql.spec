@@ -108,7 +108,7 @@
 
 Name:             %{?scl_prefix}mysql
 Version:          5.6.23
-Release:          4%{?with_debug:.debug}%{?dist}
+Release:          5%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -1039,6 +1039,9 @@ fi
 %endif
 
 %changelog
+* Mon Mar 09 2015 Honza Horak <hhorak@redhat.com> - 5.6.23-5
+- Release bump
+
 * Tue Mar 03 2015 Honza Horak <hhorak@redhat.com> - 5.6.23-4
 - Do not use scl prefix more than once in paths
   Based on https://www.redhat.com/archives/sclorg/2015-February/msg00038.html
