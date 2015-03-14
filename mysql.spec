@@ -108,7 +108,7 @@
 
 Name:             %{?scl_prefix}mysql
 Version:          5.6.23
-Release:          6%{?with_debug:.debug}%{?dist}
+Release:          7%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -165,7 +165,6 @@ Patch90:          %{pkgnamepatch}-scl-env-check.patch
 
 BuildRequires:    cmake
 BuildRequires:    libaio-devel
-BuildRequires:    libedit-devel
 BuildRequires:    libevent-devel
 BuildRequires:    openssl-devel
 BuildRequires:    perl
@@ -516,6 +515,7 @@ mkdir build && pushd build
 cmake .. \
          -DBUILD_CONFIG=mysql_release \
          -DFEATURE_SET="community" \
+         -DWITH_READLINE=ON \
          -DINSTALL_LAYOUT=RPM \
          -DDAEMON_NAME="%{daemon_name}" \
          -DDAEMON_NO_PREFIX="%{daemon_no_prefix}" \
@@ -1039,6 +1039,10 @@ fi
 %endif
 
 %changelog
+* Sat Mar 14 2015 Honza Horak <hhorak@redhat.com> - 5.6.23-7
+- Do not use libedit
+  Related: #1202016
+
 * Mon Mar 09 2015 Honza Horak <hhorak@redhat.com> - 5.6.23-6
 - Rebuild due to 'scls' removal
   Resolves: #1200052
