@@ -1,6 +1,6 @@
 diff -up mysql-5.6.23/scripts/mysqld_safe.sh.scl-env-check mysql-5.6.23/scripts/mysqld_safe.sh
 --- mysql-5.6.23/scripts/mysqld_safe.sh.scl-env-check	2015-01-19 14:48:32.000000000 +0100
-+++ mysql-5.6.23/scripts/mysqld_safe.sh	2015-02-18 21:35:53.259254972 +0100
++++ mysql-5.6.23/scripts/mysqld_safe.sh	2015-03-14 21:30:01.256181451 +0100
 @@ -11,6 +11,12 @@
  # mysql.server works by first doing a cd to the base directory and from there
  # executing mysqld_safe
@@ -15,9 +15,9 @@ diff -up mysql-5.6.23/scripts/mysqld_safe.sh.scl-env-check mysql-5.6.23/scripts/
  KILL_MYSQLD=1;
  MYSQLD=
 diff -up mysql-5.6.23/scripts/mysql.init.in.scl-env-check mysql-5.6.23/scripts/mysql.init.in
---- mysql-5.6.23/scripts/mysql.init.in.scl-env-check	2015-02-18 21:35:53.258254971 +0100
-+++ mysql-5.6.23/scripts/mysql.init.in	2015-02-18 21:35:53.260254972 +0100
-@@ -147,6 +147,18 @@ condrestart(){
+--- mysql-5.6.23/scripts/mysql.init.in.scl-env-check	2015-03-14 21:30:01.255181450 +0100
++++ mysql-5.6.23/scripts/mysql.init.in	2015-03-14 21:30:01.256181451 +0100
+@@ -154,6 +154,18 @@ condrestart(){
      [ -e $lockfile ] && restart || :
  }
  
@@ -37,8 +37,8 @@ diff -up mysql-5.6.23/scripts/mysql.init.in.scl-env-check mysql-5.6.23/scripts/m
  # See how we were called.
  case "$1" in
 diff -up mysql-5.6.23/scripts/mysql_install_db.sh.scl-env-check mysql-5.6.23/scripts/mysql_install_db.sh
---- mysql-5.6.23/scripts/mysql_install_db.sh.scl-env-check	2015-02-18 21:35:52.876254825 +0100
-+++ mysql-5.6.23/scripts/mysql_install_db.sh	2015-02-18 21:35:53.260254972 +0100
+--- mysql-5.6.23/scripts/mysql_install_db.sh.scl-env-check	2015-03-14 21:30:01.229181430 +0100
++++ mysql-5.6.23/scripts/mysql_install_db.sh	2015-03-14 21:30:01.256181451 +0100
 @@ -18,6 +18,12 @@
  #
  # All unrecognized arguments to this script are passed to mysqld.
@@ -103,8 +103,8 @@ diff -up mysql-5.6.23/scripts/mysql_install_db.sh.scl-env-check mysql-5.6.23/scr
  
    echo
 diff -up mysql-5.6.23/scripts/mysql.service.in.scl-env-check mysql-5.6.23/scripts/mysql.service.in
---- mysql-5.6.23/scripts/mysql.service.in.scl-env-check	2015-02-18 21:35:53.258254971 +0100
-+++ mysql-5.6.23/scripts/mysql.service.in	2015-02-18 21:36:41.472273394 +0100
+--- mysql-5.6.23/scripts/mysql.service.in.scl-env-check	2015-03-14 21:30:01.254181449 +0100
++++ mysql-5.6.23/scripts/mysql.service.in	2015-03-14 21:30:51.460219665 +0100
 @@ -35,14 +35,20 @@ Group=mysql
  # Execute pre and post scripts as root
  PermissionsStartOnly=true
@@ -125,7 +125,7 @@ diff -up mysql-5.6.23/scripts/mysql.service.in.scl-env-check mysql-5.6.23/script
 -ExecStartPost=@libexecdir@/mysql-wait-ready $MAINPID
 -ExecStartPost=@libexecdir@/mysql-check-upgrade
 -ExecStopPost=@libexecdir@/mysql-wait-stop
-+ExecStart=/usr/bin/scl enable $@SCL_NAME_UPPER@_SCLS_ENABLED -- @bindir@/mysqld_safe --basedir=@prefix@
++ExecStart=@libexecdir@/mysqld_safe-scl-helper enable $@SCL_NAME_UPPER@_SCLS_ENABLED -- @bindir@/mysqld_safe --basedir=@prefix@
 +ExecStartPost=/usr/bin/scl enable $@SCL_NAME_UPPER@_SCLS_ENABLED -- @libexecdir@/mysql-wait-ready $MAINPID
 +ExecStartPost=/usr/bin/scl enable $@SCL_NAME_UPPER@_SCLS_ENABLED -- @libexecdir@/mysql-check-upgrade
 +ExecStopPost=/usr/bin/scl enable $@SCL_NAME_UPPER@_SCLS_ENABLED -- @libexecdir@/mysql-wait-stop
@@ -133,8 +133,8 @@ diff -up mysql-5.6.23/scripts/mysql.service.in.scl-env-check mysql-5.6.23/script
  # Give a reasonable amount of time for the server to start up/shut down
  TimeoutSec=300
 diff -up mysql-5.6.23/support-files/mysql-log-rotate.sh.scl-env-check mysql-5.6.23/support-files/mysql-log-rotate.sh
---- mysql-5.6.23/support-files/mysql-log-rotate.sh.scl-env-check	2015-02-18 21:35:51.303254224 +0100
-+++ mysql-5.6.23/support-files/mysql-log-rotate.sh	2015-02-18 21:35:53.260254972 +0100
+--- mysql-5.6.23/support-files/mysql-log-rotate.sh.scl-env-check	2015-03-14 21:30:01.219181423 +0100
++++ mysql-5.6.23/support-files/mysql-log-rotate.sh	2015-03-14 21:30:01.257181452 +0100
 @@ -30,9 +30,9 @@
  #    postrotate
  #	# just if mysqld is really running

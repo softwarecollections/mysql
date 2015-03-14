@@ -136,6 +136,7 @@ Source19:         mysql.init.in
 Source30:         mysql-5.6.10-rpmlintrc
 # Configuration for server
 Source31:         server.cnf.in
+Source40:         daemon-scl-helper.sh
 
 # Comments for these patches are in the patch files
 # Patches common for more mysql-like packages
@@ -622,6 +623,11 @@ install -p -m 755 scripts/mysql-check-upgrade %{buildroot}%{_libexecdir}/mysql-c
 install -p -m 644 scripts/mysql-scripts-common %{buildroot}%{_libexecdir}/mysql-scripts-common
 install -D -p -m 0644 scripts/server.cnf %{buildroot}%{_sysconfdir}/my.cnf.d/%{pkg_name}-server.cnf
 
+# daemon helper for fixing SELinux in systemd
+%if %{with init_systemd} && 0%{?scl:1}
+install -p -m 755 %{SOURCE40} %{buildroot}%{_libexecdir}/mysqld_safe-scl-helper
+%endif
+
 # mysql-test includes one executable that doesn't belong under /usr/share,
 # so move it and provide a symlink
 mv %{buildroot}%{_datadir}/mysql-test/lib/My/SafeProcess/my_safe_process %{buildroot}%{_bindir}
@@ -776,6 +782,10 @@ popd
 %if 0%{?scl:1}
 semanage fcontext -a -e "%{se_daemon_source}" "%{daemondir}/%{daemon_name}%{?with_init_systemd:.service}" >/dev/null 2>&1 || :
 semanage fcontext -a -e "/var/run/mysql" "%{pidfiledir}" >/dev/null 2>&1 || :
+%if %{with init_systemd}
+# work-around for rhbz#1172683
+semanage fcontext -a -t mysqld_safe_exec_t %{_root_libexecdir}/mysqld_safe-scl-helper >/dev/null 2>&1 || :
+%endif
 selinuxenabled && load_policy || :
 restorecon -R "%{?_scl_root}/" >/dev/null 2>&1 || :
 restorecon -R "%{_sysconfdir}" >/dev/null 2>&1 || :
@@ -936,6 +946,9 @@ fi
 
 %config(noreplace) %{_sysconfdir}/my.cnf.d/%{pkg_name}-server.cnf
 %{_libexecdir}/mysqld
+%if %{with init_systemd} && 0%{?scl:1}
+%{_libexecdir}/mysqld_safe-scl-helper
+%endif
 
 %{_libdir}/mysql/INFO_SRC
 %{_libdir}/mysql/INFO_BIN
@@ -1042,6 +1055,8 @@ fi
 * Sat Mar 14 2015 Honza Horak <hhorak@redhat.com> - 5.6.23-7
 - Do not use libedit
   Related: #1202016
+- Daemon wrapper to run process with proper SELinux context
+  Resolves: #1202016
 
 * Mon Mar 09 2015 Honza Horak <hhorak@redhat.com> - 5.6.23-6
 - Rebuild due to 'scls' removal
