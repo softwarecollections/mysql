@@ -169,6 +169,7 @@ BuildRequires:    libaio-devel
 BuildRequires:    libevent-devel
 BuildRequires:    openssl-devel
 BuildRequires:    perl
+BuildRequires:    ncurses-devel
 BuildRequires:    systemtap-sdt-devel
 BuildRequires:    zlib-devel
 # Tests requires time and ps and some perl modules
@@ -551,7 +552,7 @@ cmake .. \
          -DWITH_INNODB_MEMCACHED=ON \
          -DWITH_EMBEDDED_SERVER=ON \
          -DWITH_EMBEDDED_SHARED_LIBRARY=ON \
-         -DWITH_EDITLINE=system \
+         -DWITH_EDITLINE=bundled \
          -DWITH_LIBEVENT=system \
          -DWITH_SSL=system \
          -DWITH_ZLIB=system \
@@ -1053,7 +1054,7 @@ fi
 
 %changelog
 * Sat Mar 14 2015 Honza Horak <hhorak@redhat.com> - 5.6.23-7
-- Do not use libedit
+- Do not use system libedit
   Related: #1202016
 - Daemon wrapper to run process with proper SELinux context
   Resolves: #1202016
