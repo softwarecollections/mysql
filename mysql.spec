@@ -108,7 +108,7 @@
 
 Name:             %{?scl_prefix}mysql
 Version:          5.6.23
-Release:          7%{?with_debug:.debug}%{?dist}
+Release:          8%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -1053,6 +1053,10 @@ fi
 %endif
 
 %changelog
+* Tue Mar 17 2015 Honza Horak <hhorak@redhat.com> - 5.6.23-8
+- Use correct comment in the init script
+  Related: #1184604
+
 * Sat Mar 14 2015 Honza Horak <hhorak@redhat.com> - 5.6.23-7
 - Do not use system libedit
   Related: #1202016
