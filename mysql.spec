@@ -784,6 +784,8 @@ popd
 %if 0%{?scl:1}
 semanage fcontext -a -e "%{se_daemon_source}" "%{daemondir}/%{daemon_name}%{?with_init_systemd:.service}" >/dev/null 2>&1 || :
 semanage fcontext -a -e "/var/run/mysql" "%{pidfiledir}" >/dev/null 2>&1 || :
+# work-around for rhbz#1203991
+semanage fcontext -a -t mysqld_etc_t '/etc/my\.cnf\.d/.*' >/dev/null 2>&1 || :
 %if %{with init_systemd}
 # work-around for rhbz#1172683
 semanage fcontext -a -t mysqld_safe_exec_t %{_root_libexecdir}/mysqld_safe-scl-helper >/dev/null 2>&1 || :
@@ -1056,6 +1058,8 @@ fi
 %changelog
 * Fri Mar 20 2015 Honza Horak <hhorak@redhat.com> - 5.6.23-9
 - Add dependency for semanage
+- Define SELinux context for files under /etc/my.cnf.d
+  Related: #1203991
 
 * Tue Mar 17 2015 Honza Horak <hhorak@redhat.com> - 5.6.23-8
 - Use correct comment in the init script
