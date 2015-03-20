@@ -108,7 +108,7 @@
 
 Name:             %{?scl_prefix}mysql
 Version:          5.6.23
-Release:          8%{?with_debug:.debug}%{?dist}
+Release:          9%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -314,6 +314,7 @@ Requires:         perl(DBI)
 Requires:         perl(DBD::mysql)
 %{?scl:Requires:%scl_runtime}
 %{?scl:Requires:%{_root_bindir}/scl_source}
+%{?scl:Requires(post): policycoreutils-python libselinux-utils}
 %if %{with mysql_names}
 Provides:         mysql-server = %{sameevr}
 Provides:         mysql-server%{?_isa} = %{sameevr}
@@ -1053,6 +1054,9 @@ fi
 %endif
 
 %changelog
+* Fri Mar 20 2015 Honza Horak <hhorak@redhat.com> - 5.6.23-9
+- Add dependency for semanage
+
 * Tue Mar 17 2015 Honza Horak <hhorak@redhat.com> - 5.6.23-8
 - Use correct comment in the init script
   Related: #1184604
