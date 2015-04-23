@@ -785,7 +785,7 @@ popd
 %post server
 %if 0%{?scl:1}
 semanage fcontext -a -e "%{se_daemon_source}" "%{daemondir}/%{daemon_name}%{?with_init_systemd:.service}" >/dev/null 2>&1 || :
-semanage fcontext -a -e "/var/run/mysql" "%{pidfiledir}" >/dev/null 2>&1 || :
+semanage fcontext -a -t mysqld_var_run_t "%{pidfiledir}" >/dev/null 2>&1 || :
 # work-around for rhbz#1203991
 semanage fcontext -a -t mysqld_etc_t '/etc/my\.cnf\.d/.*' >/dev/null 2>&1 || :
 %if %{with init_systemd}
@@ -1059,6 +1059,8 @@ fi
 
 %changelog
 * Thu Apr 23 2015 Honza Horak <hhorak@redhat.com> - 5.6.24-2
+- Define context for pid file dir explicitely
+  Resolves: #1207113
 - Fix mysqladmin crash if run with -u root -p
   Resolves: #1207514
 
