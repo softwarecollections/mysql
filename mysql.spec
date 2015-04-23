@@ -107,8 +107,8 @@
 %endif
 
 Name:             %{?scl_prefix}mysql
-Version:          5.6.23
-Release:          9%{?with_debug:.debug}%{?dist}
+Version:          5.6.24
+Release:          1%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -1056,6 +1056,13 @@ fi
 %endif
 
 %changelog
+* Thu Apr 23 2015 Matej Muzila <mmuzila@redhat.com> - 5.6.24-1
+- Update to MySQL 5.6.24 containing various fixes described at:
+  https://dev.mysql.com/doc/relnotes/mysql/5.6/en/news-5-6-24.html
+- Resolves: #1214590
+- Also fixes: CVE-2015-0501 CVE-2015-2568 CVE-2015-0499 CVE-2015-2571
+    CVE-2015-0433 CVE-2015-0441 CVE-2015-0505 CVE-2015-2573
+
 * Fri Mar 20 2015 Honza Horak <hhorak@redhat.com> - 5.6.23-9
 - Add dependency for semanage
 - Define SELinux context for files under /etc/my.cnf.d

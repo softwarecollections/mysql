@@ -34,7 +34,7 @@ index addfac1..68e76cd 100644
 +
  PFS_statement_stat*
  find_or_create_digest(PFS_thread *thread,
-                       PSI_digest_storage *digest_storage,
+                       const sql_digest_storage *digest_storage,
 diff --git a/storage/perfschema/pfs_host.cc b/storage/perfschema/pfs_host.cc
 index 0c6f5cf..fc624d7 100644
 --- a/storage/perfschema/pfs_host.cc
