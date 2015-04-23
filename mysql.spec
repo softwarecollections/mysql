@@ -108,7 +108,7 @@
 
 Name:             %{?scl_prefix}mysql
 Version:          5.6.24
-Release:          1%{?with_debug:.debug}%{?dist}
+Release:          2%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -151,6 +151,7 @@ Patch8:           %{pkgnamepatch}-scripts.patch
 Patch9:           %{pkgnamepatch}-install-db-sharedir.patch
 Patch10:          %{pkgnamepatch}-paths.patch
 Patch11:          %{pkgnamepatch}-noclientlib.patch
+Patch12:          %{pkgnamepatch}-admincrash.patch
 
 # Patches specific for this mysql package
 Patch51:          %{pkgnamepatch}-chain-certs.patch
@@ -444,6 +445,7 @@ the MySQL sources.
 %patch9 -p1
 %patch10 -p1
 %patch11 -p1
+%patch12 -p1
 %patch51 -p1
 %patch52 -p1
 %patch53 -p1
@@ -1056,6 +1058,10 @@ fi
 %endif
 
 %changelog
+* Thu Apr 23 2015 Honza Horak <hhorak@redhat.com> - 5.6.24-2
+- Fix mysqladmin crash if run with -u root -p
+  Resolves: #1207514
+
 * Thu Apr 23 2015 Matej Muzila <mmuzila@redhat.com> - 5.6.24-1
 - Update to MySQL 5.6.24 containing various fixes described at:
   https://dev.mysql.com/doc/relnotes/mysql/5.6/en/news-5-6-24.html
