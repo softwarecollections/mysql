@@ -108,7 +108,7 @@
 
 Name:             %{?scl_prefix}mysql
 Version:          5.6.24
-Release:          2%{?with_debug:.debug}%{?dist}
+Release:          3%{?with_debug:.debug}%{?dist}
 Summary:          MySQL client programs and shared libraries
 Group:            Applications/Databases
 URL:              http://www.mysql.com
@@ -152,6 +152,7 @@ Patch9:           %{pkgnamepatch}-install-db-sharedir.patch
 Patch10:          %{pkgnamepatch}-paths.patch
 Patch11:          %{pkgnamepatch}-noclientlib.patch
 Patch12:          %{pkgnamepatch}-admincrash.patch
+Patch13:          %{pkgnamepatch}-log-fifo.patch
 
 # Patches specific for this mysql package
 Patch51:          %{pkgnamepatch}-chain-certs.patch
@@ -446,6 +447,7 @@ the MySQL sources.
 %patch10 -p1
 %patch11 -p1
 %patch12 -p1
+%patch13 -p1
 %patch51 -p1
 %patch52 -p1
 %patch53 -p1
@@ -1058,6 +1060,10 @@ fi
 %endif
 
 %changelog
+* Thu May 07 2015 Honza Horak <hhorak@redhat.com> - 5.6.24-3
+- Fix using FIFO file as a general_log file
+  Resolves: #1219496
+
 * Thu Apr 23 2015 Honza Horak <hhorak@redhat.com> - 5.6.24-2
 - Define context for pid file dir explicitely
   Resolves: #1207113
